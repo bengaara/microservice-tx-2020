@@ -1,0 +1,10 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      -  "127.0.0.1:8900:8900"
+    #expose: - "8000"- "8900"
+    #volumes: - .:/app
+    environment:
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n
