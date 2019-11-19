@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 })
 public class TopupRequest extends TransactionGenericRequest
 {
-    @JsonProperty("source")
+    @JsonProperty("sources")
     private List<TopupValue> sources;
 
     @JsonProperty("delivery")

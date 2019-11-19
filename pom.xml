@@ -20,6 +20,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
+
     <developers>
         <developer>
             <id>owino_cliff</id>
@@ -120,12 +121,12 @@
             <version>2.1.1</version>
         </dependency>
         <!--        <dependency>-->
-<!--            <groupId>net.tospay </groupId>-->
-<!--            <artifactId>bank_db_layer</artifactId>-->
-<!--            <version>1.0.0</version>-->
-<!--            <scope>system</scope>-->
-<!--            <systemPath>${basedir}/lib/bank_db_layer-0.0.1-SNAPSHOT.jar</systemPath>-->
-<!--        </dependency>-->
+        <!--            <groupId>net.tospay </groupId>-->
+        <!--            <artifactId>bank_db_layer</artifactId>-->
+        <!--            <version>1.0.0</version>-->
+        <!--            <scope>system</scope>-->
+        <!--            <systemPath>${basedir}/lib/bank_db_layer-0.0.1-SNAPSHOT.jar</systemPath>-->
+        <!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -133,9 +134,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <profiles>
-                    <profile>dev</profile>
-                </profiles>
+
             </plugin>
         </plugins>
         <resources>

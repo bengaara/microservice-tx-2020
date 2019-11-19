@@ -17,11 +17,12 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import org.hibernate.annotations.Type;
 
+import net.tospay.transaction.enums.AccountType;
 import net.tospay.transaction.enums.TransactionStatus;
 import net.tospay.transaction.enums.TransactionType;
-import net.tospay.transaction.models.request.Destination;
+import net.tospay.transaction.models.request.TopupRequest;
 
 @Entity
 @Table(name = "transactions",
@@ -29,13 +30,20 @@ import net.tospay.transaction.models.request.Destination;
         @UniqueConstraint(columnNames = { "id" }))
 public class Transaction extends BaseEntity<UUID> implements Serializable
 {
+    @Column(name = "accountType", nullable = false)
+    AccountType accountType;
+
+    @Column(name = "country_code", nullable = false)
+    String countryCode;
+
     @Id
     @Column(name = "id", columnDefinition = "uuid default gen_random_uuid()", updatable = false)
     @GeneratedValue
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
-    @Column(name = "transaction_id", nullable = false)
+    @Column(name = "transaction_id", nullable = true)
+
     private String transactionId;
 
     @Column(name = "type", nullable = false)
@@ -50,8 +58,9 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     @Column(name = "merchant_id", nullable = false)
     private UUID merchantId;
 
-    @Column(name = "payload", nullable = false)
-    private JsonNode payload;
+    @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
+    @Type(type = "jsonb")
+    private TopupRequest payload;
 
     @Column(name = "source_complete")
     private boolean sourceComplete;
@@ -78,10 +87,20 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<Destination> destinations = new ArrayList<>();
+    private List<net.tospay.transaction.entities.Destination> destinations = new ArrayList<>();
 
     public Transaction()
     {
+    }
+
+    public String getCountryCode()
+    {
+        return countryCode;
+    }
+
+    public void setCountryCode(String countryCode)
+    {
+        this.countryCode = countryCode;
     }
 
     public boolean isSourceComplete()
@@ -114,6 +133,16 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
         this.transactionType = transactionType;
     }
 
+    public AccountType getAccountType()
+    {
+        return accountType;
+    }
+
+    public void setAccountType(AccountType accountType)
+    {
+        this.accountType = accountType;
+    }
+
     public Double getAmount()
     {
         return amount;
@@ -144,12 +173,12 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
         this.merchantId = merchantId;
     }
 
-    public JsonNode getPayload()
+    public TopupRequest getPayload()
     {
         return payload;
     }
 
-    public void setPayload(JsonNode payload)
+    public void setPayload(TopupRequest payload)
     {
         this.payload = payload;
     }
@@ -194,12 +223,12 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
         this.sources = sources;
     }
 
-    public List<Destination> getDestinations()
+    public List<net.tospay.transaction.entities.Destination> getDestinations()
     {
         return destinations;
     }
 
-    public void setDestinations(List<Destination> destinations)
+    public void setDestinations(List<net.tospay.transaction.entities.Destination> destinations)
     {
         this.destinations = destinations;
     }

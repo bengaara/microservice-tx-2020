@@ -3,6 +3,8 @@ package net.tospay.transaction.enums;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 /**
  * @author : Clifford Owino
  * @Email : owinoclifford@gmail.com
@@ -32,6 +34,7 @@ public enum SourceType
         this.type = type;
     }
 
+    @JsonCreator
     public static SourceType valueOfType(String label)
     {
         return LABEL.get(label);

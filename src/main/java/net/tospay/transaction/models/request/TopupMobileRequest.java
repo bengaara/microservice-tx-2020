@@ -42,7 +42,7 @@ public class TopupMobileRequest implements Serializable
     @JsonProperty("amount")
     private Double amount;
 
-    @JsonProperty("charge")
+    @JsonProperty("charges")
     private Double charge;
 
     @JsonProperty("currency")
@@ -52,7 +52,7 @@ public class TopupMobileRequest implements Serializable
     private String description;
 
     @JsonProperty("external_reference")
-    private String externalReference;
+    private UUID externalReference;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -92,12 +92,12 @@ public class TopupMobileRequest implements Serializable
         this.description = description;
     }
 
-    public String getExternalReference()
+    public UUID getExternalReference()
     {
         return externalReference;
     }
 
-    public void setExternalReference(String externalReference)
+    public void setExternalReference(UUID externalReference)
     {
         this.externalReference = externalReference;
     }

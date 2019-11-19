@@ -16,11 +16,10 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import net.tospay.transaction.enums.AccountType;
 import net.tospay.transaction.enums.SourceType;
 import net.tospay.transaction.enums.TransactionStatus;
+import net.tospay.transaction.models.response.TopupMobileResponse;
 
 @Entity
 @Table(name = "destinations",
@@ -43,13 +42,13 @@ public class Destination extends BaseEntity<UUID> implements Serializable
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(name = "account", nullable = false)
+    @Column(name = "account")
     private String account;
 
     @Column(name = "amount", nullable = false)
     private Double amount;
 
-    @Column(name = "charge", nullable = false)
+    @Column(name = "charge")
     private Double charge;
 
     @Column(name = "currency", nullable = false)
@@ -58,12 +57,12 @@ public class Destination extends BaseEntity<UUID> implements Serializable
     @Column(name = "status", nullable = false)
     private TransactionStatus transactionStatus = TransactionStatus.CREATED;
 
-    @Column(name = "response", nullable = false)
-    private JsonNode
+    @Column(name = "response")
+    private TopupMobileResponse
             response;
 
-    @Column(name = "response_async", nullable = false)
-    private JsonNode responseAsync;
+    @Column(name = "response_async")
+    private TopupMobileResponse responseAsync;
 
     @Column(name = "date_created", nullable = false)
     private Timestamp dateCreated;
@@ -159,22 +158,22 @@ public class Destination extends BaseEntity<UUID> implements Serializable
         this.transactionStatus = transactionStatus;
     }
 
-    public JsonNode getResponse()
+    public TopupMobileResponse getResponse()
     {
         return response;
     }
 
-    public void setResponse(JsonNode response)
+    public void setResponse(TopupMobileResponse response)
     {
         this.response = response;
     }
 
-    public JsonNode getResponseAsync()
+    public TopupMobileResponse getResponseAsync()
     {
         return responseAsync;
     }
 
-    public void setResponseAsync(JsonNode responseAsync)
+    public void setResponseAsync(TopupMobileResponse responseAsync)
     {
         this.responseAsync = responseAsync;
     }

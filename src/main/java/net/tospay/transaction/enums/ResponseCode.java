@@ -3,6 +3,8 @@ package net.tospay.transaction.enums;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 /**
  * @author : Clifford Owino
  * @Email : owinoclifford@gmail.com
@@ -28,6 +30,7 @@ public enum ResponseCode
         this.code = code;
     }
 
+    @JsonCreator
     public static ResponseCode valueOfCode(String code)
     {
         return codeMap.get(code);

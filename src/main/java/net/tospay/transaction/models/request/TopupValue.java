@@ -90,13 +90,11 @@ public class TopupValue implements Serializable
         this.amount = amount;
     }
 
-    @JsonProperty("account")
     public String getAccount()
     {
         return account;
     }
 
-    @JsonProperty("account")
     public void setAccount(String account)
     {
         this.account = account;

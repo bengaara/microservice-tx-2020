@@ -8,6 +8,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,9 @@ public class BaseController
 
     @Autowired
     RestTemplate restTemplate;
+
+    @Value("{auth.url}")
+    String authUrl;
 
     public <T extends ResponseObject> ResponseObject<T> mapResponse(T response)
     {
@@ -71,7 +75,7 @@ public class BaseController
         logger.error("", e);
 
         Error error = new Error();
-        error.setCode("000");
+        error.setCode("002");
         error.setDescription(e.getMessage());
 
         return new ResponseEntity<>(Arrays.asList(error), HttpStatus.BAD_REQUEST);

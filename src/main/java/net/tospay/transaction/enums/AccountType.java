@@ -3,6 +3,8 @@ package net.tospay.transaction.enums;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public enum AccountType
 {
     PERSONAL("PERSONAL"),
@@ -27,6 +29,7 @@ public enum AccountType
         this.type = type;
     }
 
+    @JsonCreator
     public static AccountType valueOfType(String label)
     {
         return LABEL.get(label);

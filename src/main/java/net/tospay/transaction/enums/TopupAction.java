@@ -3,6 +3,8 @@ package net.tospay.transaction.enums;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public enum TopupAction
 {
     SOURCE("SOURCE"),
@@ -25,6 +27,7 @@ public enum TopupAction
         this.type = type;
     }
 
+    @JsonCreator
     public static TopupAction valueOfType(String label)
     {
         return LABEL.get(label);
