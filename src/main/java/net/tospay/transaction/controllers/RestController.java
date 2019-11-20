@@ -240,7 +240,8 @@ public class RestController extends BaseController
             source.setResponseAsync(node);
             source.setDateResponse(new Timestamp(System.currentTimeMillis()));
             source.setTransactionStatus(transactionStatus);
-            sourceRepository.save(source);
+            source = sourceRepository.save(source);
+            transaction = source.getTransaction();
             if (TransactionStatus.FAILED.equals(transactionStatus)) {
                 logger.debug("sourcing failed  {}", source);
             }
@@ -249,7 +250,8 @@ public class RestController extends BaseController
             destination.setResponseAsync(node);
             destination.setDateResponse(new Timestamp(System.currentTimeMillis()));
             destination.setTransactionStatus(transactionStatus);
-            destinationRepository.save(destination);
+            destination = destinationRepository.save(destination);
+            transaction = destination.getTransaction();
             if (TransactionStatus.FAILED.equals(transactionStatus)) {
                 logger.debug("paydestination failed  {}", destination);
             }
@@ -258,6 +260,7 @@ public class RestController extends BaseController
             logger.error("callback called but no transaction found {}", node);
         }
 
+       // transaction = transactionRepository.save(transaction);//transactionRepository.refresh(transaction);
         fundService.checkSourceAndDestinationTransactionStatusAndAct(transaction);
 
         String status = ResponseCode.SUCCESS.type;

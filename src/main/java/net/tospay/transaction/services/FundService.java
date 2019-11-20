@@ -123,13 +123,15 @@ public class FundService extends BaseService
                             HashMap<String, Object> node = mapper.convertValue(response, HashMap.class);
                             source.setResponse(node);
                         }
-                        if (response == null || ResponseCode.FAILURE.type
-                                .equalsIgnoreCase(response.getStatus()))
-                        {//failure
+                        if (response == null || ResponseCode.FAILURE.type.equalsIgnoreCase(response.getStatus())) {//failure
                             source.setTransactionStatus(TransactionStatus.FAILED);
                             logger.debug("sourcing failed  {}", source);
                         } else {
-                            logger.debug("sourcing ok  {}", source);
+
+                            TransactionStatus status = ResponseCode.SUCCESS.type.equalsIgnoreCase(response.getStatus())?TransactionStatus.SUCCESS:TransactionStatus.PROCESSING;
+                            source.setTransactionStatus(status);
+                            logger.debug("sourcing ok  {} {}", source,status);
+
                         }
                         break;
                     case BANK:
@@ -138,9 +140,12 @@ public class FundService extends BaseService
                         break;
                 }
 
-                sourceRepository.save(source);
+                source = sourceRepository.save(source);
+
             });
-            checkSourceAndDestinationTransactionStatusAndAct(transaction);
+
+            //transaction = transactionRepository.save(transaction);//transactionRepository.refresh(transaction);
+            checkSourceAndDestinationTransactionStatusAndAct(sources.get(0).getTransaction());
 
             return CompletableFuture.completedFuture(true);
         } catch (Exception e) {
@@ -156,6 +161,7 @@ public class FundService extends BaseService
             logger.debug("null transaction ");
             return;
         }
+
         //only process incomplete transactions
         if (TransactionStatus.SUCCESS.equals(transaction.getTransactionStatus())
                 || TransactionStatus.FAILED.equals(transaction.getTransactionStatus()))
@@ -205,7 +211,7 @@ public class FundService extends BaseService
             destinationSuccessAll
                     .set(destinationSuccessAll.get() && TransactionStatus.SUCCESS.equals(d.getTransactionStatus()));
         });
-        logger.debug("mark transaction destinationComplete  {}  {}", transaction, destinationSuccessAll);
+        logger.debug("mark transaction destination Complete  {}  {}", transaction, destinationSuccessAll);
         transaction.setDestinationComplete(destinationSuccessAll.get());
 
         if (destinationSuccessAll.get() && destinationFail.get()) {//if one failed
@@ -232,7 +238,7 @@ public class FundService extends BaseService
         // if all paydestination : fire notification
         if (transaction.isDestinationComplete()) {
 
-            logger.debug("TODO: destinatio complete - firing notify  {}", transaction);
+            logger.debug("TODO: destination complete - firing notify  {}", transaction);
             //TODO: tell notify?
         }
     }
@@ -303,8 +309,7 @@ public class FundService extends BaseService
         try {
             // Hibernate.initialize(transactionRepository);
             // transactionRepository.refresh(transaction);
-            List<Destination> destinations = transactionRepository.findById(transaction.getId()).get()
-                    .getDestinations();
+            List<Destination> destinations = transaction.getDestinations();//transactionRepository.findById(transaction.getId()).get().getDestinations();
             destinations.forEach(destination -> {
 
                 switch (destination.getType()) {
@@ -339,12 +344,12 @@ public class FundService extends BaseService
                             destination.setResponse(node);
                         }
 
-                        if (response == null || !ResponseCode.SUCCESS.type
-                                .equalsIgnoreCase(response.getStatus()))
-                        {//failure
+                        if (response == null || ResponseCode.FAILURE.type.equalsIgnoreCase(response.getStatus())) {//failure
                             destination.setTransactionStatus(TransactionStatus.FAILED);
                         } else {
-                            logger.debug("destination ok  {}", destination);
+                            TransactionStatus status = ResponseCode.SUCCESS.type.equalsIgnoreCase(response.getStatus())?TransactionStatus.SUCCESS:TransactionStatus.PROCESSING;
+                            destination.setTransactionStatus(status);
+                            logger.debug("destination ok  {} {}", destination,status);
                         }
                         break;
                     case BANK:
@@ -352,9 +357,11 @@ public class FundService extends BaseService
                     case CARD:
                         break;
                 }
-                destinationRepository.save(destination);
+                destination = destinationRepository.save(destination);
+
             });
-            checkSourceAndDestinationTransactionStatusAndAct(transaction);
+           // transaction = transactionRepository.save(transaction);//transactionRepository.refresh(transaction);
+            checkSourceAndDestinationTransactionStatusAndAct(destinations.get(0).getTransaction());
 
             return CompletableFuture.completedFuture(true);
         } catch (Exception e) {
