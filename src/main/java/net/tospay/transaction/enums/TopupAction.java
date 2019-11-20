@@ -30,6 +30,8 @@ public enum TopupAction
     @JsonCreator
     public static TopupAction valueOfType(String label)
     {
+
+        label = label.toUpperCase();
         return LABEL.get(label);
     }
 }

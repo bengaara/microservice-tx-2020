@@ -18,11 +18,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 })
 public class TopupRequest extends TransactionGenericRequest
 {
-    @JsonProperty("sources")
-    private List<TopupValue> sources;
+    @JsonProperty("source")
+    private List<TopupValueSource> source;
 
     @JsonProperty("delivery")
-    private List<TopupValue> delivery;
+    private List<TopupValueDestination> delivery;
 
     @JsonProperty("userInfo")
     private UserInfo userInfo;
@@ -40,24 +40,24 @@ public class TopupRequest extends TransactionGenericRequest
         this.userInfo = userInfo;
     }
 
-    public List<TopupValue> getDelivery()
+    public List<TopupValueDestination> getDelivery()
     {
         return delivery;
     }
 
-    public void setDelivery(List<TopupValue> delivery)
+    public void setDelivery(List<TopupValueDestination> delivery)
     {
         this.delivery = delivery;
     }
 
-    public List<TopupValue> getSources()
+    public List<TopupValueSource> getSource()
     {
-        return sources;
+        return source;
     }
 
-    public void setSources(List<TopupValue> sources)
+    public void setSource(List<TopupValueSource> source)
     {
-        this.sources = sources;
+        this.source = source;
     }
 
     @JsonAnyGetter

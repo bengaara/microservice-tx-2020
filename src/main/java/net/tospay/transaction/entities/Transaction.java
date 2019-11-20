@@ -16,6 +16,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.transaction.Transactional;
 
 import org.hibernate.annotations.Type;
 
@@ -30,11 +31,6 @@ import net.tospay.transaction.models.request.TopupRequest;
         @UniqueConstraint(columnNames = { "id" }))
 public class Transaction extends BaseEntity<UUID> implements Serializable
 {
-    @Column(name = "accountType", nullable = false)
-    AccountType accountType;
-
-    @Column(name = "country_code", nullable = false)
-    String countryCode;
 
     @Id
     @Column(name = "id", columnDefinition = "uuid default gen_random_uuid()", updatable = false)
@@ -65,6 +61,22 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     @Column(name = "source_complete")
     private boolean sourceComplete;
 
+    @Column(name = "destination_started")
+    private boolean destinationStarted;
+
+    public boolean isDestinationStarted()
+    {
+        return destinationStarted;
+    }
+
+    public void setDestinationStarted(boolean destinationStarted)
+    {
+        this.destinationStarted = destinationStarted;
+    }
+
+    @Column(name = "destination_complete")
+    private boolean destinationComplete;
+
     @Column(name = "status", nullable = false)
     private TransactionStatus transactionStatus = TransactionStatus.CREATED;
 
@@ -93,14 +105,26 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     {
     }
 
-    public String getCountryCode()
+    public boolean isDestinationComplete()
     {
-        return countryCode;
+        return destinationComplete;
     }
 
-    public void setCountryCode(String countryCode)
+    public void setDestinationComplete(boolean destinationComplete)
     {
-        this.countryCode = countryCode;
+        this.destinationComplete = destinationComplete;
+    }
+
+    public void addSource(Source s)
+    {
+        this.sources.add(s);
+        s.setTransaction(this);
+    }
+
+    public void addDestination(Destination s)
+    {
+        this.destinations.add(s);
+        s.setTransaction(this);
     }
 
     public boolean isSourceComplete()
@@ -133,15 +157,6 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
         this.transactionType = transactionType;
     }
 
-    public AccountType getAccountType()
-    {
-        return accountType;
-    }
-
-    public void setAccountType(AccountType accountType)
-    {
-        this.accountType = accountType;
-    }
 
     public Double getAmount()
     {
@@ -213,6 +228,7 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
         this.dateModified = dateModified;
     }
 
+    @Transactional
     public List<Source> getSources()
     {
         return sources;
@@ -223,6 +239,7 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
         this.sources = sources;
     }
 
+    @Transactional
     public List<net.tospay.transaction.entities.Destination> getDestinations()
     {
         return destinations;

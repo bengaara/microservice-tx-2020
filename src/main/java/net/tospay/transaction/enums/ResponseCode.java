@@ -5,35 +5,34 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-/**
- * @author : Clifford Owino
- * @Email : owinoclifford@gmail.com
- * @since : 7/16/2019, Tue
- **/
+
 public enum ResponseCode
 {
-    SUCCESS("0"),
+    SUCCESS("000"),
+    FAILURE("001"),
+    PROCESSING("002"),
     GENERAL_ERROR("999");
 
     private static final Map<String, ResponseCode> codeMap = new HashMap<>();
 
     static {
         for (ResponseCode e : values()) {
-            codeMap.put(e.code, e);
+            codeMap.put(e.type, e);
         }
     }
 
-    public final String code;
+    public final String type;
 
-    private ResponseCode(String code)
+    private ResponseCode(String type)
     {
-        this.code = code;
+        this.type = type;
     }
 
     @JsonCreator
-    public static ResponseCode valueOfCode(String code)
+    public static ResponseCode valueOfType(String label)
     {
-        return codeMap.get(code);
+        label = label.toUpperCase();
+        return codeMap.get(label);
     }
 //    public static CoopResponseCode valueOfCode(String code)
 //    {

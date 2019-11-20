@@ -40,6 +40,8 @@ public enum TransactionType
     @JsonCreator
     public static TransactionType valueOfType(String label)
     {
+
+        label = label.toUpperCase();
         return LABEL.get(label);
     }
 }

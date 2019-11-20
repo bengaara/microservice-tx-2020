@@ -30,6 +30,7 @@ public enum MobilePayAction
     @JsonCreator
     public static MobilePayAction valueOfType(String label)
     {
+        label = label.toUpperCase();
         return LABEL.get(label);
     }
 }

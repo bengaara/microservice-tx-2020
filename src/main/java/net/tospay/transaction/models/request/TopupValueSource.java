@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -23,7 +25,7 @@ import net.tospay.transaction.enums.SourceType;
         "account",
         "amount"
 })
-public class TopupValue implements Serializable
+public class TopupValueSource implements Serializable
 {
     private final static long serialVersionUID = -9078608771772465581L;
 
@@ -37,9 +39,10 @@ public class TopupValue implements Serializable
     private AccountType userType;
 
     @JsonProperty("account")
-    private String account;
+    private Map<String, Object> account;
 
     @JsonProperty("amount")
+    @NotNull
     private Double amount;
 
     @JsonIgnore
@@ -90,17 +93,17 @@ public class TopupValue implements Serializable
         this.amount = amount;
     }
 
-    public String getAccount()
+    public Map<String, Object> getAccount()
     {
         return account;
     }
 
-    public void setAccount(String account)
+    public void setAccount(Map<String, Object> account)
     {
         this.account = account;
     }
 
-    public TopupValue withAccount(String account)
+    public TopupValueSource withAccount(Map<String, Object> account)
     {
         this.account = account;
         return this;
@@ -123,7 +126,7 @@ public class TopupValue implements Serializable
         this.additionalProperties.put(name, value);
     }
 
-    public TopupValue withAdditionalProperty(String name, Object value)
+    public TopupValueSource withAdditionalProperty(String name, Object value)
     {
         this.additionalProperties.put(name, value);
         return this;

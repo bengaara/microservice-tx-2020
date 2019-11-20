@@ -1,38 +1,32 @@
 package net.tospay.transaction.controllers;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.tospay.transaction.entities.Transaction;
-import net.tospay.transaction.enums.AccountType;
 import net.tospay.transaction.enums.ResponseCode;
-import net.tospay.transaction.enums.SourceType;
 import net.tospay.transaction.enums.TransactionStatus;
-import net.tospay.transaction.enums.TransactionType;
 import net.tospay.transaction.models.request.Amount;
 import net.tospay.transaction.models.request.ChargeRequest;
-import net.tospay.transaction.models.request.Source;
+import net.tospay.transaction.models.request.ChargeRequestDestination;
+import net.tospay.transaction.models.request.ChargeRequestSource;
 import net.tospay.transaction.models.request.TopupRequest;
-import net.tospay.transaction.models.request.TransactionIdRequest;
 import net.tospay.transaction.models.response.BaseResponse;
 import net.tospay.transaction.models.response.ChargeResponse;
 import net.tospay.transaction.models.response.Error;
@@ -66,65 +60,38 @@ public class RestController extends BaseController
 
     @Autowired DestinationRepository destinationRepository;
 
-    @Value("${numbergenerator.transaction.url}")
-    String numberGeneratorTransactionUrl;
-
-    @Value("${charge.url}")
-    String chargeUrl;
-
     public RestController(FundService fundService)
     {
         this.fundService = fundService;
     }
 
-    @PostMapping(Constants.URL.PROCESS)
-    public ResponseObject<BaseResponse> process(
-            @RequestBody Map<String, Object> allParams)//(@RequestBody TransactionGenericRequest request)
-            throws Exception
-    {
-        //@RequestParam Map<String,String> allParams
-        //validate
-        //get transaction type
-        //call corresponding method
-        //wait for callback
-        TransactionType transactionType =
-                allParams.containsKey("type") ? TransactionType.valueOfType(allParams.get("type").toString()) : null;
-
-        // String jsonStr = Obj.writeValueAsString(request);
-        switch (transactionType) {
-            case TOPUP:
-//                JavaType type = mapper.getTypeFactory().constructParametricType(Map.class, TopupRequest.class);
-//                TypeReference<TopupRequest> typeRef
-//                        = new TypeReference<TopupRequest>()
-//                {
-//                };
-                TopupRequest topupRequest = mapper.convertValue(allParams, TopupRequest.class);
-                return process(topupRequest);
-            //   break;
-            case WITHDRAW:
-                break;
-            case TRANSFER:
-                break;
-            case PAYMENT:
-                break;
-            case INVOICE:
-                break;
-            default:
-
-                break;
-        }
-        String status = ResponseCode.GENERAL_ERROR.code;
-        String description = ResponseCode.GENERAL_ERROR.name();
-        ArrayList<Error> errors = new ArrayList<>();
-        Error error = new Error(status, description);
-        errors.add(error);
-        return new ResponseObject(status, description, errors, null);
+    @PostMapping(Constants.URL.TRANSFER)
+    public ResponseObject<BaseResponse> transfer(
+            @Valid @RequestBody TopupRequest request) throws Exception
+    {//Map<String, Object> allParams)//(@RequestBody TransactionGenericRequest request)
+        // TopupRequest topupRequest = mapper.convertValue(allParams, TopupRequest.class);
+        logger.info(" {}", request);
+        return process(request);
     }
 
     public ResponseObject<BaseResponse> process(TopupRequest request)
             throws Exception
     {
         //TODO: validate
+
+        AtomicReference<Double> sumSourceAmount = new AtomicReference<>(0.0);
+        request.getSource().forEach((topupValue) -> {
+            sumSourceAmount.updateAndGet(v -> v + topupValue.getAmount());
+        });
+
+        if (!sumSourceAmount.get().equals(request.getAmount())) {
+            logger.debug("destination amount and source don't tally {} {}", sumSourceAmount.get(),
+                    request.getAmount());
+            return new ResponseObject(ResponseCode.FAILURE.type, ResponseCode.FAILURE.name(),
+                    Arrays.asList(new Error(ResponseCode.FAILURE.type,
+                            String.format("destination amount and source don't tally %s %s", sumSourceAmount.get(),
+                                    request.getAmount()))), request);
+        }
 
         //create transaction
         //create source & Destination
@@ -133,247 +100,168 @@ public class RestController extends BaseController
         transaction.setAmount(request.getAmount());
         transaction.setCurrency(request.getCurrency());
         transaction.setMerchantId(request.getMerchantInfo());
-        transaction.setAccountType(request.getSources().get(0).getUserType());
-        transaction.setCountryCode(request.getUserInfo().getCountry().getIso());
         //  JsonNode node = mapper.valueToTree(request);
         transaction.setPayload(request);
         transaction.setTransactionStatus(TransactionStatus.CREATED);
-        transaction.setTransactionType(TransactionType.TOPUP);
-
-        transactionRepository.save(transaction);
+        transaction.setTransactionType(request.getType());
 
         List<net.tospay.transaction.entities.Source> sources = new ArrayList<>();
-        request.getSources().forEach((topupValue) -> {
+        List<Double> destinationCharges = new ArrayList<>();
+        request.getSource().forEach((topupValue) -> {
 
             net.tospay.transaction.entities.Source sourceEntity = new net.tospay.transaction.entities.Source();
             sourceEntity.setTransaction(transaction);
             sourceEntity.setAccount(topupValue.getAccount());
-            sourceEntity.setAmount(transaction.getAmount());
+            sourceEntity.setAmount(topupValue.getAmount());
+
             sourceEntity.setCurrency(transaction.getCurrency());
             sourceEntity.setTransactionStatus(transaction.getTransactionStatus());
             sourceEntity.setType(topupValue.getType());
             sourceEntity.setUserId(topupValue.getUserId());
             sourceEntity.setUserType(topupValue.getUserType());
 
-            net.tospay.transaction.entities.Destination destinationEntity =
-                    new net.tospay.transaction.entities.Destination();
-            destinationEntity.setTransaction(transaction);
-            destinationEntity.setAccount(request.getDelivery().get(0).getAccount());
-            destinationEntity.setAmount(transaction.getAmount());
-
-            destinationEntity.setCurrency(transaction.getCurrency());
-            destinationEntity.setTransactionStatus(transaction.getTransactionStatus());
-            destinationEntity.setType(request.getDelivery().get(0).getType());
-            destinationEntity.setUserId(request.getDelivery().get(0).getUserId());
-            destinationEntity.setUserType(request.getDelivery().get(0).getUserType());
+//            destinationEntity.setTransaction(transaction);
+//            destinationEntity.setAccount(request.getDelivery().get(0).getAccount());
+//            destinationEntity.setAmount(request.getAmount());//note delivery is total.. assume 1 destination
+//
+//            destinationEntity.setCurrency(transaction.getCurrency());
+//            destinationEntity.setTransactionStatus(transaction.getTransactionStatus());
+//            destinationEntity.setType(request.getDelivery().get(0).getType());
+//            destinationEntity.setUserId(request.getDelivery().get(0).getUserId());
+//            destinationEntity.setUserType(request.getDelivery().get(0).getUserType());
 
             ChargeRequest chargeRequest = new ChargeRequest();
+            chargeRequest.setType(transaction.getTransactionType());
 
-            net.tospay.transaction.models.request.Destination destinationRequest =
-                    new net.tospay.transaction.models.request.Destination();
-            destinationRequest.setAccount(destinationEntity.getAccount());//tospay account
-            destinationRequest.setId(request.getDelivery().get(0).getAccount());
-            destinationRequest.setChannel(request.getDelivery().get(0).getType());
-            chargeRequest.setDestination(destinationRequest);
-            Source source = new Source();
-            source.setAccount(topupValue.getAccount());
-            source.setId(topupValue.getAccount());
-            source.setChannel(topupValue.getType());
-            chargeRequest.setSource(source);
+            ChargeRequestDestination chargeRequestDestination =
+                    new ChargeRequestDestination();
+            //TODO: fix this for multiple - whose billed? when?
+            String destAccountId = request.getDelivery().get(0).getAccount() != null ?
+                    (String) request.getDelivery().get(0).getAccount().get("id") : null;
+            boolean destAccountKnown =
+                    destAccountId != null && !request.getDelivery().get(0).getAccount().get("id").getClass()
+                            .equals(String.class);
+
+            chargeRequestDestination.setAccount(request.getDelivery().get(0).getUserType());//tospay account
+            chargeRequestDestination.setId(destAccountId);
+            chargeRequestDestination.setPlatform(destAccountKnown ? "known" : "unknown");
+            chargeRequestDestination.setChannel(request.getDelivery().get(0).getType());
+            chargeRequest.setDestination(chargeRequestDestination);
+
+            ChargeRequestSource chargeRequestSource = new ChargeRequestSource();
+            String sourceAccountId =
+                    sourceEntity.getAccount() != null ? (String) sourceEntity.getAccount().get("id") : null;
+            boolean sourceAccountKnown =
+                    sourceAccountId != null && !sourceEntity.getAccount().get("id").getClass().equals(String.class);
+
+            chargeRequestSource.setAccount(sourceEntity.getUserType());//tospay account
+            chargeRequestSource.setId(sourceAccountId);
+            chargeRequestSource.setPlatform(sourceAccountKnown ? "known" : "unknown");
+            chargeRequestSource.setChannel(sourceEntity.getType());
+            chargeRequest.setSource(chargeRequestSource);
+
             Amount amount = new Amount();
             amount.setAmount(request.getAmount());
             amount.setCurrency(request.getCurrency());
             chargeRequest.setAmount(amount);
-            chargeRequest.setType(TransactionType.TOPUP);
 
-            // ChargeResponse chargeResponse = chargeRestService.fetchCharge(chargeRequest);
-            sourceEntity.setCharge(0.0);
-            destinationEntity.setCharge(0.0);
-            ResponseObject<ChargeResponse> chargeResponse = fetchCharge(chargeRequest);
+            ResponseObject<ChargeResponse> chargeResponse = fundService.fetchCharge(chargeRequest);
 
-            if (chargeResponse != null && ResponseCode.SUCCESS.code.equalsIgnoreCase(chargeResponse.getStatus())) {
-                sourceEntity.setCharge(
-                        chargeResponse != null ? chargeResponse.getData().getSource().getAmount().getAmount() : null);
-                destinationEntity
-                        .setCharge(chargeResponse != null ?
-                                chargeResponse.getData().getDestination().getAmount().getAmount() : null);
+            if (chargeResponse != null && ResponseCode.SUCCESS.type.equalsIgnoreCase(chargeResponse.getStatus())) {
+                Double sourceCharge = chargeResponse.getData().getSource() != null ?
+                        chargeResponse.getData().getSource().getAmount().getAmount() : 0.0;
+                Double destinationCharge = chargeResponse.getData().getSource() != null ?
+                        chargeResponse.getData().getDestination().getAmount().getAmount() : 0.0;
+                logger.debug("sourceCharge  {} sourceCharge  {}", sourceCharge, destinationCharge);
+
+                destinationCharges.add(destinationCharge);
+
+                sourceEntity.setCharge(sourceCharge);
             }
 
-            sourceRepository.save(sourceEntity);
-            destinationRepository.save(destinationEntity);
+            transaction.addSource(sourceEntity);
             sources.add(sourceEntity);
         });
 
-        //trigger sourcing async
-        CompletableFuture<Boolean> future = fundService.paySource(sources);
+        request.getDelivery().forEach((topupValue) -> {
+            net.tospay.transaction.entities.Destination destinationEntity =
+                    new net.tospay.transaction.entities.Destination();
+            destinationEntity.setTransaction(transaction);
+            destinationEntity.setAccount(topupValue.getAccount());
+            destinationEntity.setAmount(topupValue.getAmount());
+            destinationEntity.setCurrency(transaction.getCurrency());
+            destinationEntity.setTransactionStatus(transaction.getTransactionStatus());
+            destinationEntity.setType(topupValue.getType());
+            destinationEntity.setUserId(topupValue.getUserId());
+            destinationEntity.setUserType(topupValue.getUserType());
 
-        return new ResponseObject(ResponseCode.SUCCESS.code, ResponseCode.SUCCESS.name(), null,
-                null);//return mapResponse(response);
+            //TODO: MULTIPLE RECEPIENT BILLING
+            Double destinationCharge = destinationCharges.get(0);
+            destinationEntity.setCharge(destinationCharge);
+            destinationEntity.setAmount(sumSourceAmount.get());
+            transaction.addDestination(destinationEntity);
+        });
+
+        transactionRepository.save(transaction);
+
+        //trigger sourcing async
+        CompletableFuture<Boolean> future = fundService.sourcePay(transaction);
+
+        return new ResponseObject(ResponseCode.PROCESSING.type, ResponseCode.PROCESSING.name(), null,
+                transaction.getId()
+                        + " - " + transaction.getSources().get(0).getId()
+                        + " - " + transaction.getDestinations().get(0).getId());//return mapResponse(response);
     }
 
-    @PostMapping(Constants.URL.PROCESS_CALLBACK)
+    @PostMapping(Constants.URL.CALLBACK_MOBILE)
     public ResponseObject<BaseResponse> processCallback(
-            @RequestParam Map<String, Object> allParams)//(@RequestBody TransactionGenericRequest request)
+            @RequestBody
+                    ResponseObject<TopupMobileResponse> response)//(@RequestBody TransactionGenericRequest request)
             throws Exception
     {
+        Map node = mapper.convertValue(response, Map.class);
+        logger.debug(" {}", node);
 
-        logger.debug("", allParams);
-        SourceType sourceType =
-                allParams.containsKey("channel") ?
-                        SourceType.valueOfType(allParams.get("channel").toString()) : null;
-
-        // String jsonStr = Obj.writeValueAsString(request);
-        switch (sourceType) {
-            case MOBILE:
-                ResponseObject<TopupMobileResponse> response = mapper.convertValue(allParams, ResponseObject.class);
-
-                Optional<net.tospay.transaction.entities.Source> optionalSource =
+        Optional<net.tospay.transaction.entities.Source> optionalSource =
+                response.getData() == null ? Optional.empty() :
                         sourceRepository.findById(response.getData().getExternalReference());
-                Optional<net.tospay.transaction.entities.Destination> optionalDestination =
+        Optional<net.tospay.transaction.entities.Destination> optionalDestination =
+                response.getData() == null ? Optional.empty() :
                         destinationRepository.findById(response.getData().getExternalReference());
 
-                if (!ResponseCode.SUCCESS.code
-                        .equalsIgnoreCase(response.getStatus()))
-                {//failure
+        Transaction transaction = optionalSource.isPresent() ? optionalSource.get().getTransaction() :
+                (optionalDestination.isPresent() ? optionalDestination.get().getTransaction() : null);
 
-                    if (optionalSource.isPresent()) {
-                        net.tospay.transaction.entities.Source source = optionalSource.get();
-                        //  JsonNode node = mapper.valueToTree(request);
-                        source.setResponseAsync(response.getData());
-                        source.setTransactionStatus(TransactionStatus.FAIL);
-                        source.getTransaction().setTransactionStatus(TransactionStatus.FAIL);
-                        sourceRepository.save(source);
-                    } else if (optionalDestination.isPresent()) {
-                        net.tospay.transaction.entities.Destination destination = optionalDestination.get();
-                        destination.setResponseAsync(response.getData());
-                        destination.setTransactionStatus(TransactionStatus.FAIL);
-                        destination.getTransaction().setTransactionStatus(TransactionStatus.FAIL);
-                        destinationRepository.save(destination);
-                    } else {
-                        //TODO: callback from where?
-                        logger.error("", "callback called but no transaction found", allParams);
-                    }
-                } else { //success
-                    if (optionalSource.isPresent()) {
-                        net.tospay.transaction.entities.Source source = optionalSource.get();
-                        source.setResponseAsync(response.getData());
-                        source.setTransactionStatus(TransactionStatus.SUCCESS);
-
-                        //if all success - mark transaction source complete and fire deposit
-                        AtomicBoolean sourcedAll = new AtomicBoolean(true);
-                        source.getTransaction().getSources().forEach(s ->
-                        {
-                            sourcedAll.set(sourcedAll.get() && TransactionStatus.SUCCESS == s.getTransactionStatus());
-                        });
-
-                        source.getTransaction().setSourceComplete(sourcedAll.get());
-
-                        sourceRepository.save(source);
-
-                        //fire destination
-                        CompletableFuture<Boolean> future =
-                                fundService.payDestination(source.getTransaction().getDestinations());
-                    } else if (optionalDestination.isPresent()) {
-                        net.tospay.transaction.entities.Destination destination = optionalDestination.get();
-                        destination.setResponseAsync(response.getData());
-                        destination.setTransactionStatus(TransactionStatus.FAIL);
-
-                        //if all success - mark transaction success
-
-                        AtomicBoolean destinationAll = new AtomicBoolean(true);
-                        AtomicBoolean destinationCompleteAll = new AtomicBoolean(true);
-                        destination.getTransaction().getDestinations().forEach(d ->
-                        {
-                            destinationAll
-                                    .set(destinationAll.get() && TransactionStatus.SUCCESS == d.getTransactionStatus());
-                            destinationCompleteAll
-                                    .set(destinationCompleteAll.get() && (
-                                            TransactionStatus.SUCCESS == d.getTransactionStatus()
-                                                    || TransactionStatus.FAIL == d.getTransactionStatus()));
-                        });
-
-                        if (destinationAll.get()) {
-
-                            //get transaction id
-                            ResponseObject<String> res =
-                                    fetchTransactionId(destination.getTransaction().getAccountType(),
-                                            destination.getTransaction().getTransactionType(),
-                                            destination.getTransaction().getCountryCode());
-                            if (res != null && ResponseCode.SUCCESS.code.equalsIgnoreCase(res.getStatus())) {
-                                destination.getTransaction().setTransactionId(res.getData());
-                            }
-
-                            destination.getTransaction().setTransactionStatus(TransactionStatus.SUCCESS);
-                        } else if (destinationCompleteAll.get()) {
-                            logger.debug("", "failing the transaction", destination.getTransaction());
-                            destination.getTransaction().setTransactionStatus(TransactionStatus.FAIL);
-                        }
-
-                        destinationRepository.save(destination);
-                    } else {
-                        //TODO: callback from where?
-                        logger.error("", "callback called but no transaction found", allParams);
-                    }
-                }
-
-                break;
-            case BANK:
-                break;
-            case CARD:
-                break;
-            case WALLET:
-                break;
-            default:
-                break;
+        TransactionStatus transactionStatus =
+                ResponseCode.SUCCESS.type.equalsIgnoreCase(response.getStatus()) ? TransactionStatus.SUCCESS :
+                        TransactionStatus.FAILED;
+        if (optionalSource.isPresent()) {
+            net.tospay.transaction.entities.Source source = optionalSource.get();
+            source.setResponseAsync(node);
+            source.setDateResponse(new Timestamp(System.currentTimeMillis()));
+            source.setTransactionStatus(transactionStatus);
+            sourceRepository.save(source);
+            if (TransactionStatus.FAILED.equals(transactionStatus)) {
+                logger.debug("sourcing failed  {}", source);
+            }
+        } else if (optionalDestination.isPresent()) {
+            net.tospay.transaction.entities.Destination destination = optionalDestination.get();
+            destination.setResponseAsync(node);
+            destination.setDateResponse(new Timestamp(System.currentTimeMillis()));
+            destination.setTransactionStatus(transactionStatus);
+            destinationRepository.save(destination);
+            if (TransactionStatus.FAILED.equals(transactionStatus)) {
+                logger.debug("paydestination failed  {}", destination);
+            }
+        } else {
+            //TODO: callback from where?
+            logger.error("callback called but no transaction found {}", node);
         }
-        String status = ResponseCode.GENERAL_ERROR.code;
-        String description = ResponseCode.GENERAL_ERROR.name();
-        ArrayList<Error> errors = new ArrayList<>();
-        Error error = new Error(status, description);
-        errors.add(error);
-        return new ResponseObject(status, description, errors, null);
-    }
 
-    public ResponseObject<ChargeResponse> fetchCharge(ChargeRequest chargeRequest)
-    {
-        try {
-            HttpHeaders headers = new org.springframework.http.HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity entity = new HttpEntity<ChargeRequest>(chargeRequest, headers);
+        fundService.checkSourceAndDestinationTransactionStatusAndAct(transaction);
 
-            ResponseEntity<ChargeResponse> response =
-                    restTemplate.exchange(chargeUrl, HttpMethod.POST, entity, ChargeResponse.class);
-            logger.debug("", response);
-
-            return new ResponseObject<ChargeResponse>(ResponseCode.SUCCESS.code, "success", null, response.getBody());
-        } catch (Exception e) {
-            logger.error("", e);
-            return null;
-        }
-    }
-
-    public ResponseObject<String> fetchTransactionId(AccountType accountType, TransactionType transactionType,
-            String countryCode)
-    {
-        try {
-
-            TransactionIdRequest request = new TransactionIdRequest();
-            request.setAccountType(accountType);
-            request.setCountry(countryCode);
-            request.setTransactionType(transactionType);
-
-            HttpHeaders headers = new org.springframework.http.HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity entity = new HttpEntity<TransactionIdRequest>(request, headers);
-
-            ResponseObject<String> response =
-                    restTemplate.postForObject(numberGeneratorTransactionUrl, entity, ResponseObject.class);
-            logger.debug("", response);
-
-            return response;
-        } catch (Exception e) {
-            logger.error("", e);
-            return null;
-        }
+        String status = ResponseCode.SUCCESS.type;
+        String description = ResponseCode.SUCCESS.name();
+        return new ResponseObject(status, description, null, response.getData().getExternalReference());
     }
 }

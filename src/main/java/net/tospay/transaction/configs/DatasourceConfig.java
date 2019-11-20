@@ -104,7 +104,7 @@ public class DatasourceConfig
 
             return dest.toString();
         } catch (Exception e) {
-            LOG.error("exception", e);
+            LOG.error("{}", e);
             return null;
         }
     }

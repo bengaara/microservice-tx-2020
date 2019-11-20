@@ -13,11 +13,6 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-/**
- * @author : Clifford Owino
- * @Email : owinoclifford@gmail.com
- * @since : 9/5/2019, Thu
- **/
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig
@@ -36,17 +31,13 @@ public class SwaggerConfig
     private ApiInfo apiInfo()
     {
         return new ApiInfo(
-                "Coop Middleware",
-                "A bridge between Tospay and Coop Bank",
+                "Transaction Service",
+                "A Tospay transaction Switch to all value Stores",
                 "0.0.1",
                 "https://tospay.net",
-                new Contact(
-                        "Clifford Owino",
-                        "https://tospay.net",
-                        "clifford@tospay.net"
-                ),
+                null,
                 "info@tospay.net",
-                "License of API",
+                "#",
                 Collections.emptyList());
     }
 }

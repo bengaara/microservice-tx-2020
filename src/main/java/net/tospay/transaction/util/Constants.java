@@ -6,8 +6,8 @@ public class Constants
     {
         public static final String API = "/api";
 
-        public static final String PROCESS = "/process";
+        public static final String TRANSFER = "/transfer";
 
-        public static final String PROCESS_CALLBACK = PROCESS + "/callback";
+        public static final String CALLBACK_MOBILE = "/mobile/callback";
     }
 }

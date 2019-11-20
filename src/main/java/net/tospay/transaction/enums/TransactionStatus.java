@@ -1,26 +1,39 @@
 package net.tospay.transaction.enums;
 
-/**
- * @author : Clifford Owino
- * @Email : owinoclifford@gmail.com
- * @since : 7/22/2019, Mon
- **/
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public enum TransactionStatus
 {
-    CREATED(0),
-    PROCESSING(1),
-    FAIL(2),
-    SUCCESS(3);
+    CREATED("CREATED"),
+    PROCESSING("PROCESSING"),
+    FAILED("FAILED"),
+    SUCCESS("SUCCESS");
 
-    private int transactionStatus;
+    private static final Map<String, TransactionStatus> LABEL = new HashMap<>();
 
-    TransactionStatus(int transactionStatus)
-    {
-        this.transactionStatus = transactionStatus;
+    static {
+        for (TransactionStatus e : values()) {
+            LABEL.put(e.type, e);
+        }
     }
 
-    public int getTransactionStatus()
+    private String type;
+
+    // ... fields, constructor, methods
+
+    TransactionStatus(String type)
     {
-        return transactionStatus;
+        this.type = type;
+    }
+
+    @JsonCreator
+    public static TransactionStatus valueOfType(String label)
+    {
+
+        label = label.toUpperCase();
+        return LABEL.get(label);
     }
 }

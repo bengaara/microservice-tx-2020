@@ -8,4 +8,5 @@ import org.springframework.stereotype.Service;
 public class BaseService
 {
     Logger logger = LoggerFactory.getLogger(this.getClass());
+    //Logger logger = LogManager.getLogger(this.getClass());
 }

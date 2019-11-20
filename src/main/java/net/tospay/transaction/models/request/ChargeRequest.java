@@ -25,10 +25,10 @@ public class ChargeRequest implements Serializable
     private TransactionType type;
 
     @JsonProperty("source")
-    private Source source;
+    private ChargeRequestSource source;
 
     @JsonProperty("destination")
-    private Destination destination;
+    private ChargeRequestDestination destination;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -58,22 +58,22 @@ public class ChargeRequest implements Serializable
         this.type = type;
     }
 
-    public Source getSource()
+    public ChargeRequestSource getSource()
     {
         return source;
     }
 
-    public void setSource(Source source)
+    public void setSource(ChargeRequestSource source)
     {
         this.source = source;
     }
 
-    public Destination getDestination()
+    public ChargeRequestDestination getDestination()
     {
         return destination;
     }
 
-    public void setDestination(Destination destination)
+    public void setDestination(ChargeRequestDestination destination)
     {
         this.destination = destination;
     }

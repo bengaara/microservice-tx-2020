@@ -2,9 +2,11 @@ package net.tospay.transaction.entities;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,10 +18,10 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import net.tospay.transaction.configs.HashMapConverter;
 import net.tospay.transaction.enums.AccountType;
 import net.tospay.transaction.enums.SourceType;
 import net.tospay.transaction.enums.TransactionStatus;
-import net.tospay.transaction.models.response.TopupMobileResponse;
 
 @Entity
 @Table(name = "sources",
@@ -42,8 +44,9 @@ public class Source extends BaseEntity<UUID> implements Serializable
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(name = "account", nullable = false)
-    private String account;//account id
+    @Column(name = "account", columnDefinition = "jsonb")
+    @Convert(converter = HashMapConverter.class)
+    private Map<String, Object> account;//account object
 
     @Column(name = "amount", nullable = false)
     private Double amount;
@@ -57,11 +60,13 @@ public class Source extends BaseEntity<UUID> implements Serializable
     @Column(name = "status", nullable = false)
     private TransactionStatus transactionStatus = TransactionStatus.CREATED;
 
-    @Column(name = "response")
-    private TopupMobileResponse response;
+    @Column(name = "response", columnDefinition = "jsonb")
+    @Convert(converter = HashMapConverter.class)
+    private Map<String, Object> response;
 
-    @Column(name = "response_async")
-    private TopupMobileResponse responseAsync;
+    @Column(name = "response_async", columnDefinition = "jsonb")
+    @Convert(converter = HashMapConverter.class)
+    private Map<String, Object> responseAsync;
 
     @Column(name = "date_created", nullable = false)
     private Timestamp dateCreated;
@@ -69,12 +74,25 @@ public class Source extends BaseEntity<UUID> implements Serializable
     @Column(name = "date_modified", nullable = false)
     private Timestamp dateModified;
 
+    @Column(name = "date_response")
+    private Timestamp dateResponse;
+
     @ManyToOne
     @JoinColumn(name = "transaction")
     private Transaction transaction;
 
     public Source()
     {
+    }
+
+    public Timestamp getDateResponse()
+    {
+        return dateResponse;
+    }
+
+    public void setDateResponse(Timestamp dateResponse)
+    {
+        this.dateResponse = dateResponse;
     }
 
     public SourceType getType()
@@ -107,12 +125,12 @@ public class Source extends BaseEntity<UUID> implements Serializable
         this.userId = userId;
     }
 
-    public String getAccount()
+    public Map<String, Object> getAccount()
     {
         return account;
     }
 
-    public void setAccount(String account)
+    public void setAccount(Map<String, Object> account)
     {
         this.account = account;
     }
@@ -157,22 +175,22 @@ public class Source extends BaseEntity<UUID> implements Serializable
         this.transactionStatus = transactionStatus;
     }
 
-    public TopupMobileResponse getResponse()
+    public Map<String, Object> getResponse()
     {
         return response;
     }
 
-    public void setResponse(TopupMobileResponse response)
+    public void setResponse(Map<String, Object> response)
     {
         this.response = response;
     }
 
-    public TopupMobileResponse getResponseAsync()
+    public Map<String, Object> getResponseAsync()
     {
         return responseAsync;
     }
 
-    public void setResponseAsync(TopupMobileResponse responseAsync)
+    public void setResponseAsync(Map<String, Object> responseAsync)
     {
         this.responseAsync = responseAsync;
     }

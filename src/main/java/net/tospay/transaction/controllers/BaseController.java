@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,6 +25,7 @@ import static net.tospay.transaction.models.response.ResponseCode.INVALID_REQUES
 public class BaseController
 {
     Logger logger = LoggerFactory.getLogger(this.getClass());
+    //Logger logger = LogManager.getLogger(this.getClass());
 
     @Autowired
     RestTemplate restTemplate;
@@ -38,7 +37,7 @@ public class BaseController
     {
 
         try {
-            if (!ResponseCode.SUCCESS.code.equalsIgnoreCase(response.getStatus())) {//on error map?
+            if (!ResponseCode.SUCCESS.type.equalsIgnoreCase(response.getStatus())) {//on error map?
                 String status =
                         response.getStatus() != null ? response.getStatus() : INVALID_REQUEST.responseCode;
                 String description = response.getDescription() != null ? response.getDescription() :
@@ -46,7 +45,7 @@ public class BaseController
                 ArrayList<Error> errors = new ArrayList<>();
                 Error error = new Error(status, description);
                 errors.add(error);
-                switch (ResponseCode.valueOfCode(response.getStatus())) {
+                switch (ResponseCode.valueOfType(response.getStatus())) {
 
                     //case GENERAL_ERROR:
                     default:
@@ -66,11 +65,12 @@ public class BaseController
         } catch (Exception e) {
             logger.error("", e);
         }
-        return new ResponseObject(ResponseCode.SUCCESS.code, ResponseCode.SUCCESS.code, null, response);
+        return new ResponseObject(ResponseCode.GENERAL_ERROR.type, ResponseCode.GENERAL_ERROR.type, null, response);
     }
 
     @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<Object> exception(Exception e)
+    @SuppressWarnings("unchecked")
+    public <T extends ResponseObject> ResponseObject<T> exception(Exception e)
     {
         logger.error("", e);
 
@@ -78,7 +78,12 @@ public class BaseController
         error.setCode("002");
         error.setDescription(e.getMessage());
 
-        return new ResponseEntity<>(Arrays.asList(error), HttpStatus.BAD_REQUEST);
+        ResponseObject response = new ResponseObject(ResponseCode.GENERAL_ERROR.type,
+                ResponseCode.GENERAL_ERROR.name(),
+                Arrays.asList(new Error(ResponseCode.FAILURE.type, ResponseCode.FAILURE.name()))
+                , e);
+
+        return response;
     }
 
     public UserInfoResponse verifyUserToken(String token)
@@ -93,7 +98,7 @@ public class BaseController
 
             UserInfoResponse userInfoResponse =
                     restTemplate.postForObject(authUrl, entity, UserInfoResponse.class);
-            logger.debug("", userInfoResponse);
+            logger.debug("{}", userInfoResponse);
 
             return userInfoResponse;
         } catch (Exception e) {

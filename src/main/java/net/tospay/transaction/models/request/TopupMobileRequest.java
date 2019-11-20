@@ -37,7 +37,7 @@ public class TopupMobileRequest implements Serializable
     private AccountType userType;
 
     @JsonProperty("account")
-    private String account;
+    private Map<String, Object> account;
 
     @JsonProperty("amount")
     private Double amount;
@@ -143,18 +143,18 @@ public class TopupMobileRequest implements Serializable
     }
 
     @JsonProperty("account")
-    public String getAccount()
+    public Map<String, Object> getAccount()
     {
         return account;
     }
 
     @JsonProperty("account")
-    public void setAccount(String account)
+    public void setAccount(Map<String, Object> account)
     {
         this.account = account;
     }
 
-    public TopupMobileRequest withAccount(String account)
+    public TopupMobileRequest withAccount(Map<String, Object> account)
     {
         this.account = account;
         return this;

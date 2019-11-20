@@ -32,6 +32,8 @@ public enum AccountType
     @JsonCreator
     public static AccountType valueOfType(String label)
     {
+        label = label.toUpperCase();
         return LABEL.get(label);
+
     }
 }

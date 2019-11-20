@@ -12,10 +12,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  **/
 public enum SourceType
 {
-    MOBILE("mobile"),
-    BANK("bank"),
-    WALLET("wallet"),
-    CARD("card");
+    MOBILE("MOBILE"),
+    BANK("BANK"),
+    WALLET("WALLET"),
+    CARD("CARD");
 
     private static final Map<String, SourceType> LABEL = new HashMap<>();
 
@@ -37,6 +37,7 @@ public enum SourceType
     @JsonCreator
     public static SourceType valueOfType(String label)
     {
+        label = label.toUpperCase();
         return LABEL.get(label);
     }
 }
