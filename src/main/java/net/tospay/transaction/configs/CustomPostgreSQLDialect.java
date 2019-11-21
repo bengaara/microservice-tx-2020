@@ -11,6 +11,8 @@ import com.vladmihalcea.hibernate.type.json.JsonNodeBinaryType;
 import com.vladmihalcea.hibernate.type.json.JsonNodeStringType;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
+import net.tospay.transaction.models.request.Account;
+
 public class CustomPostgreSQLDialect extends PostgreSQL95Dialect
 {
     public CustomPostgreSQLDialect()
@@ -22,5 +24,7 @@ public class CustomPostgreSQLDialect extends PostgreSQL95Dialect
         registerHibernateType(Types.OTHER, JsonBinaryType.class.getName());
         registerHibernateType(Types.OTHER, JsonNodeBinaryType.class.getName());
         registerHibernateType(Types.OTHER, JsonNodeStringType.class.getName());
+        registerHibernateType(Types.OTHER, Model.class.getName());
+
     }
 }

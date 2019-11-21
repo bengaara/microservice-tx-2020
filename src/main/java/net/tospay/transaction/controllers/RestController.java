@@ -26,12 +26,12 @@ import net.tospay.transaction.models.request.Amount;
 import net.tospay.transaction.models.request.ChargeRequest;
 import net.tospay.transaction.models.request.ChargeRequestDestination;
 import net.tospay.transaction.models.request.ChargeRequestSource;
-import net.tospay.transaction.models.request.TopupRequest;
+import net.tospay.transaction.models.request.TransferRequest;
 import net.tospay.transaction.models.response.BaseResponse;
 import net.tospay.transaction.models.response.ChargeResponse;
 import net.tospay.transaction.models.response.Error;
 import net.tospay.transaction.models.response.ResponseObject;
-import net.tospay.transaction.models.response.TopupMobileResponse;
+import net.tospay.transaction.models.response.TransferIncomingResponse;
 import net.tospay.transaction.repositories.DestinationRepository;
 import net.tospay.transaction.repositories.SourceRepository;
 import net.tospay.transaction.repositories.TransactionRepository;
@@ -67,18 +67,16 @@ public class RestController extends BaseController
 
     @PostMapping(Constants.URL.TRANSFER)
     public ResponseObject<BaseResponse> transfer(
-            @Valid @RequestBody TopupRequest request) throws Exception
+            @Valid @RequestBody TransferRequest request) throws Exception
     {//Map<String, Object> allParams)//(@RequestBody TransactionGenericRequest request)
         // TopupRequest topupRequest = mapper.convertValue(allParams, TopupRequest.class);
         logger.info(" {}", request);
         return process(request);
     }
 
-    public ResponseObject<BaseResponse> process(TopupRequest request)
+    public ResponseObject<BaseResponse> process(TransferRequest request)
             throws Exception
     {
-        //TODO: validate
-
         AtomicReference<Double> sumSourceAmount = new AtomicReference<>(0.0);
         request.getSource().forEach((topupValue) -> {
             sumSourceAmount.updateAndGet(v -> v + topupValue.getAmount());
@@ -99,7 +97,7 @@ public class RestController extends BaseController
         Transaction transaction = new Transaction();
         transaction.setAmount(request.getAmount());
         transaction.setCurrency(request.getCurrency());
-        transaction.setMerchantId(request.getMerchantInfo());
+        transaction.setMerchantId(request.getMerchantInfo().getUserId());
         //  JsonNode node = mapper.valueToTree(request);
         transaction.setPayload(request);
         transaction.setTransactionStatus(TransactionStatus.CREATED);
@@ -120,43 +118,25 @@ public class RestController extends BaseController
             sourceEntity.setUserId(topupValue.getUserId());
             sourceEntity.setUserType(topupValue.getUserType());
 
-//            destinationEntity.setTransaction(transaction);
-//            destinationEntity.setAccount(request.getDelivery().get(0).getAccount());
-//            destinationEntity.setAmount(request.getAmount());//note delivery is total.. assume 1 destination
-//
-//            destinationEntity.setCurrency(transaction.getCurrency());
-//            destinationEntity.setTransactionStatus(transaction.getTransactionStatus());
-//            destinationEntity.setType(request.getDelivery().get(0).getType());
-//            destinationEntity.setUserId(request.getDelivery().get(0).getUserId());
-//            destinationEntity.setUserType(request.getDelivery().get(0).getUserType());
-
             ChargeRequest chargeRequest = new ChargeRequest();
             chargeRequest.setType(transaction.getTransactionType());
 
             ChargeRequestDestination chargeRequestDestination =
                     new ChargeRequestDestination();
             //TODO: fix this for multiple - whose billed? when?
-            String destAccountId = request.getDelivery().get(0).getAccount() != null ?
-                    (String) request.getDelivery().get(0).getAccount().get("id") : null;
-            boolean destAccountKnown =
-                    destAccountId != null && !request.getDelivery().get(0).getAccount().get("id").getClass()
-                            .equals(String.class);
-
+            String destAccountId = request.getDelivery().get(0).getAccount() != null ?request.getDelivery().get(0).getAccount().getId(): null;
             chargeRequestDestination.setAccount(request.getDelivery().get(0).getUserType());//tospay account
             chargeRequestDestination.setId(destAccountId);
-            chargeRequestDestination.setPlatform(destAccountKnown ? "known" : "unknown");
+            chargeRequestDestination.setPlatform(destAccountId !=null ? "known" : "unknown");
             chargeRequestDestination.setChannel(request.getDelivery().get(0).getType());
             chargeRequest.setDestination(chargeRequestDestination);
 
             ChargeRequestSource chargeRequestSource = new ChargeRequestSource();
-            String sourceAccountId =
-                    sourceEntity.getAccount() != null ? (String) sourceEntity.getAccount().get("id") : null;
-            boolean sourceAccountKnown =
-                    sourceAccountId != null && !sourceEntity.getAccount().get("id").getClass().equals(String.class);
+            String sourceAccountId = sourceEntity.getAccount() != null ? sourceEntity.getAccount().getId() : null;
 
             chargeRequestSource.setAccount(sourceEntity.getUserType());//tospay account
             chargeRequestSource.setId(sourceAccountId);
-            chargeRequestSource.setPlatform(sourceAccountKnown ? "known" : "unknown");
+            chargeRequestSource.setPlatform(sourceAccountId!=null ? "known" : "unknown");
             chargeRequestSource.setChannel(sourceEntity.getType());
             chargeRequest.setSource(chargeRequestSource);
 
@@ -216,7 +196,7 @@ public class RestController extends BaseController
     @PostMapping(Constants.URL.CALLBACK_MOBILE)
     public ResponseObject<BaseResponse> processCallback(
             @RequestBody
-                    ResponseObject<TopupMobileResponse> response)//(@RequestBody TransactionGenericRequest request)
+                    ResponseObject<TransferIncomingResponse> response)//(@RequestBody TransactionGenericRequest request)
             throws Exception
     {
         Map node = mapper.convertValue(response, Map.class);
@@ -267,4 +247,5 @@ public class RestController extends BaseController
         String description = ResponseCode.SUCCESS.name();
         return new ResponseObject(status, description, null, response.getData().getExternalReference());
     }
+
 }

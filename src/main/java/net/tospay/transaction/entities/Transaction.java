@@ -20,10 +20,9 @@ import javax.transaction.Transactional;
 
 import org.hibernate.annotations.Type;
 
-import net.tospay.transaction.enums.AccountType;
 import net.tospay.transaction.enums.TransactionStatus;
 import net.tospay.transaction.enums.TransactionType;
-import net.tospay.transaction.models.request.TopupRequest;
+import net.tospay.transaction.models.request.TransferRequest;
 
 @Entity
 @Table(name = "transactions",
@@ -56,7 +55,7 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
 
     @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
     @Type(type = "jsonb")
-    private TopupRequest payload;
+    private TransferRequest payload;
 
     @Column(name = "source_complete")
     private boolean sourceComplete;
@@ -188,12 +187,12 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
         this.merchantId = merchantId;
     }
 
-    public TopupRequest getPayload()
+    public TransferRequest getPayload()
     {
         return payload;
     }
 
-    public void setPayload(TopupRequest payload)
+    public void setPayload(TransferRequest payload)
     {
         this.payload = payload;
     }

@@ -11,12 +11,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import net.tospay.transaction.enums.TransactionType;
+import net.tospay.transaction.models.response.MerchantInfo;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "sources",
         "delivery"
 })
-public class TopupRequest extends TransactionGenericRequest
+public class TransferRequest
 {
     @JsonProperty("source")
     private List<TopupValueSource> source;
@@ -26,6 +29,84 @@ public class TopupRequest extends TransactionGenericRequest
 
     @JsonProperty("userInfo")
     private UserInfo userInfo;
+
+    @JsonProperty("deviceInfo")
+    private DeviceInfo deviceInfo;
+
+    @JsonProperty("merchantInfo")
+    private MerchantInfo merchantInfo;
+
+    @JsonProperty("account")
+    private Account account;
+
+    @JsonProperty("amount")
+    private Double amount;
+
+    @JsonProperty("currency")
+    private String currency;
+
+    @JsonProperty("type")
+    private TransactionType type;
+
+    public TransactionType getType()
+    {
+        return type;
+    }
+
+    public void setType(TransactionType type)
+    {
+        this.type = type;
+    }
+
+    public String getCurrency()
+    {
+        return currency;
+    }
+
+    public void setCurrency(String currency)
+    {
+        this.currency = currency;
+    }
+
+    public DeviceInfo getDeviceInfo()
+    {
+        return deviceInfo;
+    }
+
+    public void setDeviceInfo(DeviceInfo deviceInfo)
+    {
+        this.deviceInfo = deviceInfo;
+    }
+
+    public MerchantInfo getMerchantInfo()
+    {
+        return merchantInfo;
+    }
+
+    public void setMerchantInfo(MerchantInfo merchantInfo)
+    {
+        this.merchantInfo = merchantInfo;
+    }
+
+    public Account getAccount()
+    {
+        return account;
+    }
+
+    public void setAccount(Account account)
+    {
+        this.account = account;
+    }
+
+    public Double getAmount()
+    {
+        return amount;
+    }
+
+    public void setAmount(Double amount)
+    {
+        this.amount = amount;
+    }
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -77,7 +158,7 @@ public class TopupRequest extends TransactionGenericRequest
         this.additionalProperties.put(name, value);
     }
 
-    public TopupRequest withAdditionalProperty(String name, Object value)
+    public TransferRequest withAdditionalProperty(String name, Object value)
     {
         this.additionalProperties.put(name, value);
         return this;

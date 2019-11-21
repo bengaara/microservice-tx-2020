@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -31,13 +32,17 @@ import net.tospay.transaction.enums.MobilePayAction;
 import net.tospay.transaction.enums.ResponseCode;
 import net.tospay.transaction.enums.TransactionStatus;
 import net.tospay.transaction.enums.TransactionType;
+import net.tospay.transaction.models.request.Account;
 import net.tospay.transaction.models.request.ChargeRequest;
-import net.tospay.transaction.models.request.TopupMobileRequest;
+import net.tospay.transaction.models.request.TransactionRequest;
+import net.tospay.transaction.models.request.TransferOutgoinBankRequest;
+import net.tospay.transaction.models.request.TransferOutgoingRequest;
 import net.tospay.transaction.models.request.TransactionIdRequest;
+import net.tospay.transaction.models.request.TransferRequest;
 import net.tospay.transaction.models.response.ChargeResponse;
 import net.tospay.transaction.models.response.Error;
 import net.tospay.transaction.models.response.ResponseObject;
-import net.tospay.transaction.models.response.TopupMobileResponse;
+import net.tospay.transaction.models.response.TransferIncomingResponse;
 import net.tospay.transaction.repositories.DestinationRepository;
 import net.tospay.transaction.repositories.SourceRepository;
 import net.tospay.transaction.repositories.TransactionRepository;
@@ -68,6 +73,9 @@ public class FundService extends BaseService
     @Value("${walletpay.url}")
     private String walletpayUrl;
 
+    @Value("${cardpay.url}")
+    private String cardpayUrl;
+
     public FundService(RestTemplate restTemplate, TransactionRepository transactionRepository,
             SourceRepository sourceRepository, DestinationRepository destinationRepository)
     {
@@ -92,12 +100,9 @@ public class FundService extends BaseService
                     .getSources();
             sources.forEach(source -> {
 
-                switch (source.getType()) {
-                    case MOBILE: //async
-                    case WALLET://sync
                         source.setTransactionStatus(TransactionStatus.PROCESSING);
-                        TopupMobileRequest request = new TopupMobileRequest();
-                        request.setAccount(source.getAccount());
+                        TransferOutgoingRequest request = new TransferOutgoingRequest();
+                        request.setAccount(source.getAccount()!=null?new Account(source.getAccount()):null);
                         request.setAction(MobilePayAction.SOURCE);
                         request.setAmount(source.getAmount());
                         request.setUserId(source.getUserId());
@@ -107,7 +112,7 @@ public class FundService extends BaseService
                         request.setDescription(source.getType().toString());
                         request.setExternalReference(source.getId());
 
-                        ResponseObject<TopupMobileResponse> response = null;
+                        ResponseObject<TransferIncomingResponse> response = null;
                         switch (source.getType()) {
                             case MOBILE: //async
                                 response = hitMobile(request);
@@ -116,6 +121,20 @@ public class FundService extends BaseService
                                 //process wallet response since its sync
                                 response = hitWallet(request);
                                 source.setDateResponse(new Timestamp(System.currentTimeMillis()));
+                                break;
+                            case CARD:
+                                //process card response since its sync
+
+                                TransferRequest r = source.getTransaction().getPayload();
+                             //   r.setAdditionalProperty("orderInfo ",request);
+
+                                response = hitCard(r,request);
+                                source.setDateResponse(new Timestamp(System.currentTimeMillis()));
+                                break;
+                            case BANK:
+                               //TODO
+                                source.setTransactionStatus(TransactionStatus.FAILED);
+                                logger.debug("sourcing failed for bank TODO implementation {}", source);
                                 break;
                         }
 
@@ -133,12 +152,6 @@ public class FundService extends BaseService
                             logger.debug("sourcing ok  {} {}", source,status);
 
                         }
-                        break;
-                    case BANK:
-                        break;
-                    case CARD:
-                        break;
-                }
 
                 source = sourceRepository.save(source);
 
@@ -243,16 +256,16 @@ public class FundService extends BaseService
         }
     }
 
-    public ResponseObject<TopupMobileResponse> hitMobile(TopupMobileRequest request)
+    public ResponseObject<TransferIncomingResponse> hitMobile(TransferOutgoingRequest request)
     {
         try {
 
             logger.debug(" {}", request);
             HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity entity = new HttpEntity<TopupMobileRequest>(request, headers);
+            HttpEntity entity = new HttpEntity<TransferOutgoingRequest>(request, headers);
 
-            ResponseObject<TopupMobileResponse> response =
+            ResponseObject<TransferIncomingResponse> response =
                     restTemplate.postForObject(mobilepayUrl, entity, ResponseObject.class);
             logger.debug(" {}", response);
 
@@ -272,16 +285,16 @@ public class FundService extends BaseService
         }
     }
 
-    public ResponseObject<TopupMobileResponse> hitWallet(TopupMobileRequest request)
+    public ResponseObject<TransferIncomingResponse> hitWallet(TransferOutgoingRequest request)
     {
         try {
 
             logger.debug(" {}", request);
             HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity entity = new HttpEntity<TopupMobileRequest>(request, headers);
+            HttpEntity entity = new HttpEntity<TransferOutgoingRequest>(request, headers);
 
-            ResponseObject<TopupMobileResponse> response =
+            ResponseObject<TransferIncomingResponse> response =
                     restTemplate.postForObject(walletpayUrl, entity, ResponseObject.class);
             logger.debug(" {}", response);
 
@@ -301,7 +314,43 @@ public class FundService extends BaseService
             return null;
         }
     }
+    public ResponseObject<TransferIncomingResponse> hitCard(TransferRequest request, TransferOutgoingRequest  transferOutgoingRequest)
+    {
+        try {
 
+            logger.debug(" {}", request);
+            HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            Map s = new ObjectMapper().convertValue(request,Map.class);
+            Map m = new ObjectMapper().convertValue(transferOutgoingRequest,Map.class);
+            m.put("reference",m.get("external_reference"));
+            s.put("orderInfo",m);
+
+
+            HttpEntity entity = new HttpEntity<Map>(s, headers);
+
+            ResponseObject<TransferIncomingResponse> response =
+                    restTemplate.postForObject(cardpayUrl, entity, ResponseObject.class);
+            logger.debug(" {}", response);
+
+            return response;
+        } catch (HttpClientErrorException e) {
+            logger.error(" {}", e);
+
+            String status = ResponseCode.FAILURE.type;
+            String description = e.getResponseBodyAsString();
+            ArrayList<Error> errors = new ArrayList<>();
+            Error error = new Error(status, description);
+            errors.add(error);
+
+            return new ResponseObject<>(status, description, errors, null);
+        } catch (Exception e) {
+            logger.error("{}", e);
+            return null;
+        }
+    }
     @Async
     @Transactional
     public CompletableFuture<Boolean> payDestination(Transaction transaction)
@@ -312,13 +361,10 @@ public class FundService extends BaseService
             List<Destination> destinations = transaction.getDestinations();//transactionRepository.findById(transaction.getId()).get().getDestinations();
             destinations.forEach(destination -> {
 
-                switch (destination.getType()) {
-                    case MOBILE:  //async wait for callback
-                    case WALLET:
 
                         destination.setTransactionStatus(TransactionStatus.PROCESSING);
-                        TopupMobileRequest request = new TopupMobileRequest();
-                        request.setAccount(destination.getAccount());
+                        TransferOutgoingRequest request = new TransferOutgoingRequest();
+                        request.setAccount(destination.getAccount()!=null?new Account(destination.getAccount()):null);
                         request.setAction(MobilePayAction.DESTINATION);
                         request.setAmount(destination.getAmount());
                         request.setUserId(destination.getUserId());
@@ -328,7 +374,7 @@ public class FundService extends BaseService
                         request.setDescription(destination.getType().toString());
                         request.setExternalReference(destination.getId());
 
-                        ResponseObject<TopupMobileResponse> response = null;
+                        ResponseObject<TransferIncomingResponse> response = null;
                         switch (destination.getType()) {
                             case MOBILE:
                                 response = hitMobile(request);
@@ -336,6 +382,19 @@ public class FundService extends BaseService
                             case WALLET:
                                 response = hitWallet(request);
                                 destination.setDateResponse(new Timestamp(System.currentTimeMillis()));
+                                break;
+                            case CARD:
+//                                response = hitCard(request);
+//                                destination.setDateResponse(new Timestamp(System.currentTimeMillis()));
+//                                break;
+                                //TODO
+                                destination.setTransactionStatus(TransactionStatus.FAILED);
+                                logger.debug("destination failed for card TODO implementation {}", destination);
+                                break;
+                            case BANK:
+                                //TODO
+                                destination.setTransactionStatus(TransactionStatus.FAILED);
+                                logger.debug("destination failed for bank TODO implementation {}", destination);
                                 break;
                         }
 
@@ -351,14 +410,8 @@ public class FundService extends BaseService
                             destination.setTransactionStatus(status);
                             logger.debug("destination ok  {} {}", destination,status);
                         }
-                        break;
-                    case BANK:
-                        break;
-                    case CARD:
-                        break;
-                }
-                destination = destinationRepository.save(destination);
 
+                destination = destinationRepository.save(destination);
             });
            // transaction = transactionRepository.save(transaction);//transactionRepository.refresh(transaction);
             checkSourceAndDestinationTransactionStatusAndAct(destinations.get(0).getTransaction());

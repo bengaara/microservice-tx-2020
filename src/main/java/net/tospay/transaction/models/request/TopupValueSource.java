@@ -39,7 +39,7 @@ public class TopupValueSource implements Serializable
     private AccountType userType;
 
     @JsonProperty("account")
-    private Map<String, Object> account;
+    private Account account;
 
     @JsonProperty("amount")
     @NotNull
@@ -93,17 +93,17 @@ public class TopupValueSource implements Serializable
         this.amount = amount;
     }
 
-    public Map<String, Object> getAccount()
+    public Account getAccount()
     {
         return account;
     }
 
-    public void setAccount(Map<String, Object> account)
+    public void setAccount(Account account)
     {
         this.account = account;
     }
 
-    public TopupValueSource withAccount(Map<String, Object> account)
+    public TopupValueSource withAccount(Account account)
     {
         this.account = account;
         return this;

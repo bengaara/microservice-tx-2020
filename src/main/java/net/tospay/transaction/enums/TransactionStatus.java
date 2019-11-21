@@ -10,7 +10,8 @@ public enum TransactionStatus
     CREATED("CREATED"),
     PROCESSING("PROCESSING"),
     FAILED("FAILED"),
-    SUCCESS("SUCCESS");
+    SUCCESS("SUCCESS"),
+    PARTIAL_COMPLETE("PARTIAL_COMPLETE");
 
     private static final Map<String, TransactionStatus> LABEL = new HashMap<>();
 

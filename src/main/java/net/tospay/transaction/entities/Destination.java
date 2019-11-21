@@ -19,9 +19,12 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import net.tospay.transaction.configs.HashMapConverter;
+import net.tospay.transaction.configs.Model;
+import net.tospay.transaction.configs.ModelConverter;
 import net.tospay.transaction.enums.AccountType;
 import net.tospay.transaction.enums.SourceType;
 import net.tospay.transaction.enums.TransactionStatus;
+import net.tospay.transaction.models.request.Account;
 
 @Entity
 @Table(name = "destinations",
@@ -45,8 +48,8 @@ public class Destination extends BaseEntity<UUID> implements Serializable
     private UUID userId;
 
     @Column(name = "account", columnDefinition = "jsonb")
-    @Convert(converter = HashMapConverter.class)
-    private Map<String, Object> account;
+    @Convert(converter = ModelConverter.class)
+    private Model account;
 
     @Column(name = "amount", nullable = false)
     private Double amount;
@@ -126,13 +129,14 @@ public class Destination extends BaseEntity<UUID> implements Serializable
         this.userId = userId;
     }
 
-    public Map<String, Object> getAccount()
+    public Model getAccount()
     {
         return account;
     }
 
-    public void setAccount(Map<String, Object> account)
+    public void setAccount(Model account)
     {
+
         this.account = account;
     }
 

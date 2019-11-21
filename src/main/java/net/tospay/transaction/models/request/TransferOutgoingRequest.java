@@ -23,7 +23,7 @@ import net.tospay.transaction.enums.MobilePayAction;
         "account",
         "amount"
 })
-public class TopupMobileRequest implements Serializable
+public class TransferOutgoingRequest implements Serializable
 {
     private final static long serialVersionUID = -9078608771772465581L;
 
@@ -37,7 +37,7 @@ public class TopupMobileRequest implements Serializable
     private AccountType userType;
 
     @JsonProperty("account")
-    private Map<String, Object> account;
+    private Account account;
 
     @JsonProperty("amount")
     private Double amount;
@@ -143,18 +143,18 @@ public class TopupMobileRequest implements Serializable
     }
 
     @JsonProperty("account")
-    public Map<String, Object> getAccount()
+    public Account getAccount()
     {
         return account;
     }
 
     @JsonProperty("account")
-    public void setAccount(Map<String, Object> account)
+    public void setAccount(Account account)
     {
         this.account = account;
     }
 
-    public TopupMobileRequest withAccount(Map<String, Object> account)
+    public TransferOutgoingRequest withAccount(Account account)
     {
         this.account = account;
         return this;
@@ -177,7 +177,7 @@ public class TopupMobileRequest implements Serializable
         this.additionalProperties.put(name, value);
     }
 
-    public TopupMobileRequest withAdditionalProperty(String name, Object value)
+    public TransferOutgoingRequest withAdditionalProperty(String name, Object value)
     {
         this.additionalProperties.put(name, value);
         return this;

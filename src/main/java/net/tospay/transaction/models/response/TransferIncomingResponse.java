@@ -18,7 +18,7 @@ import net.tospay.transaction.enums.SourceType;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
 })
-public class TopupMobileResponse implements Serializable
+public class TransferIncomingResponse implements Serializable
 {
     private final static long serialVersionUID = -9078608771772465581L;
 
@@ -125,7 +125,7 @@ public class TopupMobileResponse implements Serializable
         this.additionalProperties.put(name, value);
     }
 
-    public TopupMobileResponse withAdditionalProperty(String name, Object value)
+    public TransferIncomingResponse withAdditionalProperty(String name, Object value)
     {
         this.additionalProperties.put(name, value);
         return this;
