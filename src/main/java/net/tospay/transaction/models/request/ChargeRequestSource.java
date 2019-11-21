@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.SourceType;
+import net.tospay.transaction.enums.Transfer;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -35,7 +35,7 @@ public class ChargeRequestSource implements Serializable
     private String id;
 
     @JsonProperty("channel")
-    private SourceType channel;
+    private Transfer.SourceType channel;
 
     @JsonProperty("amount")
     private Amount amount;
@@ -100,18 +100,18 @@ public class ChargeRequestSource implements Serializable
     }
 
     @JsonProperty("from")
-    public SourceType getChannel()
+    public Transfer.SourceType getChannel()
     {
         return channel;
     }
 
     @JsonProperty("from")
-    public void setChannel(SourceType channel)
+    public void setChannel(Transfer.SourceType channel)
     {
         this.channel = channel;
     }
 
-    public ChargeRequestSource withChannel(SourceType channel)
+    public ChargeRequestSource withChannel(Transfer.SourceType channel)
     {
         this.channel = channel;
         return this;

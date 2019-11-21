@@ -21,7 +21,7 @@ public enum ResponseCode
         }
     }
 
-    public final String type;
+     public final String type;
 
     private ResponseCode(String type)
     {

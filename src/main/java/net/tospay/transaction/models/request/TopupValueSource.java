@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.SourceType;
+import net.tospay.transaction.enums.Transfer;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -30,7 +30,7 @@ public class TopupValueSource implements Serializable
     private final static long serialVersionUID = -9078608771772465581L;
 
     @JsonProperty("type")
-    private SourceType type;
+    private Transfer.SourceType type;
 
     @JsonProperty("user_id")
     private UUID userId;
@@ -53,12 +53,12 @@ public class TopupValueSource implements Serializable
         return serialVersionUID;
     }
 
-    public SourceType getType()
+    public Transfer.SourceType getType()
     {
         return type;
     }
 
-    public void setType(SourceType type)
+    public void setType(Transfer.SourceType type)
     {
         this.type = type;
     }

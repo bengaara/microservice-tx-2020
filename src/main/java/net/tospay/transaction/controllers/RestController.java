@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.tospay.transaction.entities.Transaction;
 import net.tospay.transaction.enums.ResponseCode;
-import net.tospay.transaction.enums.TransactionStatus;
+import net.tospay.transaction.enums.Transfer;
 import net.tospay.transaction.models.request.Amount;
 import net.tospay.transaction.models.request.ChargeRequest;
 import net.tospay.transaction.models.request.ChargeRequestDestination;
@@ -100,7 +100,7 @@ public class RestController extends BaseController
         transaction.setMerchantId(request.getMerchantInfo().getUserId());
         //  JsonNode node = mapper.valueToTree(request);
         transaction.setPayload(request);
-        transaction.setTransactionStatus(TransactionStatus.CREATED);
+        transaction.setTransactionStatus(Transfer.TransactionStatus.CREATED);
         transaction.setTransactionType(request.getType());
 
         List<net.tospay.transaction.entities.Source> sources = new ArrayList<>();
@@ -212,9 +212,9 @@ public class RestController extends BaseController
         Transaction transaction = optionalSource.isPresent() ? optionalSource.get().getTransaction() :
                 (optionalDestination.isPresent() ? optionalDestination.get().getTransaction() : null);
 
-        TransactionStatus transactionStatus =
-                ResponseCode.SUCCESS.type.equalsIgnoreCase(response.getStatus()) ? TransactionStatus.SUCCESS :
-                        TransactionStatus.FAILED;
+        Transfer.TransactionStatus transactionStatus =
+                ResponseCode.SUCCESS.type.equalsIgnoreCase(response.getStatus()) ? Transfer.TransactionStatus.SUCCESS :
+                        Transfer.TransactionStatus.FAILED;
         if (optionalSource.isPresent()) {
             net.tospay.transaction.entities.Source source = optionalSource.get();
             source.setResponseAsync(node);
@@ -222,7 +222,7 @@ public class RestController extends BaseController
             source.setTransactionStatus(transactionStatus);
             source = sourceRepository.save(source);
             transaction = source.getTransaction();
-            if (TransactionStatus.FAILED.equals(transactionStatus)) {
+            if (Transfer.TransactionStatus.FAILED.equals(transactionStatus)) {
                 logger.debug("sourcing failed  {}", source);
             }
         } else if (optionalDestination.isPresent()) {
@@ -232,7 +232,7 @@ public class RestController extends BaseController
             destination.setTransactionStatus(transactionStatus);
             destination = destinationRepository.save(destination);
             transaction = destination.getTransaction();
-            if (TransactionStatus.FAILED.equals(transactionStatus)) {
+            if (Transfer.TransactionStatus.FAILED.equals(transactionStatus)) {
                 logger.debug("paydestination failed  {}", destination);
             }
         } else {

@@ -22,9 +22,7 @@ import net.tospay.transaction.configs.HashMapConverter;
 import net.tospay.transaction.configs.Model;
 import net.tospay.transaction.configs.ModelConverter;
 import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.SourceType;
-import net.tospay.transaction.enums.TransactionStatus;
-import net.tospay.transaction.models.request.Account;
+import net.tospay.transaction.enums.Transfer;
 
 @Entity
 @Table(name = "sources",
@@ -39,7 +37,7 @@ public class Source extends BaseEntity<UUID> implements Serializable
     private UUID id;
 
     @Column(name = "type", nullable = false)
-    private SourceType type;
+    private Transfer.SourceType type;
 
     @Column(name = "user_type", nullable = false)
     private AccountType userType;
@@ -61,7 +59,7 @@ public class Source extends BaseEntity<UUID> implements Serializable
     private String currency;
 
     @Column(name = "status", nullable = false)
-    private TransactionStatus transactionStatus = TransactionStatus.CREATED;
+    private Transfer.TransactionStatus transactionStatus = Transfer.TransactionStatus.CREATED;
 
     @Column(name = "response", columnDefinition = "jsonb")
     @Convert(converter = HashMapConverter.class)
@@ -98,12 +96,12 @@ public class Source extends BaseEntity<UUID> implements Serializable
         this.dateResponse = dateResponse;
     }
 
-    public SourceType getType()
+    public Transfer.SourceType getType()
     {
         return type;
     }
 
-    public void setType(SourceType type)
+    public void setType(Transfer.SourceType type)
     {
         this.type = type;
     }
@@ -168,12 +166,12 @@ public class Source extends BaseEntity<UUID> implements Serializable
         this.currency = currency;
     }
 
-    public TransactionStatus getTransactionStatus()
+    public Transfer.TransactionStatus getTransactionStatus()
     {
         return transactionStatus;
     }
 
-    public void setTransactionStatus(TransactionStatus transactionStatus)
+    public void setTransactionStatus(Transfer.TransactionStatus transactionStatus)
     {
         this.transactionStatus = transactionStatus;
     }

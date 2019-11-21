@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.SourceType;
+import net.tospay.transaction.enums.Transfer;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -23,7 +23,7 @@ public class TransferIncomingResponse implements Serializable
     private final static long serialVersionUID = -9078608771772465581L;
 
     @JsonProperty("channel")
-    private SourceType channel;
+    private Transfer.SourceType channel;
 
     @JsonProperty("user_id")
     private UUID userId;
@@ -48,12 +48,12 @@ public class TransferIncomingResponse implements Serializable
         return serialVersionUID;
     }
 
-    public SourceType getChannel()
+    public Transfer.SourceType getChannel()
     {
         return channel;
     }
 
-    public void setChannel(SourceType channel)
+    public void setChannel(Transfer.SourceType channel)
     {
         this.channel = channel;
     }

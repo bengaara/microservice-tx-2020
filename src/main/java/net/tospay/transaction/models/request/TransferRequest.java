@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import net.tospay.transaction.enums.TransactionType;
+import net.tospay.transaction.enums.Transfer;
 import net.tospay.transaction.models.response.MerchantInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -46,14 +46,14 @@ public class TransferRequest
     private String currency;
 
     @JsonProperty("type")
-    private TransactionType type;
+    private Transfer.TransactionType type;
 
-    public TransactionType getType()
+    public Transfer.TransactionType getType()
     {
         return type;
     }
 
-    public void setType(TransactionType type)
+    public void setType(Transfer.TransactionType type)
     {
         this.type = type;
     }

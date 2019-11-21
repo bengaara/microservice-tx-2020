@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import net.tospay.transaction.enums.TransactionType;
+import net.tospay.transaction.enums.Transfer;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -22,7 +22,7 @@ public class ChargeRequest implements Serializable
     private Amount amount;
 
     @JsonProperty("type")
-    private TransactionType type;
+    private Transfer.TransactionType type;
 
     @JsonProperty("source")
     private ChargeRequestSource source;
@@ -48,12 +48,12 @@ public class ChargeRequest implements Serializable
         this.amount = amount;
     }
 
-    public TransactionType getType()
+    public Transfer.TransactionType getType()
     {
         return type;
     }
 
-    public void setType(TransactionType type)
+    public void setType(Transfer.TransactionType type)
     {
         this.type = type;
     }

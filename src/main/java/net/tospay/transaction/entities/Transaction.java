@@ -20,8 +20,7 @@ import javax.transaction.Transactional;
 
 import org.hibernate.annotations.Type;
 
-import net.tospay.transaction.enums.TransactionStatus;
-import net.tospay.transaction.enums.TransactionType;
+import net.tospay.transaction.enums.Transfer;
 import net.tospay.transaction.models.request.TransferRequest;
 
 @Entity
@@ -42,7 +41,7 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     private String transactionId;
 
     @Column(name = "type", nullable = false)
-    private TransactionType transactionType;
+    private Transfer.TransactionType transactionType;
 
     @Column(name = "amount", nullable = false)
     private Double amount;
@@ -77,7 +76,7 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     private boolean destinationComplete;
 
     @Column(name = "status", nullable = false)
-    private TransactionStatus transactionStatus = TransactionStatus.CREATED;
+    private Transfer.TransactionStatus transactionStatus = Transfer.TransactionStatus.CREATED;
 
     @Column(name = "date_created", nullable = false)
     private Timestamp dateCreated;
@@ -146,12 +145,12 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
         this.transactionId = transactionId;
     }
 
-    public TransactionType getTransactionType()
+    public Transfer.TransactionType getTransactionType()
     {
         return transactionType;
     }
 
-    public void setTransactionType(TransactionType transactionType)
+    public void setTransactionType(Transfer.TransactionType transactionType)
     {
         this.transactionType = transactionType;
     }
@@ -197,12 +196,12 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
         this.payload = payload;
     }
 
-    public TransactionStatus getTransactionStatus()
+    public Transfer.TransactionStatus getTransactionStatus()
     {
         return transactionStatus;
     }
 
-    public void setTransactionStatus(TransactionStatus transactionStatus)
+    public void setTransactionStatus(Transfer.TransactionStatus transactionStatus)
     {
         this.transactionStatus = transactionStatus;
     }
