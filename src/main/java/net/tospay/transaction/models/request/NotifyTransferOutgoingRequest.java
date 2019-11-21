@@ -1,5 +1,7 @@
 package net.tospay.transaction.models.request;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -9,18 +11,11 @@ import net.tospay.transaction.enums.Transfer;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotifyTransferOutgoingRequest
 {
-    @JsonProperty("category")
-    Notify.Category category;
+  //  @JsonProperty("category") Notify.Category category;
 
-    public Notify.Category getCategory()
-    {
-        return category;
-    }
+   // public Notify.Category getCategory(){return category; }
 
-    public void setCategory(Notify.Category category)
-    {
-        this.category = category;
-    }
+ //   public void setCategory(Notify.Category category){this.category = category;}
 
     @JsonProperty("topic") Transfer.TransactionType topic;
 
@@ -28,10 +23,42 @@ public class NotifyTransferOutgoingRequest
 
     @JsonProperty("amount") String amount;
     @JsonProperty("currency") String currency;
-  //  @JsonProperty("reference") String reference;
-  //  @JsonProperty("date") String date;
+
+    public String getReference()
+    {
+        return reference;
+    }
+
+    public void setReference(String reference)
+    {
+        this.reference = reference;
+    }
+
+    public String getDate()
+    {
+        return date;
+    }
+
+    public void setDate(String date)
+    {
+        this.date = date;
+    }
+
+    @JsonProperty("reference") String reference;
+   @JsonProperty("date") String date; //DD MMM YYYY hh:mm a
     @JsonProperty("recipient_id") String recipientId;
     @JsonProperty("recipient_type") String recipientType;
+    @JsonProperty("senders") List<NotifyTransferOutgoingSenderRequest> senders;
+
+    public List<NotifyTransferOutgoingSenderRequest> getSenders()
+    {
+        return senders;
+    }
+
+    public void setSenders(List<NotifyTransferOutgoingSenderRequest> senders)
+    {
+        this.senders = senders;
+    }
 
     public Transfer.TransactionType getTopic()
     {

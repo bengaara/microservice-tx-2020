@@ -38,6 +38,7 @@ import net.tospay.transaction.models.request.TransferOutgoingRequest;
 import net.tospay.transaction.models.request.TransferRequest;
 import net.tospay.transaction.models.response.ChargeResponse;
 import net.tospay.transaction.models.response.Error;
+import net.tospay.transaction.models.response.MerchantInfo;
 import net.tospay.transaction.models.response.ResponseObject;
 import net.tospay.transaction.models.response.TransferIncomingResponse;
 import net.tospay.transaction.repositories.DestinationRepository;
@@ -102,7 +103,7 @@ public class FundService extends BaseService
 
                 source.setTransactionStatus(Transfer.TransactionStatus.PROCESSING);
                 TransferOutgoingRequest request = new TransferOutgoingRequest();
-                request.setAccount(source.getAccount() != null ? new Account(source.getAccount()) : null);
+                request.setAccount(source.getAccount());
                 request.setAction(MobilePayAction.SOURCE);
                 request.setAmount(source.getAmount());
                 request.setUserId(source.getUserId());
@@ -142,7 +143,7 @@ public class FundService extends BaseService
                     HashMap<String, Object> node = mapper.convertValue(response, HashMap.class);
                     source.setResponse(node);
                 }
-                if (response == null || ResponseCode.FAILURE.type.equalsIgnoreCase(response.getStatus())) {//failure
+               if (response == null || ResponseCode.FAILURE.type.equalsIgnoreCase(response.getStatus())) {//failure
                     source.setTransactionStatus(Transfer.TransactionStatus.FAILED);
                     logger.debug("sourcing failed  {}", source);
                 } else {
@@ -152,8 +153,20 @@ public class FundService extends BaseService
                                     Transfer.TransactionStatus.SUCCESS : Transfer.TransactionStatus.PROCESSING;
                     source.setTransactionStatus(status);
                     logger.debug("sourcing ok  {} {}", source, status);
-                }
 
+                    //one success.. fetch TR id
+                    if (source.getTransaction().getTransactionId() ==null){
+
+                        MerchantInfo merchantInfo = transaction.getPayload().getMerchantInfo();
+                        ResponseObject<String> tr = fetchTransactionId(merchantInfo.getTypeId(),
+                                source.getTransaction().getTransactionType(),merchantInfo.getCountryCode());
+                        if(tr !=null && ResponseCode.SUCCESS.equals(tr.getStatus())){
+                            source.getTransaction().setTransactionId(tr.getData());
+                        }
+
+                    }
+                }
+               // transactionRepository.save(transaction);
                 source = sourceRepository.save(source);
             });
 
@@ -169,6 +182,7 @@ public class FundService extends BaseService
 
     public void checkSourceAndDestinationTransactionStatusAndAct(Transaction transaction)
     {
+        ObjectMapper objectMapper = new ObjectMapper();
         //if all success - mark transaction source complete
         if (transaction == null) {
             logger.debug("null transaction ");
@@ -192,6 +206,8 @@ public class FundService extends BaseService
                             .equals(s.getTransactionStatus()));
             if (Transfer.TransactionStatus.FAILED.equals(s.getTransactionStatus())) {
                 sourcedFail.set(true);
+
+                logger.debug("failed source {}", s.getId());
             }
         });
         logger.debug("mark transaction sourceComplete  {}  {}", transaction, sourcedSuccessAll);
@@ -224,7 +240,7 @@ public class FundService extends BaseService
 
             return;
         } else {
-            logger.debug("TODO unknown transaction source state  {}", transaction);
+            logger.debug("TODO unknown transaction source state  {}", transaction.getId());
         }
 
         AtomicBoolean destinationSuccessAll = new AtomicBoolean(true);
@@ -235,7 +251,8 @@ public class FundService extends BaseService
                     .set(destinationSuccessAll.get() && Transfer.TransactionStatus.SUCCESS
                             .equals(d.getTransactionStatus()));
         });
-        logger.debug("mark transaction destination Complete  {}  {}", transaction, destinationSuccessAll);
+        logger.debug("mark transaction destination Complete  {}  {}", transaction.getId(), destinationSuccessAll);
+
         transaction.setDestinationComplete(destinationSuccessAll.get());
 
         if (destinationSuccessAll.get() && destinationFail.get()) {//if one failed
@@ -279,9 +296,10 @@ public class FundService extends BaseService
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity entity = new HttpEntity<TransferOutgoingRequest>(request, headers);
 
+            logger.debug(" {}", objectMapper.writeValueAsString(request));
             ResponseObject<TransferIncomingResponse> response =
                     restTemplate.postForObject(mobilepayUrl, entity, ResponseObject.class);
-            logger.debug(" {}", response);
+            logger.debug(" {}", objectMapper.writeValueAsString(response));
 
             return response;
         } catch (HttpClientErrorException e) {
@@ -308,9 +326,10 @@ public class FundService extends BaseService
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity entity = new HttpEntity<TransferOutgoingRequest>(request, headers);
 
+            logger.debug(" {}", objectMapper.writeValueAsString(request));
             ResponseObject<TransferIncomingResponse> response =
                     restTemplate.postForObject(walletpayUrl, entity, ResponseObject.class);
-            logger.debug(" {}", response);
+            logger.debug(" {}", objectMapper.writeValueAsString(response));
 
             return response;
         } catch (HttpClientErrorException e) {
@@ -382,7 +401,7 @@ public class FundService extends BaseService
 
                 destination.setTransactionStatus(Transfer.TransactionStatus.PROCESSING);
                 TransferOutgoingRequest request = new TransferOutgoingRequest();
-                request.setAccount(destination.getAccount() != null ? new Account(destination.getAccount()) : null);
+                request.setAccount(destination.getAccount());
                 request.setAction(MobilePayAction.DESTINATION);
                 request.setAmount(destination.getAmount());
                 request.setUserId(destination.getUserId());

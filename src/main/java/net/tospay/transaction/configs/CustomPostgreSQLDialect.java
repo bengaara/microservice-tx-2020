@@ -24,7 +24,7 @@ public class CustomPostgreSQLDialect extends PostgreSQL95Dialect
         registerHibernateType(Types.OTHER, JsonBinaryType.class.getName());
         registerHibernateType(Types.OTHER, JsonNodeBinaryType.class.getName());
         registerHibernateType(Types.OTHER, JsonNodeStringType.class.getName());
-        registerHibernateType(Types.OTHER, Model.class.getName());
+
 
     }
 }
