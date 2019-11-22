@@ -213,7 +213,7 @@ public class FundService extends BaseService
         logger.debug("mark transaction sourceComplete  {}  {}", transaction, sourcedSuccessAll);
         transaction.setSourceComplete(sourcedSuccessAll.get());
 
-        if (sourcedSuccessAll.get() && sourcedFail.get()) {//if one failed
+        if (sourcedFail.get()) {//if one failed
 
             logger.debug("mark transaction status  {}", transaction);
             transaction.setTransactionStatus(Transfer.TransactionStatus.FAILED);

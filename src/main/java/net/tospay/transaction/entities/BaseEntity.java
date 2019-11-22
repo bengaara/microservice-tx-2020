@@ -1,5 +1,9 @@
 package net.tospay.transaction.entities;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 import javax.persistence.MappedSuperclass;
 
 import org.hibernate.annotations.TypeDef;
@@ -32,4 +36,11 @@ public abstract class BaseEntity<T>
     public abstract T getId();
 
     public abstract void setId(T id);
+
+    public static String toDbField(String s){
+        return Arrays.asList(s.split("_")).stream()
+                .map(String::toLowerCase)
+                .reduce((s1, s2) -> s1 +s2.substring(0,1).toUpperCase()+s2.substring(1).toLowerCase()).get();
+
+    }
 }

@@ -29,9 +29,12 @@ import net.tospay.transaction.models.request.TransferRequest;
         @UniqueConstraint(columnNames = { "id" }))
 public class Transaction extends BaseEntity<UUID> implements Serializable
 {
+    private static final String DATE_MODIFIED = "date_modified";
+
+    private static final String ID = "id";
 
     @Id
-    @Column(name = "id", columnDefinition = "uuid default gen_random_uuid()", updatable = false)
+    @Column(name = ID, columnDefinition = "uuid default gen_random_uuid()", updatable = false)
     @GeneratedValue
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
@@ -62,16 +65,6 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     @Column(name = "destination_started")
     private boolean destinationStarted;
 
-    public boolean isDestinationStarted()
-    {
-        return destinationStarted;
-    }
-
-    public void setDestinationStarted(boolean destinationStarted)
-    {
-        this.destinationStarted = destinationStarted;
-    }
-
     @Column(name = "destination_complete")
     private boolean destinationComplete;
 
@@ -81,7 +74,7 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     @Column(name = "date_created", nullable = false)
     private Timestamp dateCreated;
 
-    @Column(name = "date_modified", nullable = false)
+    @Column(name = DATE_MODIFIED, nullable = false)
     private Timestamp dateModified;
 
     //  mappedBy = "source",
@@ -101,6 +94,16 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
 
     public Transaction()
     {
+    }
+
+    public boolean isDestinationStarted()
+    {
+        return destinationStarted;
+    }
+
+    public void setDestinationStarted(boolean destinationStarted)
+    {
+        this.destinationStarted = destinationStarted;
     }
 
     public boolean isDestinationComplete()
@@ -154,7 +157,6 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     {
         this.transactionType = transactionType;
     }
-
 
     public Double getAmount()
     {

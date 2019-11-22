@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -15,7 +16,5 @@ public interface DestinationRepository extends BaseRepositoryInterface<Destinati
 {
     Optional<Destination> findById(UUID uuid);
 
-    @Query(value = "SELECT d FROM Destination d " +
-            "WHERE d.userId=:userId and d.userType=:userType limit 10")
-    ArrayList<Destination> fetchByUserIdAndUserType(UUID userId, AccountType userType);
+    ArrayList<Destination> findByUserIdAndUserType(UUID userId, AccountType userType, Pageable pageable);
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -14,8 +15,5 @@ import net.tospay.transaction.enums.AccountType;
 public interface SourceRepository extends BaseRepositoryInterface<Source, UUID>
 {
     Optional<Source> findById(UUID uuid);
-
-    @Query(value = "SELECT s FROM Source s " +
-            "WHERE s.userId=:userId and s.userType=:userType limit 10")
-    ArrayList< Source> fetchByUserIdAndUserType(UUID userId, AccountType userType);
+    ArrayList< Source> findByUserIdAndUserType(UUID userId, AccountType userType, Pageable p);
 }

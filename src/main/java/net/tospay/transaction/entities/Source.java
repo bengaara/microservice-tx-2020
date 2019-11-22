@@ -31,56 +31,88 @@ import net.tospay.transaction.models.request.Account;
         @UniqueConstraint(columnNames = { "id" }))
 public class Source extends BaseEntity<UUID> implements Serializable
 {
+    public static final String ID = "id";
+
+    public static final String TYPE = "type";
+
+    public static final String USER_TYPE = "user_type";
+
+    public static final String USER_ID = "user_id";
+
+    public static final String ACCOUNT = "account";
+
+    public static final String AMOUNT = "amount";
+
+    public static final String CHARGE = "charge";
+
+
+    public static final String RESPONSE = "response";
+
+    public static final String CURRENCY ="currency" ;
+
+    public static final String STATUS = "status";
+
+    public static final String RESPONSE_ASYNC = "response_async";
+
+    public static final String TRANSACTION = "transaction";
+
+    public static final String DATE_CREATED ="date_created" ;
+
+    public static final String DATE_MODIFIED ="date_modified" ;
+
+    public static final String DATE_RESPONSE = "date_response";
+
+
     @Id
-    @Column(name = "id", columnDefinition = "uuid default gen_random_uuid()", updatable = false)
+    @Column(name = ID, columnDefinition = "uuid default gen_random_uuid()", updatable = false)
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(name = "type", nullable = false)
+    @Column(name = TYPE, nullable = false)
     private Transfer.SourceType type;
 
-    @Column(name = "user_type", nullable = false)
+    @Column(name = USER_TYPE, nullable = false)
     private AccountType userType;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = USER_ID, nullable = false)
     private UUID userId;
 
-    @Column(name = "account", columnDefinition = "jsonb")
+    @Column(name = ACCOUNT, columnDefinition = "jsonb")
     @Type(type = "jsonb")
     private Account account;
 
-    @Column(name = "amount", nullable = false)
+    @Column(name = AMOUNT, nullable = false)
     private Double amount;
 
-    @Column(name = "charge")
+    @Column(name = CHARGE)
     private Double charge;
 
-    @Column(name = "currency", nullable = false)
+    @Column(name = CURRENCY, nullable = false)
     private String currency;
 
-    @Column(name = "status", nullable = false)
+    @Column(name = STATUS, nullable = false)
     private Transfer.TransactionStatus transactionStatus = Transfer.TransactionStatus.CREATED;
 
-    @Column(name = "response", columnDefinition = "jsonb")
+    @Column(name = RESPONSE, columnDefinition = "jsonb")
     @Convert(converter = HashMapConverter.class)
     private Map<String, Object> response;
 
-    @Column(name = "response_async", columnDefinition = "jsonb")
+    @Column(name = RESPONSE_ASYNC, columnDefinition = "jsonb")
     @Convert(converter = HashMapConverter.class)
     private Map<String, Object> responseAsync;
 
-    @Column(name = "date_created", nullable = false)
+    @Column(name = DATE_CREATED, nullable = false)
     private Timestamp dateCreated;
 
-    @Column(name = "date_modified", nullable = false)
+    @Column(name = DATE_MODIFIED, nullable = false)
     private Timestamp dateModified;
 
-    @Column(name = "date_response")
+    @Column(name = DATE_RESPONSE)
     private Timestamp dateResponse;
 
     @ManyToOne
-    @JoinColumn(name = "transaction")
+    @JoinColumn(name = TRANSACTION)
     private Transaction transaction;
 
     public Source()
