@@ -9,5 +9,7 @@ public class Constants
         public static final String TRANSFER = "/transfer";
 
         public static final String CALLBACK_MOBILE = "/mobile/callback";
+
+        public static final String TRANSACTIONS_FETCH = "/transactions/fetch";
     }
 }

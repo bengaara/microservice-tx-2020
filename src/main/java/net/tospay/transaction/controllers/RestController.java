@@ -38,11 +38,7 @@ import net.tospay.transaction.repositories.TransactionRepository;
 import net.tospay.transaction.services.FundService;
 import net.tospay.transaction.util.Constants;
 
-/**
- * @author : Clifford Owino
- * @Email : owinoclifford@gmail.com
- * @since : 9/5/2019, Thu
- **/
+
 @org.springframework.web.bind.annotation.RestController
 @RequestMapping(Constants.URL.API + "/v1")
 public class RestController extends BaseController
