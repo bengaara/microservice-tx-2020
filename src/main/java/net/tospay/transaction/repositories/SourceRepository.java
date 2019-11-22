@@ -16,6 +16,6 @@ public interface SourceRepository extends BaseRepositoryInterface<Source, UUID>
     Optional<Source> findById(UUID uuid);
 
     @Query(value = "SELECT s FROM Source s " +
-            "WHERE s.userId=:userId and s.userType=:userType ")
+            "WHERE s.userId=:userId and s.userType=:userType limit 10")
     ArrayList< Source> fetchByUserIdAndUserType(UUID userId, AccountType userType);
 }

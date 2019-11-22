@@ -16,6 +16,6 @@ public interface DestinationRepository extends BaseRepositoryInterface<Destinati
     Optional<Destination> findById(UUID uuid);
 
     @Query(value = "SELECT d FROM Destination d " +
-            "WHERE d.userId=:userId and d.userType=:userType ")
+            "WHERE d.userId=:userId and d.userType=:userType limit 10")
     ArrayList<Destination> fetchByUserIdAndUserType(UUID userId, AccountType userType);
 }

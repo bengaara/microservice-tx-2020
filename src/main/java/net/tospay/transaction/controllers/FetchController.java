@@ -1,6 +1,7 @@
 package net.tospay.transaction.controllers;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -75,6 +76,13 @@ public class FetchController extends BaseController
             res.setType(s.getType().name());
             list.add(res);
         });
+        list.sort(new Comparator<TransactionFetchResponse>() {
+            @Override
+            public int compare(TransactionFetchResponse o1, TransactionFetchResponse o2) {
+                return o1.getDateCreated().compareTo(o2.getDateCreated()) ;
+            }
+        });
+
 
         return new ResponseObject(ResponseCode.SUCCESS.type, ResponseCode.SUCCESS.name(), null, list);
     }
