@@ -1,9 +1,11 @@
-package net.tospay.transaction.models.response;
+package net.tospay.transaction.models.request;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -13,17 +15,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.SourceType;
+import net.tospay.transaction.enums.Transfer;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
+        "type",
+        "user_id",
+        "user_type",
+        "account",
+        "amount"
 })
-public class TopupMobileResponse implements Serializable
+public class TopupValueSource implements Serializable
 {
     private final static long serialVersionUID = -9078608771772465581L;
 
-    @JsonProperty("channel")
-    private SourceType channel;
+    @JsonProperty("type")
+    private Transfer.SourceType type;
 
     @JsonProperty("user_id")
     private UUID userId;
@@ -31,14 +38,12 @@ public class TopupMobileResponse implements Serializable
     @JsonProperty("user_type")
     private AccountType userType;
 
-    @JsonProperty("transaction")
-    private TopupMobileTransactionResponse transaction;
+    @JsonProperty("account")
+    private Account account;
 
-    @JsonProperty("reason")
-    private String reason;
-
-    @JsonProperty("external_reference")
-    private UUID externalReference;
+    @JsonProperty("amount")
+    @NotNull
+    private Double amount;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -48,44 +53,14 @@ public class TopupMobileResponse implements Serializable
         return serialVersionUID;
     }
 
-    public SourceType getChannel()
+    public Transfer.SourceType getType()
     {
-        return channel;
+        return type;
     }
 
-    public void setChannel(SourceType channel)
+    public void setType(Transfer.SourceType type)
     {
-        this.channel = channel;
-    }
-
-    public TopupMobileTransactionResponse getTransaction()
-    {
-        return transaction;
-    }
-
-    public void setTransaction(TopupMobileTransactionResponse transaction)
-    {
-        this.transaction = transaction;
-    }
-
-    public String getReason()
-    {
-        return reason;
-    }
-
-    public void setReason(String reason)
-    {
-        this.reason = reason;
-    }
-
-    public UUID getExternalReference()
-    {
-        return externalReference;
-    }
-
-    public void setExternalReference(UUID externalReference)
-    {
-        this.externalReference = externalReference;
+        this.type = type;
     }
 
     public UUID getUserId()
@@ -108,6 +83,32 @@ public class TopupMobileResponse implements Serializable
         this.userType = userType;
     }
 
+    public Double getAmount()
+    {
+        return amount;
+    }
+
+    public void setAmount(Double amount)
+    {
+        this.amount = amount;
+    }
+
+    public Account getAccount()
+    {
+        return account;
+    }
+
+    public void setAccount(Account account)
+    {
+        this.account = account;
+    }
+
+    public TopupValueSource withAccount(Account account)
+    {
+        this.account = account;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties()
     {
@@ -125,7 +126,7 @@ public class TopupMobileResponse implements Serializable
         this.additionalProperties.put(name, value);
     }
 
-    public TopupMobileResponse withAdditionalProperty(String name, Object value)
+    public TopupValueSource withAdditionalProperty(String name, Object value)
     {
         this.additionalProperties.put(name, value);
         return this;

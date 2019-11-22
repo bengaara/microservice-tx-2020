@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.9.RELEASE</version>
+        <version>2.2.0.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>net.tospay</groupId>
@@ -20,27 +20,36 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
+
     <developers>
-        <developer>
-            <id>owino_cliff</id>
-            <name>Clifford Owino Oyugi</name>
-            <email>clifford@tospay.net</email>
-            <organization>Tospay Ltd.</organization>
-            <organizationUrl>https://tospay.net</organizationUrl>
-            <roles>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-            <timezone>+3</timezone>
-        </developer>
+
     </developers>
 
     <dependencies>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-web</artifactId>-->
+
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.data</groupId>-->
+<!--            <artifactId>spring-data-jpa</artifactId>-->
+
+<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.plugin</groupId>
+            <artifactId>spring-plugin-core</artifactId>
+            <version>2.0.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-rest</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -66,42 +75,43 @@
             <artifactId>converter-jackson</artifactId>
             <version>2.5.0</version>
         </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-core</artifactId>
-            <version>2.9.2</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-spi</artifactId>
-            <version>2.9.2</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.springfox</groupId>-->
+<!--            <artifactId>springfox-core</artifactId>-->
+<!--            <version>2.9.2</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>io.springfox</groupId>-->
+<!--            <artifactId>springfox-spi</artifactId>-->
+<!--            <version>2.9.2</version>-->
+<!--        </dependency>-->
         <!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>2.9.2</version>
-        </dependency>
+        <!-- dependency>
+        org.springframework.boot
+        spring-boot-starter-data-rest
+     </dependency>
+            -->
 
-        <!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui -->
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>2.8.0</version>
-        </dependency>
+<!--    <dependency>-->
+<!--        <groupId>io.springfox</groupId>-->
+<!--        <artifactId>springfox-swagger2</artifactId>-->
+<!--        <version>2.9.2</version>-->
+<!--    </dependency>-->
+
+
+<!--    &lt;!&ndash; https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui &ndash;&gt;-->
+<!--    <dependency>-->
+<!--        <groupId>io.springfox</groupId>-->
+<!--        <artifactId>springfox-swagger-ui</artifactId>-->
+<!--        <version>2.9.2</version>-->
+<!--    </dependency>-->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.9</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-rest</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
+
+
         <!-- PostgreSQL -->
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -120,12 +130,12 @@
             <version>2.1.1</version>
         </dependency>
         <!--        <dependency>-->
-<!--            <groupId>net.tospay </groupId>-->
-<!--            <artifactId>bank_db_layer</artifactId>-->
-<!--            <version>1.0.0</version>-->
-<!--            <scope>system</scope>-->
-<!--            <systemPath>${basedir}/lib/bank_db_layer-0.0.1-SNAPSHOT.jar</systemPath>-->
-<!--        </dependency>-->
+        <!--            <groupId>net.tospay </groupId>-->
+        <!--            <artifactId>bank_db_layer</artifactId>-->
+        <!--            <version>1.0.0</version>-->
+        <!--            <scope>system</scope>-->
+        <!--            <systemPath>${basedir}/lib/bank_db_layer-0.0.1-SNAPSHOT.jar</systemPath>-->
+        <!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -133,9 +143,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <profiles>
-                    <profile>dev</profile>
-                </profiles>
             </plugin>
         </plugins>
         <resources>

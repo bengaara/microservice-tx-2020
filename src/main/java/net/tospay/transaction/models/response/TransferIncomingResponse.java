@@ -1,4 +1,4 @@
-package net.tospay.transaction.models.request;
+package net.tospay.transaction.models.response;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -13,22 +13,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.MobilePayAction;
+import net.tospay.transaction.enums.Transfer;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "type",
-        "user_id",
-        "user_type",
-        "account",
-        "amount"
 })
-public class TopupMobileRequest implements Serializable
+public class TransferIncomingResponse implements Serializable
 {
     private final static long serialVersionUID = -9078608771772465581L;
 
-    @JsonProperty("action")
-    private MobilePayAction action;
+    @JsonProperty("channel")
+    private Transfer.SourceType channel;
 
     @JsonProperty("user_id")
     private UUID userId;
@@ -36,23 +31,14 @@ public class TopupMobileRequest implements Serializable
     @JsonProperty("user_type")
     private AccountType userType;
 
-    @JsonProperty("account")
-    private String account;
+    @JsonProperty("transaction")
+    private TopupMobileTransactionResponse transaction;
 
-    @JsonProperty("amount")
-    private Double amount;
-
-    @JsonProperty("charge")
-    private Double charge;
-
-    @JsonProperty("currency")
-    private String currency;
-
-    @JsonProperty("description")
-    private String description;
+    @JsonProperty("reason")
+    private String reason;
 
     @JsonProperty("external_reference")
-    private String externalReference;
+    private UUID externalReference;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -62,54 +48,44 @@ public class TopupMobileRequest implements Serializable
         return serialVersionUID;
     }
 
-    public Double getCharge()
+    public Transfer.SourceType getChannel()
     {
-        return charge;
+        return channel;
     }
 
-    public void setCharge(Double charge)
+    public void setChannel(Transfer.SourceType channel)
     {
-        this.charge = charge;
+        this.channel = channel;
     }
 
-    public String getCurrency()
+    public TopupMobileTransactionResponse getTransaction()
     {
-        return currency;
+        return transaction;
     }
 
-    public void setCurrency(String currency)
+    public void setTransaction(TopupMobileTransactionResponse transaction)
     {
-        this.currency = currency;
+        this.transaction = transaction;
     }
 
-    public String getDescription()
+    public String getReason()
     {
-        return description;
+        return reason;
     }
 
-    public void setDescription(String description)
+    public void setReason(String reason)
     {
-        this.description = description;
+        this.reason = reason;
     }
 
-    public String getExternalReference()
+    public UUID getExternalReference()
     {
         return externalReference;
     }
 
-    public void setExternalReference(String externalReference)
+    public void setExternalReference(UUID externalReference)
     {
         this.externalReference = externalReference;
-    }
-
-    public MobilePayAction getAction()
-    {
-        return action;
-    }
-
-    public void setAction(MobilePayAction action)
-    {
-        this.action = action;
     }
 
     public UUID getUserId()
@@ -132,34 +108,6 @@ public class TopupMobileRequest implements Serializable
         this.userType = userType;
     }
 
-    public Double getAmount()
-    {
-        return amount;
-    }
-
-    public void setAmount(Double amount)
-    {
-        this.amount = amount;
-    }
-
-    @JsonProperty("account")
-    public String getAccount()
-    {
-        return account;
-    }
-
-    @JsonProperty("account")
-    public void setAccount(String account)
-    {
-        this.account = account;
-    }
-
-    public TopupMobileRequest withAccount(String account)
-    {
-        this.account = account;
-        return this;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties()
     {
@@ -177,7 +125,7 @@ public class TopupMobileRequest implements Serializable
         this.additionalProperties.put(name, value);
     }
 
-    public TopupMobileRequest withAdditionalProperty(String name, Object value)
+    public TransferIncomingResponse withAdditionalProperty(String name, Object value)
     {
         this.additionalProperties.put(name, value);
         return this;

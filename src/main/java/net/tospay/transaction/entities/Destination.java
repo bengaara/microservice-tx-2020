@@ -2,9 +2,11 @@ package net.tospay.transaction.entities;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,75 +18,123 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import org.hibernate.annotations.Type;
 
+import net.tospay.transaction.configs.HashMapConverter;
 import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.SourceType;
-import net.tospay.transaction.enums.TransactionStatus;
+import net.tospay.transaction.enums.Transfer;
+import net.tospay.transaction.models.request.Account;
 
 @Entity
 @Table(name = "destinations",
         uniqueConstraints =
         @UniqueConstraint(columnNames = { "id" }))
-public class Destination extends BaseEntity<UUID> implements Serializable
+public class Destination
 {
+    public static final String ID = "id";
+
+    public static final String TYPE = "type";
+
+    public static final String USER_TYPE = "user_type";
+
+    public static final String USER_ID = "user_id";
+
+    public static final String ACCOUNT = "account";
+
+    public static final String AMOUNT = "amount";
+
+    public static final String CHARGE = "charge";
+
+
+    public static final String RESPONSE = "response";
+
+    public static final String CURRENCY ="currency" ;
+
+    public static final String STATUS = "status";
+
+    public static final String RESPONSE_ASYNC = "response_async";
+
+    public static final String TRANSACTION = "transaction";
+
+    public static final String DATE_CREATED ="date_created" ;
+
+    public static final String DATE_MODIFIED ="date_modified" ;
+
+    public static final String DATE_RESPONSE = "date_response";
+
     @Id
-    @Column(name = "id", columnDefinition = "uuid default gen_random_uuid()", updatable = false)
+    @Column(name = ID, columnDefinition = "uuid default gen_random_uuid()", updatable = false)
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(name = "type", nullable = false)
-    private SourceType type;
+    @Column(name = TYPE, nullable = false)
+    private Transfer.SourceType type;
 
-    @Column(name = "user_type", nullable = false)
+    @Column(name = USER_TYPE, nullable = false)
     private AccountType userType;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = USER_ID, nullable = false)
     private UUID userId;
 
-    @Column(name = "account", nullable = false)
-    private String account;
+    @Column(name = ACCOUNT, columnDefinition = "jsonb")
+    @Type(type = "jsonb")
+    private Account account;
 
-    @Column(name = "amount", nullable = false)
+    @Column(name = AMOUNT, nullable = false)
     private Double amount;
 
-    @Column(name = "charge", nullable = false)
+    @Column(name = CHARGE)
     private Double charge;
 
-    @Column(name = "currency", nullable = false)
+    @Column(name = CURRENCY, nullable = false)
     private String currency;
 
-    @Column(name = "status", nullable = false)
-    private TransactionStatus transactionStatus = TransactionStatus.CREATED;
+    @Column(name = STATUS, nullable = false)
+    private Transfer.TransactionStatus transactionStatus = Transfer.TransactionStatus.CREATED;
 
-    @Column(name = "response", nullable = false)
-    private JsonNode
-            response;
+    @Column(name = RESPONSE, columnDefinition = "jsonb")
+    @Convert(converter = HashMapConverter.class)
+    private Map<String, Object> response;
 
-    @Column(name = "response_async", nullable = false)
-    private JsonNode responseAsync;
+    @Column(name = RESPONSE_ASYNC, columnDefinition = "jsonb")
+    @Convert(converter = HashMapConverter.class)
+    private Map<String, Object> responseAsync;
 
-    @Column(name = "date_created", nullable = false)
+    @Column(name = DATE_CREATED, nullable = false)
     private Timestamp dateCreated;
 
-    @Column(name = "date_modified", nullable = false)
+    @Column(name = DATE_MODIFIED, nullable = false)
     private Timestamp dateModified;
 
+    @Column(name = DATE_RESPONSE)
+    private Timestamp dateResponse;
+
     @ManyToOne
-    @JoinColumn(name = "transaction")
+    @JoinColumn(name = TRANSACTION)
     private Transaction transaction;
+
 
     public Destination()
     {
     }
 
-    public SourceType getType()
+    public Timestamp getDateResponse()
+    {
+        return dateResponse;
+    }
+
+    public void setDateResponse(Timestamp dateResponse)
+    {
+        this.dateResponse = dateResponse;
+    }
+
+    public Transfer.SourceType getType()
     {
         return type;
     }
 
-    public void setType(SourceType type)
+    public void setType(Transfer.SourceType type)
     {
         this.type = type;
     }
@@ -109,13 +159,14 @@ public class Destination extends BaseEntity<UUID> implements Serializable
         this.userId = userId;
     }
 
-    public String getAccount()
+    public Account getAccount()
     {
         return account;
     }
 
-    public void setAccount(String account)
+    public void setAccount(Account account)
     {
+
         this.account = account;
     }
 
@@ -149,32 +200,32 @@ public class Destination extends BaseEntity<UUID> implements Serializable
         this.currency = currency;
     }
 
-    public TransactionStatus getTransactionStatus()
+    public Transfer.TransactionStatus getTransactionStatus()
     {
         return transactionStatus;
     }
 
-    public void setTransactionStatus(TransactionStatus transactionStatus)
+    public void setTransactionStatus(Transfer.TransactionStatus transactionStatus)
     {
         this.transactionStatus = transactionStatus;
     }
 
-    public JsonNode getResponse()
+    public Map<String, Object> getResponse()
     {
         return response;
     }
 
-    public void setResponse(JsonNode response)
+    public void setResponse(Map<String, Object> response)
     {
         this.response = response;
     }
 
-    public JsonNode getResponseAsync()
+    public Map<String, Object> getResponseAsync()
     {
         return responseAsync;
     }
 
-    public void setResponseAsync(JsonNode responseAsync)
+    public void setResponseAsync(Map<String, Object> responseAsync)
     {
         this.responseAsync = responseAsync;
     }
@@ -209,13 +260,13 @@ public class Destination extends BaseEntity<UUID> implements Serializable
         this.transaction = transaction;
     }
 
-    @Override
+
     public UUID getId()
     {
         return id;
     }
 
-    @Override
+
     public void setId(UUID id)
     {
         this.id = id;

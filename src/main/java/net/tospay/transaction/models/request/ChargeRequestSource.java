@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import net.tospay.transaction.enums.AccountType;
 import net.tospay.transaction.enums.Transfer;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -20,12 +21,12 @@ import net.tospay.transaction.enums.Transfer;
         "id",
         "channel"
 })
-public class Source implements Serializable
+public class ChargeRequestSource implements Serializable
 {
     private final static long serialVersionUID = -9078608771772465581L;
 
     @JsonProperty("account")
-    private Map<String, Object> account;
+    private AccountType account;
 
     @JsonProperty("platform")
     private String platform;
@@ -63,18 +64,18 @@ public class Source implements Serializable
     }
 
     @JsonProperty("account")
-    public Map<String, Object> getAccount()
+    public AccountType getAccount()
     {
         return account;
     }
 
     @JsonProperty("account")
-    public void setAccount(Map<String, Object> account)
+    public void setAccount(AccountType account)
     {
         this.account = account;
     }
 
-    public Source withAccount(Map<String, Object> account)
+    public ChargeRequestSource withAccount(AccountType account)
     {
         this.account = account;
         return this;
@@ -92,7 +93,7 @@ public class Source implements Serializable
         this.id = id;
     }
 
-    public Source withId(String id)
+    public ChargeRequestSource withId(String id)
     {
         this.id = id;
         return this;
@@ -110,7 +111,7 @@ public class Source implements Serializable
         this.channel = channel;
     }
 
-    public Source withChannel(Transfer.SourceType channel)
+    public ChargeRequestSource withChannel(Transfer.SourceType channel)
     {
         this.channel = channel;
         return this;
@@ -128,7 +129,7 @@ public class Source implements Serializable
         this.additionalProperties.put(name, value);
     }
 
-    public Source withAdditionalProperty(String name, Object value)
+    public ChargeRequestSource withAdditionalProperty(String name, Object value)
     {
         this.additionalProperties.put(name, value);
         return this;

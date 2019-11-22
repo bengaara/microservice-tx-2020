@@ -3,6 +3,8 @@ package net.tospay.transaction.enums;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public enum MobilePayAction
 {
     SOURCE("SOURCE"),
@@ -25,8 +27,10 @@ public enum MobilePayAction
         this.type = type;
     }
 
+    @JsonCreator
     public static MobilePayAction valueOfType(String label)
     {
+        label = label.toUpperCase();
         return LABEL.get(label);
     }
 }

@@ -16,12 +16,12 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.transaction.Transactional;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import org.hibernate.annotations.Type;
 
-import net.tospay.transaction.enums.TransactionStatus;
-import net.tospay.transaction.enums.TransactionType;
-import net.tospay.transaction.models.request.Destination;
+import net.tospay.transaction.enums.Transfer;
+import net.tospay.transaction.models.request.TransferRequest;
 
 @Entity
 @Table(name = "transactions",
@@ -29,17 +29,22 @@ import net.tospay.transaction.models.request.Destination;
         @UniqueConstraint(columnNames = { "id" }))
 public class Transaction extends BaseEntity<UUID> implements Serializable
 {
+    private static final String DATE_MODIFIED = "date_modified";
+
+    private static final String ID = "id";
+
     @Id
-    @Column(name = "id", columnDefinition = "uuid default gen_random_uuid()", updatable = false)
+    @Column(name = ID, columnDefinition = "uuid default gen_random_uuid()", updatable = false)
     @GeneratedValue
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
-    @Column(name = "transaction_id", nullable = false)
+    @Column(name = "transaction_id", nullable = true)
+
     private String transactionId;
 
     @Column(name = "type", nullable = false)
-    private TransactionType transactionType;
+    private Transfer.TransactionType transactionType;
 
     @Column(name = "amount", nullable = false)
     private Double amount;
@@ -50,19 +55,26 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     @Column(name = "merchant_id", nullable = false)
     private UUID merchantId;
 
-    @Column(name = "payload", nullable = false)
-    private JsonNode payload;
+    @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
+    @Type(type = "jsonb")
+    private TransferRequest payload;
 
     @Column(name = "source_complete")
     private boolean sourceComplete;
 
+    @Column(name = "destination_started")
+    private boolean destinationStarted;
+
+    @Column(name = "destination_complete")
+    private boolean destinationComplete;
+
     @Column(name = "status", nullable = false)
-    private TransactionStatus transactionStatus = TransactionStatus.CREATED;
+    private Transfer.TransactionStatus transactionStatus = Transfer.TransactionStatus.CREATED;
 
     @Column(name = "date_created", nullable = false)
     private Timestamp dateCreated;
 
-    @Column(name = "date_modified", nullable = false)
+    @Column(name = DATE_MODIFIED, nullable = false)
     private Timestamp dateModified;
 
     //  mappedBy = "source",
@@ -78,10 +90,42 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<Destination> destinations = new ArrayList<>();
+    private List<net.tospay.transaction.entities.Destination> destinations = new ArrayList<>();
 
     public Transaction()
     {
+    }
+
+    public boolean isDestinationStarted()
+    {
+        return destinationStarted;
+    }
+
+    public void setDestinationStarted(boolean destinationStarted)
+    {
+        this.destinationStarted = destinationStarted;
+    }
+
+    public boolean isDestinationComplete()
+    {
+        return destinationComplete;
+    }
+
+    public void setDestinationComplete(boolean destinationComplete)
+    {
+        this.destinationComplete = destinationComplete;
+    }
+
+    public void addSource(Source s)
+    {
+        this.sources.add(s);
+        s.setTransaction(this);
+    }
+
+    public void addDestination(Destination s)
+    {
+        this.destinations.add(s);
+        s.setTransaction(this);
     }
 
     public boolean isSourceComplete()
@@ -104,12 +148,12 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
         this.transactionId = transactionId;
     }
 
-    public TransactionType getTransactionType()
+    public Transfer.TransactionType getTransactionType()
     {
         return transactionType;
     }
 
-    public void setTransactionType(TransactionType transactionType)
+    public void setTransactionType(Transfer.TransactionType transactionType)
     {
         this.transactionType = transactionType;
     }
@@ -144,22 +188,22 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
         this.merchantId = merchantId;
     }
 
-    public JsonNode getPayload()
+    public TransferRequest getPayload()
     {
         return payload;
     }
 
-    public void setPayload(JsonNode payload)
+    public void setPayload(TransferRequest payload)
     {
         this.payload = payload;
     }
 
-    public TransactionStatus getTransactionStatus()
+    public Transfer.TransactionStatus getTransactionStatus()
     {
         return transactionStatus;
     }
 
-    public void setTransactionStatus(TransactionStatus transactionStatus)
+    public void setTransactionStatus(Transfer.TransactionStatus transactionStatus)
     {
         this.transactionStatus = transactionStatus;
     }
@@ -184,6 +228,7 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
         this.dateModified = dateModified;
     }
 
+    @Transactional
     public List<Source> getSources()
     {
         return sources;
@@ -194,12 +239,13 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
         this.sources = sources;
     }
 
-    public List<Destination> getDestinations()
+    @Transactional
+    public List<net.tospay.transaction.entities.Destination> getDestinations()
     {
         return destinations;
     }
 
-    public void setDestinations(List<Destination> destinations)
+    public void setDestinations(List<net.tospay.transaction.entities.Destination> destinations)
     {
         this.destinations = destinations;
     }
