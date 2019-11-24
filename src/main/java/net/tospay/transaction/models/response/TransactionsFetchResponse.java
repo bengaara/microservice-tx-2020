@@ -1,12 +1,14 @@
 package net.tospay.transaction.models.response;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TransactionFetchResponse
+public class TransactionsFetchResponse
 {
     @JsonProperty("transactionId")
     private String transactionId;
@@ -38,17 +40,40 @@ public class TransactionFetchResponse
     @JsonProperty("currency")
     private String currency;
 
-    @JsonProperty("charge")
-    private String charge;
 
     @JsonProperty("date_created")
     private Date dateCreated;
 
-    @JsonProperty("date_updated")
-    private Date dateUpdated;
-
     @JsonProperty("status")
     private String status;
+
+    @JsonProperty("source")
+    List<TransactionFetchResponse> source = new ArrayList<>();
+
+    public List<TransactionFetchResponse> getSource()
+    {
+        return source;
+    }
+
+    public void setSource(List<TransactionFetchResponse> source)
+    {
+        this.source = source;
+    }
+
+    public List<TransactionFetchResponse> getDelivery()
+    {
+        return delivery;
+    }
+
+    public void setDelivery(List<TransactionFetchResponse> delivery)
+    {
+        this.delivery = delivery;
+    }
+
+    @JsonProperty("delivery")
+    List<TransactionFetchResponse> delivery = new ArrayList<>();
+
+
 
     public String getType()
     {
@@ -90,15 +115,6 @@ public class TransactionFetchResponse
         this.currency = currency;
     }
 
-    public String getCharge()
-    {
-        return charge;
-    }
-
-    public void setCharge(String charge)
-    {
-        this.charge = charge;
-    }
 
     public Date getDateCreated()
     {
@@ -110,15 +126,6 @@ public class TransactionFetchResponse
         this.dateCreated = dateCreated;
     }
 
-    public Date getDateUpdated()
-    {
-        return dateUpdated;
-    }
-
-    public void setDateUpdated(Date dateUpdated)
-    {
-        this.dateUpdated = dateUpdated;
-    }
 
     public String getStatus()
     {

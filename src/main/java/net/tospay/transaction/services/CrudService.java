@@ -49,6 +49,7 @@ public class CrudService extends BaseService
         }
     }
 
+
     public @NotNull ArrayList<Destination> fetchDestinations(UUID userId, AccountType userType)
     {
         try {
@@ -60,4 +61,5 @@ public class CrudService extends BaseService
             return new ArrayList<Destination>();
         }
     }
+
 }

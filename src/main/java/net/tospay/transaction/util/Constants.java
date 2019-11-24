@@ -11,5 +11,7 @@ public class Constants
         public static final String CALLBACK_MOBILE = "/mobile/callback";
 
         public static final String TRANSACTIONS_FETCH = "/transactions/fetch";
+
+        public static final String TRANSACTIONS_ALL = "/transactions/all";
     }
 }

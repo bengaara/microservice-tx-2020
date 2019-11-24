@@ -2,7 +2,9 @@ package net.tospay.transaction.controllers;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -21,6 +23,7 @@ import net.tospay.transaction.models.request.TransactionFetchRequest;
 import net.tospay.transaction.models.response.BaseResponse;
 import net.tospay.transaction.models.response.ResponseObject;
 import net.tospay.transaction.models.response.TransactionFetchResponse;
+import net.tospay.transaction.models.response.TransactionsFetchResponse;
 import net.tospay.transaction.services.CrudService;
 import net.tospay.transaction.util.Constants;
 
@@ -103,5 +106,71 @@ public class FetchController extends BaseController
 
 
         return new ResponseObject(ResponseCode.SUCCESS.type, ResponseCode.SUCCESS.name(), null, list);
+    }
+    @PostMapping(Constants.URL.TRANSACTIONS_ALL)
+    public ResponseObject<List<TransactionFetchResponse>> fetchTransactions(@Valid @RequestBody TransactionFetchRequest request)
+    {
+        logger.info(" {}", request);
+
+        List<Source> list1 = crudServiced.fetchSources(request.getUserId(), request.getUserType());
+        List<Destination> list2 = crudServiced.fetchDestinations(request.getUserId(), request.getUserType());
+
+        Map<String,TransactionsFetchResponse> transactions = new HashMap<String,TransactionsFetchResponse>();
+
+        list1.forEach(s -> {
+            TransactionFetchResponse res = new TransactionFetchResponse();
+            res.setAmount(s.getAmount());
+            res.setCharge(s.getCharge().toString());
+            res.setCurrency(s.getCurrency());
+            res.setDateCreated(s.getDateCreated());
+            res.setDateUpdated(s.getDateModified());
+            res.setTransactionId(s.getTransaction().getTransactionId());
+            res.setTransactionTransferId(s.getId().toString());
+            res.settId(s.getTransaction().getId().toString());
+            res.setSourceChannel(s.getType().name());
+            res.setType(s.getTransaction().getTransactionType().name());
+            res.setStatus(s.getTransactionStatus().name());
+
+            TransactionsFetchResponse t =transactions.get(res.gettId());
+            if(t==null){
+                t= new TransactionsFetchResponse();
+                t.setAmount(s.getTransaction().getAmount());
+                t.setCurrency(s.getTransaction().getCurrency());
+                transactions.put(res.gettId(),t);
+
+            }
+            t.getSource().add(res);
+        });
+        list2.forEach(s -> {
+            TransactionFetchResponse res = new TransactionFetchResponse();
+            res.setAmount(s.getAmount());
+            res.setCharge(s.getCharge().toString());
+            res.setCurrency(s.getCurrency());
+            res.setDateCreated(s.getDateCreated());
+            res.setDateUpdated(s.getDateModified());
+            res.setTransactionId(s.getTransaction().getTransactionId());
+            res.setTransactionTransferId(s.getId().toString());
+            res.settId(s.getTransaction().getId().toString());
+            res.setSourceChannel(s.getType().name());
+            res.setType(s.getTransaction().getTransactionType().name());
+            res.setStatus(s.getTransactionStatus().name());
+
+            TransactionsFetchResponse t =transactions.get(res.gettId());
+            if(t==null){
+                t= new TransactionsFetchResponse();
+                t.setAmount(s.getTransaction().getAmount());
+                t.setCurrency(s.getTransaction().getCurrency());
+                transactions.put(res.gettId(),t);
+
+            }
+            t.getDelivery().add(res);
+        });
+        List<TransactionsFetchResponse> transactionsList = transactions.values().stream()
+                .collect(Collectors.toList());
+
+
+
+
+        return new ResponseObject(ResponseCode.SUCCESS.type, ResponseCode.SUCCESS.name(), null, transactionsList);
     }
 }
