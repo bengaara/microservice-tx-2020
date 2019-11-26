@@ -28,7 +28,6 @@ import net.tospay.transaction.models.request.ChargeRequest;
 import net.tospay.transaction.models.request.ChargeRequestDestination;
 import net.tospay.transaction.models.request.ChargeRequestSource;
 import net.tospay.transaction.models.request.TransferRequest;
-import net.tospay.transaction.models.request.UserInfo;
 import net.tospay.transaction.models.response.BaseResponse;
 import net.tospay.transaction.models.response.ChargeResponse;
 import net.tospay.transaction.models.response.Error;
@@ -110,9 +109,9 @@ public class RestController extends BaseController
 
             net.tospay.transaction.entities.Source sourceEntity = new net.tospay.transaction.entities.Source();
             sourceEntity.setTransaction(transaction);
-            sourceEntity.setAccount(topupValue.getAccount()!=null?topupValue.getAccount():new Account());
-            sourceEntity.getAccount().setEmail(request.getUserInfo()!=null?request.getUserInfo().getEmail():null);
-            sourceEntity.getAccount().setName(request.getUserInfo()!=null?request.getUserInfo().getName():null);
+            sourceEntity.setAccount(topupValue.getAccount() != null ? topupValue.getAccount() : new Account());
+          //  sourceEntity.getAccount().setEmail(request.getUserInfo() != null ? request.getUserInfo().getEmail() : null);
+         //   sourceEntity.getAccount().setName(request.getUserInfo() != null ? request.getUserInfo().getName() : null);
             sourceEntity.setAmount(topupValue.getAmount());
 
             sourceEntity.setCurrency(transaction.getCurrency());
@@ -173,16 +172,25 @@ public class RestController extends BaseController
                     new net.tospay.transaction.entities.Destination();
             destinationEntity.setTransaction(transaction);
 
-
             destinationEntity.setAmount(topupValue.getAmount());
             destinationEntity.setCurrency(transaction.getCurrency());
             destinationEntity.setTransactionStatus(transaction.getTransactionStatus());
             destinationEntity.setType(topupValue.getType());
             destinationEntity.setUserId(topupValue.getUserId());
             destinationEntity.setUserType(topupValue.getUserType());
-
-
-
+            destinationEntity.setAccount(topupValue.getAccount());
+//            if(topupValue.getAccount()==null) {
+//                Account account = new Account();
+//                account.setUserId(String.valueOf(topupValue.getUserId()));
+//                account.setUserType(String.valueOf(topupValue.getUserType()));
+//                ResponseObject<UserInfo> r = authService.getUserInfo(account);
+//                if (r != null && ResponseCode.SUCCESS.type.equalsIgnoreCase(r.getStatus())) {
+//                    destinationEntity.getAccount().setEmail(r.getData().getEmail());
+//                    destinationEntity.getAccount().setName(r.getData().getName());
+//                    destinationEntity.getAccount().setPhone(r.getData().getPhone());
+//                }
+//                destinationEntity.setAccount(account);
+//            }
 
             //TODO: MULTIPLE RECEPIENT BILLING
             Double destinationCharge = destinationCharges.get(0);

@@ -362,6 +362,7 @@ public class FundService extends BaseService
         try {
 
             logger.debug(" {}", request);
+            request.setAccount(null);
             HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity entity = new HttpEntity<TransferOutgoingRequest>(request, headers);
@@ -457,9 +458,9 @@ return false;
                     Account account = new Account();
                     account.setUserId(String.valueOf(response.getMerchantInfo().getUserId()));
                     account.setUserType(String.valueOf(response.getMerchantInfo().getTypeId()));
-                    account.setPhone(response.getMerchantInfo().getPhone());
-                    account.setName(response.getMerchantInfo().getName());
-                    account.setEmail(response.getMerchantInfo().getEmail());
+//                    account.setPhone(response.getMerchantInfo().getPhone());
+//                    account.setName(response.getMerchantInfo().getName());
+//                    account.setEmail(response.getMerchantInfo().getEmail());
                     request.setAccount(account);
                     request.setAction(MobilePayAction.DESTINATION);
                     request.setAmount(response.getOrderInfo().getAmount());
@@ -514,19 +515,6 @@ return false;
 
                     destination.setTransactionStatus(Transfer.TransactionStatus.PROCESSING);
                     TransferOutgoingRequest request = new TransferOutgoingRequest();
-
-                Account account = new Account();
-                account.setUserId(String.valueOf(destination.getUserId()));
-                account.setUserType(String.valueOf(destination.getUserType()));
-
-//                ResponseObject<UserInfo> r = authService.getUserInfo(account);
-//                if (r != null && ResponseCode.SUCCESS.type.equalsIgnoreCase(r.getStatus())) {
-//                    destinationEntity.getAccount().setEmail(r.getData().getEmail());
-//                    destinationEntity.getAccount().setName(r.getData().getName());
-//                    destinationEntity.getAccount().setPhone(r.getData().getPhone());
-//                }
-//                destinationEntity.setAccount(account);
-
                     request.setAccount(destination.getAccount());
                     request.setAction(MobilePayAction.DESTINATION);
                     request.setAmount(destination.getAmount());
