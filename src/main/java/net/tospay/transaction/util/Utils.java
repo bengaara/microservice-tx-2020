@@ -1,6 +1,7 @@
 package net.tospay.transaction.util;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * @author : Clifford Owino
@@ -8,6 +9,8 @@ import java.time.LocalDateTime;
  * @since : 9/5/2019, Thu
  **/
 public class Utils {
+
+    public static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("d MMM yyyy h:mm a");
 
     /**
      * Gets a string from current date and time

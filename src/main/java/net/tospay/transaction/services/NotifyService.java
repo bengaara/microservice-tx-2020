@@ -24,6 +24,7 @@ import net.tospay.transaction.models.request.NotifyTransferOutgoingSenderRequest
 import net.tospay.transaction.repositories.DestinationRepository;
 import net.tospay.transaction.repositories.SourceRepository;
 import net.tospay.transaction.repositories.TransactionRepository;
+import net.tospay.transaction.util.Utils;
 
 @Service
 public class NotifyService extends BaseService
@@ -56,7 +57,7 @@ public class NotifyService extends BaseService
     {
         try {
 
-            DateTimeFormatter FOMATTER = DateTimeFormatter.ofPattern("d MMM yyyy h:mm a");
+
             list.forEach(d -> {
 
                         if (d.getUserId() == null) {
@@ -73,7 +74,7 @@ public class NotifyService extends BaseService
                             request.setRecipientId( String.valueOf(d.getUserId()));
                             request.setRecipientType(String.valueOf(d.getUserType()));
                             request.setReference(d.getTransaction().getTransactionId());
-                            request.setDate(FOMATTER.format(LocalDateTime.now()));
+                            request.setDate(Utils.FORMATTER.format(LocalDateTime.now()));
 
                             List<NotifyTransferOutgoingSenderRequest> l = new ArrayList<>();
                             d.getTransaction().getSources().forEach(s->{
@@ -81,6 +82,9 @@ public class NotifyService extends BaseService
                                     NotifyTransferOutgoingSenderRequest sender =
                                             new NotifyTransferOutgoingSenderRequest(String.valueOf(s.getUserId()),
                                                     String.valueOf(s.getUserType()));
+//                                    sender.setSenderName(s.getAccount()!=null?s.getAccount().getName():null);
+//                                    sender.setSenderEmail(s.getAccount()!=null?s.getAccount().getEmail():null);
+                                    l.add(sender);
                                 }
                             });
                             request.setSenders(l.size()>0?l:null);

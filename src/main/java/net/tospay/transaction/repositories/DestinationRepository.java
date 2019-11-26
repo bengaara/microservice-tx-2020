@@ -17,4 +17,6 @@ public interface DestinationRepository extends BaseRepositoryInterface<Destinati
     Optional<Destination> findById(UUID uuid);
 
     ArrayList<Destination> findByUserIdAndUserType(UUID userId, AccountType userType, Pageable pageable);
+
+
 }

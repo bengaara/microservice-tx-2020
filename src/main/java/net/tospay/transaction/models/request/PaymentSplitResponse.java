@@ -6,55 +6,57 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import net.tospay.transaction.enums.Transfer;
+import net.tospay.transaction.models.response.MerchantInfo;
+import net.tospay.transaction.models.response.UserInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PaymentSplitRequest
+public class PaymentSplitResponse
 {
-    @JsonProperty("email") String email;
+    @JsonProperty("merchantInfo")  MerchantInfo merchantInfo;
 
-    @JsonProperty("merchant") UUID merchant;
+    @JsonProperty("orderInfo") OrderInfo orderInfo;
 
-    @JsonProperty("reference") String reference;
+    @JsonProperty("splitInfo")  SplitInfo splitInfo;
 
-    @JsonProperty("status") Transfer.TransactionStatus status;
+    @JsonProperty("userInfo")  UserInfo userInfo;
 
-    public String getEmail()
+    public MerchantInfo getMerchantInfo()
     {
-        return email;
+        return merchantInfo;
     }
 
-    public void setEmail(String email)
+    public void setMerchantInfo(MerchantInfo merchantInfo)
     {
-        this.email = email;
+        this.merchantInfo = merchantInfo;
     }
 
-    public UUID getMerchant()
+    public OrderInfo getOrderInfo()
     {
-        return merchant;
+        return orderInfo;
     }
 
-    public void setMerchant(UUID merchant)
+    public void setOrderInfo(OrderInfo orderInfo)
     {
-        this.merchant = merchant;
+        this.orderInfo = orderInfo;
     }
 
-    public String getReference()
+    public SplitInfo getSplitInfo()
     {
-        return reference;
+        return splitInfo;
     }
 
-    public void setReference(String reference)
+    public void setSplitInfo(SplitInfo splitInfo)
     {
-        this.reference = reference;
+        this.splitInfo = splitInfo;
     }
 
-    public Transfer.TransactionStatus getStatus()
+    public UserInfo getUserInfo()
     {
-        return status;
+        return userInfo;
     }
 
-    public void setStatus(Transfer.TransactionStatus status)
+    public void setUserInfo(UserInfo userInfo)
     {
-        this.status = status;
+        this.userInfo = userInfo;
     }
 }

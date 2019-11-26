@@ -3,6 +3,7 @@ package net.tospay.transaction.models.request;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -47,6 +48,19 @@ public class TransferRequest
 
     @JsonProperty("type")
     private Transfer.TransactionType type;
+
+    @JsonProperty("external_reference")
+    private String externalReference;
+
+    public String getExternalReference()
+    {
+        return externalReference;
+    }
+
+    public void setExternalReference(String externalReference)
+    {
+        this.externalReference = externalReference;
+    }
 
     public Transfer.TransactionType getType()
     {

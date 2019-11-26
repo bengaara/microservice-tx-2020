@@ -22,11 +22,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.tospay.transaction.entities.Transaction;
 import net.tospay.transaction.enums.ResponseCode;
 import net.tospay.transaction.enums.Transfer;
+import net.tospay.transaction.models.request.Account;
 import net.tospay.transaction.models.request.Amount;
 import net.tospay.transaction.models.request.ChargeRequest;
 import net.tospay.transaction.models.request.ChargeRequestDestination;
 import net.tospay.transaction.models.request.ChargeRequestSource;
 import net.tospay.transaction.models.request.TransferRequest;
+import net.tospay.transaction.models.request.UserInfo;
 import net.tospay.transaction.models.response.BaseResponse;
 import net.tospay.transaction.models.response.ChargeResponse;
 import net.tospay.transaction.models.response.Error;
@@ -35,9 +37,9 @@ import net.tospay.transaction.models.response.TransferIncomingResponse;
 import net.tospay.transaction.repositories.DestinationRepository;
 import net.tospay.transaction.repositories.SourceRepository;
 import net.tospay.transaction.repositories.TransactionRepository;
+import net.tospay.transaction.services.AuthService;
 import net.tospay.transaction.services.FundService;
 import net.tospay.transaction.util.Constants;
-
 
 @org.springframework.web.bind.annotation.RestController
 @RequestMapping(Constants.URL.API + "/v1")
@@ -56,9 +58,12 @@ public class RestController extends BaseController
 
     @Autowired DestinationRepository destinationRepository;
 
-    public RestController(FundService fundService)
+    AuthService authService;
+
+    public RestController(FundService fundService, AuthService authService)
     {
         this.fundService = fundService;
+        this.authService = authService;
     }
 
     @PostMapping(Constants.URL.TRANSFER)
@@ -98,14 +103,16 @@ public class RestController extends BaseController
         transaction.setPayload(request);
         transaction.setTransactionStatus(Transfer.TransactionStatus.CREATED);
         transaction.setTransactionType(request.getType());
-
+        transaction.setExternalReference(request.getExternalReference());
         List<net.tospay.transaction.entities.Source> sources = new ArrayList<>();
         List<Double> destinationCharges = new ArrayList<>();
         request.getSource().forEach((topupValue) -> {
 
             net.tospay.transaction.entities.Source sourceEntity = new net.tospay.transaction.entities.Source();
             sourceEntity.setTransaction(transaction);
-            sourceEntity.setAccount(topupValue.getAccount());
+            sourceEntity.setAccount(topupValue.getAccount()!=null?topupValue.getAccount():new Account());
+            sourceEntity.getAccount().setEmail(request.getUserInfo()!=null?request.getUserInfo().getEmail():null);
+            sourceEntity.getAccount().setName(request.getUserInfo()!=null?request.getUserInfo().getName():null);
             sourceEntity.setAmount(topupValue.getAmount());
 
             sourceEntity.setCurrency(transaction.getCurrency());
@@ -120,10 +127,12 @@ public class RestController extends BaseController
             ChargeRequestDestination chargeRequestDestination =
                     new ChargeRequestDestination();
             //TODO: fix this for multiple - whose billed? when?
-            String destAccountId = request.getDelivery().get(0).getAccount() != null ?request.getDelivery().get(0).getAccount().getId(): null;
+            String destAccountId = request.getDelivery().get(0).getAccount() != null ?
+                    request.getDelivery().get(0).getAccount().getId() : null;
             chargeRequestDestination.setAccount(request.getDelivery().get(0).getUserType());//tospay account
+
             chargeRequestDestination.setId(destAccountId);
-            chargeRequestDestination.setPlatform(destAccountId !=null ? "known" : "unknown");
+            chargeRequestDestination.setPlatform(destAccountId != null ? "known" : "unknown");
             chargeRequestDestination.setChannel(request.getDelivery().get(0).getType());
             chargeRequest.setDestination(chargeRequestDestination);
 
@@ -132,7 +141,7 @@ public class RestController extends BaseController
 
             chargeRequestSource.setAccount(sourceEntity.getUserType());//tospay account
             chargeRequestSource.setId(sourceAccountId);
-            chargeRequestSource.setPlatform(sourceAccountId!=null ? "known" : "unknown");
+            chargeRequestSource.setPlatform(sourceAccountId != null ? "known" : "unknown");
             chargeRequestSource.setChannel(sourceEntity.getType());
             chargeRequest.setSource(chargeRequestSource);
 
@@ -163,13 +172,17 @@ public class RestController extends BaseController
             net.tospay.transaction.entities.Destination destinationEntity =
                     new net.tospay.transaction.entities.Destination();
             destinationEntity.setTransaction(transaction);
-            destinationEntity.setAccount(topupValue.getAccount());
+
+
             destinationEntity.setAmount(topupValue.getAmount());
             destinationEntity.setCurrency(transaction.getCurrency());
             destinationEntity.setTransactionStatus(transaction.getTransactionStatus());
             destinationEntity.setType(topupValue.getType());
             destinationEntity.setUserId(topupValue.getUserId());
             destinationEntity.setUserType(topupValue.getUserType());
+
+
+
 
             //TODO: MULTIPLE RECEPIENT BILLING
             Double destinationCharge = destinationCharges.get(0);
@@ -236,12 +249,11 @@ public class RestController extends BaseController
             logger.error("callback called but no transaction found {}", node);
         }
 
-       // transaction = transactionRepository.save(transaction);//transactionRepository.refresh(transaction);
+        // transaction = transactionRepository.save(transaction);//transactionRepository.refresh(transaction);
         fundService.checkSourceAndDestinationTransactionStatusAndAct(transaction);
 
         String status = ResponseCode.SUCCESS.type;
         String description = ResponseCode.SUCCESS.name();
         return new ResponseObject(status, description, null, response.getData().getExternalReference());
     }
-
 }

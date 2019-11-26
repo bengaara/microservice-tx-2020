@@ -21,6 +21,47 @@ public class Account
     @JsonProperty("network")
     private Network network;
 
+    @JsonProperty("email")
+    private String email;
+
+    @JsonProperty("name")
+    private String name;
+
+    public String getEmail()
+    {
+        return email;
+    }
+
+    public void setEmail(String email)
+    {
+        this.email = email;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getPhone()
+    {
+        return phone;
+    }
+
+    public void setPhone(String phone)
+    {
+        this.phone = phone;
+    }
+
+    @JsonProperty("phone")
+    private String phone;
+
+
+
     public String getUserId()
     {
         return userId;

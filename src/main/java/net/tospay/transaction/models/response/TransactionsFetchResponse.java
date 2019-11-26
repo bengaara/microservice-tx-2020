@@ -156,4 +156,5 @@ public class TransactionsFetchResponse
     {
         this.transactionTransferId = transactionTransferId;
     }
+
 }

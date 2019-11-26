@@ -81,7 +81,7 @@ public class BaseController
         ResponseObject response = new ResponseObject(ResponseCode.GENERAL_ERROR.type,
                 ResponseCode.GENERAL_ERROR.name(),
                 Arrays.asList(new Error(ResponseCode.FAILURE.type, ResponseCode.FAILURE.name()))
-                , e);
+                , e.getCause());
 
         return response;
     }

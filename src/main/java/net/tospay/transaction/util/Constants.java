@@ -13,5 +13,7 @@ public class Constants
         public static final String TRANSACTIONS_FETCH = "/transactions/fetch";
 
         public static final String TRANSACTIONS_ALL = "/transactions/all";
+
+        public static final String TRANSACTIONS_ID = "/transactions/fetch/{transactionId}";
     }
 }

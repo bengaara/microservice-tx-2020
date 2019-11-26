@@ -77,6 +77,9 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     @Column(name = DATE_MODIFIED, nullable = false)
     private Timestamp dateModified;
 
+    @Column(name = "external_reference")
+    private String externalReference;
+
     //  mappedBy = "source",
     @OneToMany(
 
@@ -151,6 +154,16 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     public Transfer.TransactionType getTransactionType()
     {
         return transactionType;
+    }
+
+    public String getExternalReference()
+    {
+        return externalReference;
+    }
+
+    public void setExternalReference(String externalReference)
+    {
+        this.externalReference = externalReference;
     }
 
     public void setTransactionType(Transfer.TransactionType transactionType)

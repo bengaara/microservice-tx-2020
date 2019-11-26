@@ -51,7 +51,8 @@ public class Transfer
         PAYMENT("PAYMENT"),
         REVERSE("REVERSE"),
         SETTLEMENT("SETTLEMENT"),
-        INVOICE("INVOICE");
+        INVOICE("INVOICE"),
+        SPLIT("SPLIT");
 
         private static final Map<String, TransactionType> LABEL = new HashMap<>();
 

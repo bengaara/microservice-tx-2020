@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.transaction.Transactional;
 
@@ -33,9 +34,12 @@ import net.tospay.transaction.enums.ResponseCode;
 import net.tospay.transaction.enums.Transfer;
 import net.tospay.transaction.models.request.Account;
 import net.tospay.transaction.models.request.ChargeRequest;
+import net.tospay.transaction.models.request.PaymentSplitRequest;
+import net.tospay.transaction.models.request.PaymentSplitResponse;
 import net.tospay.transaction.models.request.TransactionIdRequest;
 import net.tospay.transaction.models.request.TransferOutgoingRequest;
 import net.tospay.transaction.models.request.TransferRequest;
+import net.tospay.transaction.models.request.UserInfo;
 import net.tospay.transaction.models.response.ChargeResponse;
 import net.tospay.transaction.models.response.Error;
 import net.tospay.transaction.models.response.MerchantInfo;
@@ -111,7 +115,7 @@ public class FundService extends BaseService
                 request.setCharge(source.getCharge());
                 request.setCurrency(source.getCurrency());
                 request.setDescription(source.getType().toString());
-                request.setExternalReference(source.getId());
+                request.setExternalReference(source.getId().toString());
 
                 ResponseObject<TransferIncomingResponse> response = null;
                 switch (source.getType()) {
@@ -143,7 +147,7 @@ public class FundService extends BaseService
                     HashMap<String, Object> node = mapper.convertValue(response, HashMap.class);
                     source.setResponse(node);
                 }
-               if (response == null || ResponseCode.FAILURE.type.equalsIgnoreCase(response.getStatus())) {//failure
+                if (response == null || ResponseCode.FAILURE.type.equalsIgnoreCase(response.getStatus())) {//failure
                     source.setTransactionStatus(Transfer.TransactionStatus.FAILED);
                     logger.debug("sourcing failed  {}", source);
                 } else {
@@ -154,19 +158,18 @@ public class FundService extends BaseService
                     source.setTransactionStatus(status);
                     logger.debug("sourcing ok  {} {}", source, status);
 
-                    //one success.. fetch TR id
-                    if (source.getTransaction().getTransactionId() ==null){
+                    //one success.. generate TR id
+                    if (source.getTransaction().getTransactionId() == null) {
 
                         MerchantInfo merchantInfo = transaction.getPayload().getMerchantInfo();
-                        ResponseObject<String> tr = fetchTransactionId(merchantInfo.getTypeId(),
-                                source.getTransaction().getTransactionType(),merchantInfo.getCountryCode());
-                        if(tr !=null && ResponseCode.SUCCESS.equals(tr.getStatus())){
+                        ResponseObject<String> tr = generateTransactionId(merchantInfo.getTypeId(),
+                                source.getTransaction().getTransactionType(), merchantInfo.getCountryCode());
+                        if (tr != null && ResponseCode.SUCCESS.equals(tr.getStatus())) {
                             source.getTransaction().setTransactionId(tr.getData());
                         }
-
                     }
                 }
-               // transactionRepository.save(transaction);
+                // transactionRepository.save(transaction);
                 source = sourceRepository.save(source);
             });
 
@@ -223,6 +226,8 @@ public class FundService extends BaseService
             logger.debug("TODO {}", transaction);
             //notify
             notifyService.notifyTransferSource(transaction.getSources());
+
+            //TODO: auto rollback funds to wallet?
 
             return;
         } else if (transaction.isSourceComplete() && !transaction.isDestinationStarted()) {
@@ -284,6 +289,41 @@ public class FundService extends BaseService
 
             logger.debug("TODO: destination complete - firing notify  {}", transaction);
             notifyService.notifyTransferDestination(transaction.getDestinations());
+        }
+    }
+
+    public ResponseObject<PaymentSplitResponse> hitSplitBillPaymentService(Source source)
+    {
+
+        try {
+
+            logger.debug(" {}", source);
+
+            PaymentSplitRequest request = new PaymentSplitRequest();
+            request.setEmail(source.getTransaction().getPayload().getUserInfo().getEmail());
+            request.setMerchant(source.getTransaction().getMerchantId());
+            request.setReference(source.getTransaction().getExternalReference());
+            request.setStatus(source.getTransactionStatus());
+
+            HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity entity = new HttpEntity<PaymentSplitRequest>(request, headers);
+
+            logger.debug(" {}", source);
+            ResponseObject<PaymentSplitResponse> response =
+                    restTemplate.postForObject(mobilepayUrl, entity, ResponseObject.class);
+            logger.debug(" {}", response);
+
+            return response;
+        } catch (HttpClientErrorException e) {
+            logger.error(" {}", e);
+            String status = ResponseCode.FAILURE.type;
+            String description = e.getResponseBodyAsString();
+            ArrayList<Error> errors = new ArrayList<>();
+            Error error = new Error(status, description);
+            errors.add(error);
+
+            return new ResponseObject<>(status, description, errors, null);
         }
     }
 
@@ -393,68 +433,154 @@ public class FundService extends BaseService
     public CompletableFuture<Boolean> payDestination(Transaction transaction)
     {
         try {
-            // Hibernate.initialize(transactionRepository);
-            // transactionRepository.refresh(transaction);
-            List<Destination> destinations = transaction
-                    .getDestinations();//transactionRepository.findById(transaction.getId()).get().getDestinations();
-            destinations.forEach(destination -> {
 
-                destination.setTransactionStatus(Transfer.TransactionStatus.PROCESSING);
-                TransferOutgoingRequest request = new TransferOutgoingRequest();
-                request.setAccount(destination.getAccount());
-                request.setAction(MobilePayAction.DESTINATION);
-                request.setAmount(destination.getAmount());
-                request.setUserId(destination.getUserId());
-                request.setUserType(destination.getUserType());
-                request.setCharge(destination.getCharge());
-                request.setCurrency(destination.getCurrency());
-                request.setDescription(destination.getType().toString());
-                request.setExternalReference(destination.getId());
+            //if split bill enquire if sourcing complete
+            if (Transfer.TransactionType.SPLIT.equals(transaction.getTransactionType())) {
 
-                ResponseObject<TransferIncomingResponse> response = null;
-                switch (destination.getType()) {
-                    case MOBILE:
-                        response = hitMobile(request);
-                        break;
-                    case WALLET:
-                        response = hitWallet(request);
+                AtomicReference<ResponseObject<PaymentSplitResponse>> res = null;
+
+                boolean result = transaction.getSources().stream().anyMatch(source -> {
+                    ResponseObject<PaymentSplitResponse> r =   hitSplitBillPaymentService(source);
+                    logger.debug("{}", res);
+                    if (res.get() != null && ResponseCode.FAILURE.type.equalsIgnoreCase(res.get().getStatus())) {
+                        logger.debug("split bill sourcing complete");
+                        res.set(r);
+                        return true;
+                    }
+return false;
+                });
+                //if split complete pay merchant wallet
+                if (res.get() != null && ResponseCode.FAILURE.type.equalsIgnoreCase(res.get().getStatus())) {
+                    PaymentSplitResponse response = res.get().getData();
+                    TransferOutgoingRequest request = new TransferOutgoingRequest();
+
+                    Account account = new Account();
+                    account.setUserId(String.valueOf(response.getMerchantInfo().getUserId()));
+                    account.setUserType(String.valueOf(response.getMerchantInfo().getTypeId()));
+                    account.setPhone(response.getMerchantInfo().getPhone());
+                    account.setName(response.getMerchantInfo().getName());
+                    account.setEmail(response.getMerchantInfo().getEmail());
+                    request.setAccount(account);
+                    request.setAction(MobilePayAction.DESTINATION);
+                    request.setAmount(response.getOrderInfo().getAmount());
+                    request.setUserId(response.getMerchantInfo().getUserId());
+                    request.setUserType(response.getMerchantInfo().getTypeId());
+                    //TODO request.setCharge(destination.getCharge());
+                    request.setCurrency(response.getOrderInfo().getCurrency());
+                    request.setDescription(response.getOrderInfo().getDescription());
+                    request.setExternalReference(response.getOrderInfo().getReference());
+
+                    ResponseObject<TransferIncomingResponse> r  = hitWallet(request);
+                    Destination destination= new Destination();
+                    destination.setTransaction(transaction);
+                    destination.setAccount(account);
+                    destination.setAmount(request.getAmount());
+                    destination.setCurrency(transaction.getCurrency());
+                    destination.setTransactionStatus(transaction.getTransactionStatus());
+                    destination.setType(Transfer.SourceType.WALLET);
+                    destination.setUserId(response.getMerchantInfo().getUserId());
+                    destination.setUserType(response.getMerchantInfo().getTypeId());
+
+
+                    if (r != null) {
+                        HashMap<String, Object> node = mapper.convertValue(r, HashMap.class);
+                        destination.setResponse(node);
                         destination.setDateResponse(new Timestamp(System.currentTimeMillis()));
-                        break;
-                    case CARD:
+                    }
+                    if (r == null || ResponseCode.FAILURE.type.equalsIgnoreCase(r.getStatus())) {//failure
+                        destination.setTransactionStatus(Transfer.TransactionStatus.FAILED);
+                    } else {
+                        Transfer.TransactionStatus status =
+                                ResponseCode.SUCCESS.type.equalsIgnoreCase(r.getStatus()) ?
+                                        Transfer.TransactionStatus.SUCCESS : Transfer.TransactionStatus.PROCESSING;
+                        destination.setTransactionStatus(status);
+                        logger.debug("destination ok  {} {}", destination, status);
+                    }
+
+                    transaction.addDestination(destination);
+                    destination = destinationRepository.save(destination);
+                }
+                // transaction = transactionRepository.save(transaction);//transactionRepository.refresh(transaction);
+                checkSourceAndDestinationTransactionStatusAndAct(transaction);
+
+                return CompletableFuture.completedFuture(true);
+            } else {
+
+                // Hibernate.initialize(transactionRepository);
+                // transactionRepository.refresh(transaction);
+                List<Destination> destinations = transaction
+                        .getDestinations();//transactionRepository.findById(transaction.getId()).get().getDestinations();
+                destinations.forEach(destination -> {
+
+                    destination.setTransactionStatus(Transfer.TransactionStatus.PROCESSING);
+                    TransferOutgoingRequest request = new TransferOutgoingRequest();
+
+                Account account = new Account();
+                account.setUserId(String.valueOf(destination.getUserId()));
+                account.setUserType(String.valueOf(destination.getUserType()));
+
+//                ResponseObject<UserInfo> r = authService.getUserInfo(account);
+//                if (r != null && ResponseCode.SUCCESS.type.equalsIgnoreCase(r.getStatus())) {
+//                    destinationEntity.getAccount().setEmail(r.getData().getEmail());
+//                    destinationEntity.getAccount().setName(r.getData().getName());
+//                    destinationEntity.getAccount().setPhone(r.getData().getPhone());
+//                }
+//                destinationEntity.setAccount(account);
+
+                    request.setAccount(destination.getAccount());
+                    request.setAction(MobilePayAction.DESTINATION);
+                    request.setAmount(destination.getAmount());
+                    request.setUserId(destination.getUserId());
+                    request.setUserType(destination.getUserType());
+                    request.setCharge(destination.getCharge());
+                    request.setCurrency(destination.getCurrency());
+                    request.setDescription(destination.getType().toString());
+                    request.setExternalReference(destination.getId().toString());
+
+                    ResponseObject<TransferIncomingResponse> response = null;
+                    switch (destination.getType()) {
+                        case MOBILE:
+                            response = hitMobile(request);
+                            break;
+                        case WALLET:
+                            response = hitWallet(request);
+                            destination.setDateResponse(new Timestamp(System.currentTimeMillis()));
+                            break;
+                        case CARD:
 //                                response = hitCard(request);
 //                                destination.setDateResponse(new Timestamp(System.currentTimeMillis()));
 //                                break;
-                        //TODO
+                            //TODO
+                            destination.setTransactionStatus(Transfer.TransactionStatus.FAILED);
+                            logger.debug("destination failed for card TODO implementation {}", destination);
+                            break;
+                        case BANK:
+                            //TODO
+                            destination.setTransactionStatus(Transfer.TransactionStatus.FAILED);
+                            logger.debug("destination failed for bank TODO implementation {}", destination);
+                            break;
+                    }
+
+                    if (response != null) {
+                        HashMap<String, Object> node = mapper.convertValue(response, HashMap.class);
+                        destination.setResponse(node);
+                    }
+
+                    if (response == null || ResponseCode.FAILURE.type.equalsIgnoreCase(response.getStatus())) {//failure
                         destination.setTransactionStatus(Transfer.TransactionStatus.FAILED);
-                        logger.debug("destination failed for card TODO implementation {}", destination);
-                        break;
-                    case BANK:
-                        //TODO
-                        destination.setTransactionStatus(Transfer.TransactionStatus.FAILED);
-                        logger.debug("destination failed for bank TODO implementation {}", destination);
-                        break;
-                }
+                    } else {
+                        Transfer.TransactionStatus status =
+                                ResponseCode.SUCCESS.type.equalsIgnoreCase(response.getStatus()) ?
+                                        Transfer.TransactionStatus.SUCCESS : Transfer.TransactionStatus.PROCESSING;
+                        destination.setTransactionStatus(status);
+                        logger.debug("destination ok  {} {}", destination, status);
+                    }
 
-                if (response != null) {
-                    HashMap<String, Object> node = mapper.convertValue(response, HashMap.class);
-                    destination.setResponse(node);
-                }
-
-                if (response == null || ResponseCode.FAILURE.type.equalsIgnoreCase(response.getStatus())) {//failure
-                    destination.setTransactionStatus(Transfer.TransactionStatus.FAILED);
-                } else {
-                    Transfer.TransactionStatus status =
-                            ResponseCode.SUCCESS.type.equalsIgnoreCase(response.getStatus()) ?
-                                    Transfer.TransactionStatus.SUCCESS : Transfer.TransactionStatus.PROCESSING;
-                    destination.setTransactionStatus(status);
-                    logger.debug("destination ok  {} {}", destination, status);
-                }
-
-                destination = destinationRepository.save(destination);
-            });
-            // transaction = transactionRepository.save(transaction);//transactionRepository.refresh(transaction);
-            checkSourceAndDestinationTransactionStatusAndAct(destinations.get(0).getTransaction());
-
+                    destination = destinationRepository.save(destination);
+                });
+                // transaction = transactionRepository.save(transaction);//transactionRepository.refresh(transaction);
+                checkSourceAndDestinationTransactionStatusAndAct(destinations.get(0).getTransaction());
+            }
             return CompletableFuture.completedFuture(true);
         } catch (Exception e) {
             logger.error("{}", e);
@@ -484,7 +610,8 @@ public class FundService extends BaseService
         }
     }
 
-    public ResponseObject<String> fetchTransactionId(AccountType accountType, Transfer.TransactionType transactionType,
+    public ResponseObject<String> generateTransactionId(AccountType accountType,
+            Transfer.TransactionType transactionType,
             String countryCode)
     {
         try {

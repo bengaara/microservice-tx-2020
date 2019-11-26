@@ -5,6 +5,10 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import net.tospay.transaction.entities.Destination;
+import net.tospay.transaction.entities.Source;
+import net.tospay.transaction.util.Utils;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransactionFetchResponse
 {
@@ -43,6 +47,19 @@ public class TransactionFetchResponse
 
     @JsonProperty("date_created")
     private Date dateCreated;
+
+    public String getDateCreatedFormatted()
+    {
+        return dateCreatedFormatted;
+    }
+
+    public void setDateCreatedFormatted(String dateCreatedFormatted)
+    {
+        this.dateCreatedFormatted = dateCreatedFormatted;
+    }
+
+    @JsonProperty("date_created_formatted")
+    private String dateCreatedFormatted;
 
     @JsonProperty("date_updated")
     private Date dateUpdated;
@@ -148,5 +165,40 @@ public class TransactionFetchResponse
     public void setTransactionTransferId(String transactionTransferId)
     {
         this.transactionTransferId = transactionTransferId;
+    }
+
+    public static TransactionFetchResponse from(Source s){
+        TransactionFetchResponse res = new TransactionFetchResponse();
+        res.setAmount(s.getAmount());
+        res.setCharge(s.getCharge().toString());
+        res.setCurrency(s.getCurrency());
+        res.setDateCreated(s.getDateCreated());
+        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated().toLocalDateTime()));
+        res.setDateUpdated(s.getDateModified());
+        res.setTransactionId(s.getTransaction().getTransactionId());
+        res.setTransactionTransferId(s.getId().toString());
+        res.settId(s.getTransaction().getId().toString());
+        res.setSourceChannel(s.getType().name());
+        res.setType(s.getTransaction().getTransactionType().name());
+        res.setStatus(s.getTransactionStatus().name());
+
+        return res;
+    }
+    public static TransactionFetchResponse from(Destination s){
+        TransactionFetchResponse res = new TransactionFetchResponse();
+        res.setAmount(s.getAmount());
+        res.setCharge(s.getCharge().toString());
+        res.setCurrency(s.getCurrency());
+        res.setDateCreated(s.getDateCreated());
+        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated().toLocalDateTime()));
+        res.setDateUpdated(s.getDateModified());
+        res.setTransactionId(s.getTransaction().getTransactionId());
+        res.setTransactionTransferId(s.getId().toString());
+        res.settId(s.getTransaction().getId().toString());
+        res.setSourceChannel(s.getType().name());
+        res.setType(s.getTransaction().getTransactionType().name());
+        res.setStatus(s.getTransactionStatus().name());
+
+        return res;
     }
 }

@@ -1,7 +1,6 @@
 package net.tospay.transaction.services;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,138 +13,75 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import net.tospay.transaction.entities.Destination;
 import net.tospay.transaction.entities.Source;
-import net.tospay.transaction.enums.Notify;
+import net.tospay.transaction.enums.ResponseCode;
+import net.tospay.transaction.models.request.Account;
 import net.tospay.transaction.models.request.NotifyTransferOutgoingRequest;
 import net.tospay.transaction.models.request.NotifyTransferOutgoingSenderRequest;
+import net.tospay.transaction.models.request.TransferOutgoingRequest;
+import net.tospay.transaction.models.request.UserInfo;
+import net.tospay.transaction.models.response.Error;
+import net.tospay.transaction.models.response.ResponseObject;
+import net.tospay.transaction.models.response.TransferIncomingResponse;
 import net.tospay.transaction.repositories.DestinationRepository;
 import net.tospay.transaction.repositories.SourceRepository;
 import net.tospay.transaction.repositories.TransactionRepository;
 import net.tospay.transaction.util.Utils;
 
 @Service
-public class NotifyService extends BaseService
+public class AuthService extends BaseService
 {
     RestTemplate restTemplate;
 
-    TransactionRepository transactionRepository;
-
-    SourceRepository sourceRepository;
-
-    DestinationRepository destinationRepository;
 
 
-    @Value("${notify.transfer.url}")
-    String notifyTransferUrl;
+    @Value("${auth.account.info.url}")
+    String authAccountInfoUrl;
 
-    public NotifyService(RestTemplate restTemplate, TransactionRepository transactionRepository,
-            SourceRepository sourceRepository, DestinationRepository destinationRepository)
+    public AuthService(RestTemplate restTemplate)
     {
         this.restTemplate = restTemplate;
-
-        this.transactionRepository = transactionRepository;
-
-        this.sourceRepository = sourceRepository;
-
-        this.destinationRepository = destinationRepository;
     }
 
-    public void notifyTransferDestination(List<Destination> list)
+
+
+    public ResponseObject<UserInfo>  getUserInfo(Account account)
     {
         try {
-
-
-            list.forEach(d -> {
-
-                        if (d.getUserId() == null) {
-                            logger.debug("notifyTransferDestination failed - no userId {}", d.getId());
-
-                        }else {
-                            logger.debug("notifyTransferDestination", d.getId());
-                            NotifyTransferOutgoingRequest request = new NotifyTransferOutgoingRequest();
-                            // request.setCategory(Notify.Category.TRANSFER);
-                            request.setTopic(d.getTransaction().getTransactionType());
-                            request.setStatus(d.getTransactionStatus());
-                            request.setAmount(d.getAmount().toString());
-                            request.setCurrency(d.getCurrency());
-                            request.setRecipientId( String.valueOf(d.getUserId()));
-                            request.setRecipientType(String.valueOf(d.getUserType()));
-                            request.setReference(d.getTransaction().getTransactionId());
-                            request.setDate(Utils.FORMATTER.format(LocalDateTime.now()));
-
-                            List<NotifyTransferOutgoingSenderRequest> l = new ArrayList<>();
-                            d.getTransaction().getSources().forEach(s->{
-                                if(s.getUserId() !=null) {
-                                    NotifyTransferOutgoingSenderRequest sender =
-                                            new NotifyTransferOutgoingSenderRequest(String.valueOf(s.getUserId()),
-                                                    String.valueOf(s.getUserType()));
-                                }
-                            });
-                            request.setSenders(l.size()>0?l:null);
-                            NotifyTransferOutgoingRequest response = hitNotify(request);
-                        }
-                    }
-
-            );
+            ResponseObject<UserInfo>  response = hitAuthAccount(account);
+            return response;
         } catch (Exception e) {
             logger.error("", e);
-            return;
+            return null;
         }
     }
 
-    public void notifyTransferSource(List<Source> list)
+    public ResponseObject<UserInfo> hitAuthAccount(Account request)
     {
         try {
 
-            DateTimeFormatter FOMATTER = DateTimeFormatter.ofPattern("d MMM yyyy h:mm a");
-            list.forEach(d -> {
-                if (d.getUserId() == null) {
-                    logger.debug("notifyTransferSources failed - no userId {}", d.getId());
-
-                }else {
-                    logger.debug("notifyTransferSource", d.getId());
-                    NotifyTransferOutgoingRequest request = new NotifyTransferOutgoingRequest();
-                   // request.setCategory(Notify.Category.TRANSFER);
-                    request.setTopic(d.getTransaction().getTransactionType());
-                    request.setStatus(d.getTransactionStatus());
-                    request.setAmount(d.getAmount().toString());
-                    request.setCurrency(d.getCurrency());
-                    request.setRecipientId( String.valueOf(d.getUserId()));
-                    request.setRecipientType(String.valueOf(d.getUserType()));
-                    request.setReference(d.getTransaction().getTransactionId());
-                    request.setDate(FOMATTER.format(LocalDateTime.now()));
-
-                    NotifyTransferOutgoingRequest response = hitNotify(request);
-                }
-            }
-
-
-            );
-        } catch (Exception e) {
-            logger.error("", e);
-            return;
-        }
-    }
-
-    NotifyTransferOutgoingRequest hitNotify(NotifyTransferOutgoingRequest request)
-    {
-        try {
-            HttpHeaders headers = new HttpHeaders();
+            logger.debug(" {}", request);
+            HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity entity = new HttpEntity<NotifyTransferOutgoingRequest>(request, headers);
+            HttpEntity entity = new HttpEntity<Account>(request, headers);
 
-            logger.debug("sending notify{}", objectMapper.writeValueAsString(request));
-            NotifyTransferOutgoingRequest response =
-                    restTemplate.postForObject(notifyTransferUrl, entity, NotifyTransferOutgoingRequest.class);
-            logger.debug("{}", objectMapper.writeValueAsString(response));
+            logger.debug(" {}", request);
+            ResponseObject<UserInfo> response =
+                    restTemplate.postForObject(authAccountInfoUrl, entity, ResponseObject.class);
+            logger.debug(" {}", response);
 
             return response;
         } catch (HttpClientErrorException e) {
-            logger.error("{}", e.getResponseBodyAsString());
-            return null;
+            logger.error(" {}", e);
+
+            String status = ResponseCode.FAILURE.type;
+            String description = e.getResponseBodyAsString();
+            ArrayList<Error> errors = new ArrayList<>();
+            Error error = new Error(status, description);
+            errors.add(error);
+            logger.error(" {}", description);
+            return new ResponseObject<>(status, description, errors, null);
         } catch (Exception e) {
             logger.error("{}", e);
             return null;

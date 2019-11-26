@@ -2,16 +2,22 @@ package net.tospay.transaction.models.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class OrderInfo
+public class SplitInfo
 {
     @JsonProperty("amount")
     private Double amount;
+
     @JsonProperty("currency")
     private String currency;
+
     @JsonProperty("description")
     private String description;
-    @JsonProperty("reference")
-    private String reference;
+
+    @JsonProperty("email")
+    private String email;
+
+    @JsonProperty("charge")
+    private Amount charge;
 
     public Double getAmount()
     {
@@ -43,14 +49,14 @@ public class OrderInfo
         this.description = description;
     }
 
-    public String getReference()
+    public String getEmail()
     {
-        return reference;
+        return email;
     }
 
-    public void setReference(String reference)
+    public void setEmail(String email)
     {
-        this.reference = reference;
+        this.email = email;
     }
 
     public Amount getCharge()
@@ -62,8 +68,4 @@ public class OrderInfo
     {
         this.charge = charge;
     }
-
-    @JsonProperty("charge")
-    private Amount charge;
-
-  }
+}

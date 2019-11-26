@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class OrderInfo
 {
     @JsonProperty("amount")
-    private String amount;
+    private Double amount;
     @JsonProperty("currency")
     private String currency;
     @JsonProperty("description")
@@ -13,12 +13,12 @@ public class OrderInfo
     @JsonProperty("reference")
     private String reference;
 
-    public String getAmount()
+    public Double getAmount()
     {
         return amount;
     }
 
-    public void setAmount(String amount)
+    public void setAmount(Double amount)
     {
         this.amount = amount;
     }

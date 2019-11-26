@@ -1,24 +1,24 @@
 package net.tospay.transaction.models.request;
 
-import java.util.List;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import net.tospay.transaction.enums.ResponseCode;
 import net.tospay.transaction.enums.Transfer;
+import net.tospay.transaction.models.response.MerchantInfo;
+import net.tospay.transaction.models.response.UserInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class NotifyPaymentOutgoingRequest
+public class PaymentSplitRequest
 {
-
-
     @JsonProperty("email") String email;
-    @JsonProperty("merchant") String merchant;
+
+    @JsonProperty("merchant") UUID merchant;
+
+    @JsonProperty("status") Transfer.TransactionStatus status;
 
     @JsonProperty("reference") String reference;
-
-    @JsonProperty("status") ResponseCode status;
 
     public String getEmail()
     {
@@ -30,14 +30,24 @@ public class NotifyPaymentOutgoingRequest
         this.email = email;
     }
 
-    public String getMerchant()
+    public UUID getMerchant()
     {
         return merchant;
     }
 
-    public void setMerchant(String merchant)
+    public void setMerchant(UUID merchant)
     {
         this.merchant = merchant;
+    }
+
+    public Transfer.TransactionStatus getStatus()
+    {
+        return status;
+    }
+
+    public void setStatus(Transfer.TransactionStatus status)
+    {
+        this.status = status;
     }
 
     public String getReference()
@@ -48,15 +58,5 @@ public class NotifyPaymentOutgoingRequest
     public void setReference(String reference)
     {
         this.reference = reference;
-    }
-
-    public ResponseCode getStatus()
-    {
-        return status;
-    }
-
-    public void setStatus(ResponseCode status)
-    {
-        this.status = status;
     }
 }
