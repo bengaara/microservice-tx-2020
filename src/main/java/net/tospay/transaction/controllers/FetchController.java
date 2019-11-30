@@ -50,8 +50,8 @@ public class FetchController extends BaseController
     {
         logger.info(" {}", request);
 
-        List<Source> list1 = crudServiced.fetchSources(request.getUserId(), request.getUserType());
-        List<Destination> list2 = crudServiced.fetchDestinations(request.getUserId(), request.getUserType());
+        List<Source> list1 = crudServiced.fetchSources(request.getUserId(), request.getUserType(),request.getOffset());
+        List<Destination> list2 = crudServiced.fetchDestinations(request.getUserId(), request.getUserType(),request.getOffset());
 
         List<TransactionFetchResponse> list = new ArrayList<>();
 
@@ -129,8 +129,8 @@ public class FetchController extends BaseController
     {
         logger.info(" {}", request);
 
-        List<Source> list1 = crudServiced.fetchSources(request.getUserId(), request.getUserType());
-        List<Destination> list2 = crudServiced.fetchDestinations(request.getUserId(), request.getUserType());
+        List<Source> list1 = crudServiced.fetchSources(request.getUserId(), request.getUserType(),request.getOffset());
+        List<Destination> list2 = crudServiced.fetchDestinations(request.getUserId(), request.getUserType(),request.getOffset());
 
         Map<String,TransactionsFetchResponse> transactions = new HashMap<String,TransactionsFetchResponse>();
 

@@ -101,9 +101,11 @@ public class FundService extends BaseService
 
 // Hibernate.initialize(transactionRepository);
 //transactionRepository.refresh(transaction);
-            List<Source> sources = transactionRepository.findById(transaction.getId()).get()
-                    .getSources();
-            sources.forEach(source -> {
+
+            transaction.setTransactionStatus(Transfer.TransactionStatus.PROCESSING);
+         //   List<Source> sources = transactionRepository.findById(transaction.getId()).get().getSources();
+            List<Source> sources =transaction.getSources();
+                    sources.forEach(source -> {
 
                 source.setTransactionStatus(Transfer.TransactionStatus.PROCESSING);
                 TransferOutgoingRequest request = new TransferOutgoingRequest();
@@ -161,10 +163,11 @@ public class FundService extends BaseService
                     //one success.. generate TR id
                     if (source.getTransaction().getTransactionId() == null) {
 
-                        MerchantInfo merchantInfo = transaction.getPayload().getMerchantInfo();
+                        MerchantInfo merchantInfo = source.getTransaction().getPayload().getMerchantInfo();
                         ResponseObject<String> tr = generateTransactionId(merchantInfo.getTypeId(),
                                 source.getTransaction().getTransactionType(), merchantInfo.getCountryCode());
-                        if (tr != null && ResponseCode.SUCCESS.equals(tr.getStatus())) {
+                        if (tr != null && ResponseCode.SUCCESS.type.equals(tr.getStatus())) {
+                            logger.debug("transaction id {}",tr.getData());
                             source.getTransaction().setTransactionId(tr.getData());
                         }
                     }
@@ -182,6 +185,80 @@ public class FundService extends BaseService
             return CompletableFuture.completedFuture(false);
         }
     }
+public void moveFundsToWallet(Transaction transaction){
+
+
+if(!Transfer.TransactionStatus.FAILED.equals(transaction.getTransactionStatus())){
+    logger.debug("cant refund transaction {} with status {}",transaction.getId(),transaction.getTransactionStatus());
+    return;
+}
+
+    Double amount = 0.0;
+    for (Source source : transaction.getSources()) {
+        if(Transfer.TransactionStatus.SUCCESS.equals(source.getTransactionStatus())) {
+            amount += source.getAmount();
+            logger.debug("adding sourced amount {} ",source.getAmount());
+        }
+    }
+    for (Destination destination : transaction.getDestinations()) {
+        if(Transfer.TransactionStatus.SUCCESS.equals(destination.getTransactionStatus())) {
+            amount -= destination.getAmount();
+            logger.debug("deducting delivered amount {} ",destination.getAmount());
+        }
+    }
+    if(amount<=0){
+        logger.debug("cant refund transaction amount {} ",amount);
+        return;
+    }
+    Source source = transaction.getSources().get(0);
+    logger.debug("refunding transaction {} amount {} to user {}",transaction.getId(),amount,source.getUserId());
+
+    source.setTransactionStatus(Transfer.TransactionStatus.PROCESSING);
+    TransferOutgoingRequest request = new TransferOutgoingRequest();
+    request.setAccount(source.getAccount());
+    request.setAction(MobilePayAction.DESTINATION);
+    request.setAmount(amount);
+    request.setUserId(source.getUserId());
+    request.setUserType(source.getUserType());
+    request.setCharge(0.0);
+    request.setCurrency(source.getCurrency());
+    request.setDescription("REFUND");
+    request.setExternalReference(transaction.getId().toString());
+
+    Destination destination= new Destination();
+    destination.setTransaction(transaction);
+    destination.setAccount(source.getAccount());
+    destination.setAmount(request.getAmount());
+    destination.setCurrency(request.getCurrency());
+    destination.setTransactionStatus(Transfer.TransactionStatus.REVERSED);
+    destination.setType(Transfer.SourceType.WALLET);
+    destination.setUserId(request.getUserId());
+    destination.setUserType(request.getUserType());
+
+    ResponseObject<TransferIncomingResponse> response = hitWallet(request);
+
+    if (response != null) {
+        HashMap<String, Object> node = mapper.convertValue(response, HashMap.class);
+        destination.setResponse(node);
+        destination.setDateResponse(new Timestamp(System.currentTimeMillis()));
+    }
+    if (response == null || ResponseCode.FAILURE.type.equalsIgnoreCase(response.getStatus())) {//failure
+        destination.setTransactionStatus(Transfer.TransactionStatus.FAILED);
+    } else {
+        Transfer.TransactionStatus status =
+                ResponseCode.SUCCESS.type.equalsIgnoreCase(response.getStatus()) ?
+                        Transfer.TransactionStatus.SUCCESS : Transfer.TransactionStatus.PROCESSING;
+        destination.setTransactionStatus(status);
+        transaction.setTransactionStatus(Transfer.TransactionStatus.REVERSED);
+        logger.debug("destination ok transaction status : {}  {} {}",transaction.getTransactionStatus(), destination, status);
+    }
+
+    transaction.addDestination(destination);
+    destination = destinationRepository.save(destination);
+
+
+
+}
 
     public void checkSourceAndDestinationTransactionStatusAndAct(Transaction transaction)
     {
@@ -194,9 +271,10 @@ public class FundService extends BaseService
 
         //only process incomplete transactions
         if (Transfer.TransactionStatus.SUCCESS.equals(transaction.getTransactionStatus())
-                || Transfer.TransactionStatus.FAILED.equals(transaction.getTransactionStatus()))
+                || Transfer.TransactionStatus.FAILED.equals(transaction.getTransactionStatus())
+                || Transfer.TransactionStatus.REVERSED.equals(transaction.getTransactionStatus()))
         {
-            logger.debug("cant process completed transaction  {}", transaction.getId());
+            logger.debug("cant process completed transaction  {} {}", transaction.getId(),transaction.getTransactionStatus());
             return;
         }
 
@@ -222,12 +300,11 @@ public class FundService extends BaseService
             transaction.setTransactionStatus(Transfer.TransactionStatus.FAILED);
             transactionRepository.save(transaction);
 
-            //TODO:actions
-            logger.debug("TODO {}", transaction);
             //notify
             notifyService.notifyTransferSource(transaction.getSources());
+            //auto rollback funds to wallet?
+            moveFundsToWallet(transaction);
 
-            //TODO: auto rollback funds to wallet?
 
             return;
         } else if (transaction.isSourceComplete() && !transaction.isDestinationStarted()) {
@@ -266,9 +343,10 @@ public class FundService extends BaseService
             transaction.setTransactionStatus(Transfer.TransactionStatus.FAILED);
             transactionRepository.save(transaction);
 
-            //TODO: what actions?
-            logger.debug("TODO {}", transaction);
             notifyService.notifyTransferDestination(transaction.getDestinations());
+
+            //auto rollback funds to wallet?
+            moveFundsToWallet(transaction);
 
             return;
         } else if (destinationSuccessAll.get() && !destinationFail.get()) {//successful
@@ -471,7 +549,7 @@ return false;
                     request.setDescription(response.getOrderInfo().getDescription());
                     request.setExternalReference(response.getOrderInfo().getReference());
 
-                    ResponseObject<TransferIncomingResponse> r  = hitWallet(request);
+
                     Destination destination= new Destination();
                     destination.setTransaction(transaction);
                     destination.setAccount(account);
@@ -482,7 +560,7 @@ return false;
                     destination.setUserId(response.getMerchantInfo().getUserId());
                     destination.setUserType(response.getMerchantInfo().getTypeId());
 
-
+                    ResponseObject<TransferIncomingResponse> r  = hitWallet(request);
                     if (r != null) {
                         HashMap<String, Object> node = mapper.convertValue(r, HashMap.class);
                         destination.setResponse(node);
@@ -523,7 +601,7 @@ return false;
                     request.setCharge(destination.getCharge());
                     request.setCurrency(destination.getCurrency());
                     request.setDescription(destination.getType().toString());
-                    request.setExternalReference(destination.getId().toString());
+                    request.setExternalReference(transaction.getExternalReference());
 
                     ResponseObject<TransferIncomingResponse> response = null;
                     switch (destination.getType()) {
@@ -603,7 +681,7 @@ return false;
             String countryCode)
     {
         try {
-
+            logger.debug("generateTransactionId");
             TransactionIdRequest request = new TransactionIdRequest();
             request.setAccountType(accountType);
             request.setCountry(countryCode);
@@ -626,4 +704,5 @@ return false;
             return null;
         }
     }
+
 }

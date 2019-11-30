@@ -192,7 +192,7 @@ public class RestController extends BaseController
 //                destinationEntity.setAccount(account);
 //            }
 
-            //TODO: MULTIPLE RECEPIENT BILLING
+            //TODO: MULTIPLE RECIPIENT BILLING
             Double destinationCharge = destinationCharges.get(0);
             destinationEntity.setCharge(destinationCharge);
             destinationEntity.setAmount(sumSourceAmount.get());
@@ -258,6 +258,7 @@ public class RestController extends BaseController
         }
 
         // transaction = transactionRepository.save(transaction);//transactionRepository.refresh(transaction);
+
         fundService.checkSourceAndDestinationTransactionStatusAndAct(transaction);
 
         String status = ResponseCode.SUCCESS.type;

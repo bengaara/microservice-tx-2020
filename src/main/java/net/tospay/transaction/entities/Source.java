@@ -8,6 +8,8 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,6 +22,8 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Type;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import net.tospay.transaction.configs.HashMapConverter;
 import net.tospay.transaction.enums.AccountType;
 import net.tospay.transaction.enums.Transfer;
@@ -29,6 +33,7 @@ import net.tospay.transaction.models.request.Account;
 @Table(name = "sources",
         uniqueConstraints =
         @UniqueConstraint(columnNames = { "id" }))
+@JsonIgnoreProperties
 public class Source extends BaseEntity<UUID> implements Serializable
 {
     public static final String ID = "id";
@@ -69,6 +74,7 @@ public class Source extends BaseEntity<UUID> implements Serializable
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = TYPE, nullable = false)
     private Transfer.SourceType type;
 
@@ -91,6 +97,7 @@ public class Source extends BaseEntity<UUID> implements Serializable
     @Column(name = CURRENCY, nullable = false)
     private String currency;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = STATUS, nullable = false)
     private Transfer.TransactionStatus transactionStatus = Transfer.TransactionStatus.CREATED;
 

@@ -9,6 +9,8 @@ import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -20,6 +22,8 @@ import javax.transaction.Transactional;
 
 import org.hibernate.annotations.Type;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import net.tospay.transaction.enums.Transfer;
 import net.tospay.transaction.models.request.TransferRequest;
 
@@ -27,6 +31,7 @@ import net.tospay.transaction.models.request.TransferRequest;
 @Table(name = "transactions",
         uniqueConstraints =
         @UniqueConstraint(columnNames = { "id" }))
+@JsonIgnoreProperties
 public class Transaction extends BaseEntity<UUID> implements Serializable
 {
     private static final String DATE_MODIFIED = "date_modified";
@@ -43,6 +48,7 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
 
     private String transactionId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private Transfer.TransactionType transactionType;
 
@@ -68,6 +74,7 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     @Column(name = "destination_complete")
     private boolean destinationComplete;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Transfer.TransactionStatus transactionStatus = Transfer.TransactionStatus.CREATED;
 

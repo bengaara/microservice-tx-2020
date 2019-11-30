@@ -22,7 +22,7 @@ public enum MobilePayAction
 
     // ... fields, constructor, methods
 
-    MobilePayAction(String type)
+     MobilePayAction(String type)
     {
         this.type = type;
     }

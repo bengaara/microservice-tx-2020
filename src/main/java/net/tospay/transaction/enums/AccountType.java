@@ -24,7 +24,7 @@ public enum AccountType
 
     // ... fields, constructor, methods
 
-    AccountType(String type)
+     AccountType(String type)
     {
         this.type = type;
     }

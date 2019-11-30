@@ -24,7 +24,7 @@ public class Notify
 
         // ... fields, constructor, methods
 
-        Category(String type)
+         Category(String type)
         {
             this.type = type;
         }
