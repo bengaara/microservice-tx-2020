@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.Schedules;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -53,7 +54,7 @@ import net.tospay.transaction.repositories.DestinationRepository;
 import net.tospay.transaction.repositories.SourceRepository;
 import net.tospay.transaction.repositories.TransactionRepository;
 
-@Service
+@Component
 public class JobScheduleService extends BaseService
 {
     ObjectMapper mapper = new ObjectMapper();
