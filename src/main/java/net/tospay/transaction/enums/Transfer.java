@@ -48,10 +48,11 @@ public class Transfer
         TOPUP("TOPUP"),
         TRANSFER("TRANSFER"),
         WITHDRAW("WITHDRAW"),
-        PAYMENT("PAYMENT"),
+        QR("QR"),
         REVERSE("REVERSE"),
         SETTLEMENT("SETTLEMENT"),
-        INVOICE("INVOICE");
+        INVOICE("INVOICE"),
+        SPLIT("SPLIT");
 
         private static final Map<String, TransactionType> LABEL = new HashMap<>();
 
@@ -122,7 +123,8 @@ public class Transfer
         PROCESSING("PROCESSING"),
         FAILED("FAILED"),
         SUCCESS("SUCCESS"),
-        PARTIAL_COMPLETE("PARTIAL_COMPLETE");
+        PARTIAL_COMPLETE("PARTIAL_COMPLETE"),
+        REVERSED("REVERSED");
 
         private static final Map<String, TransactionStatus> LABEL = new HashMap<>();
 
@@ -147,6 +149,20 @@ public class Transfer
 
             label = label.toUpperCase();
             return LABEL.get(label);
+        }
+
+        public int getCode()
+        {
+            int x =0;
+            for (Map.Entry<String, TransactionStatus> entry : LABEL.entrySet()) {
+                String s = entry.getKey();
+                TransactionStatus transactionStatus = entry.getValue();
+                if (s == type) {
+                    return x;
+                }
+                x++;
+            }
+            return -1;
         }
     }
 }

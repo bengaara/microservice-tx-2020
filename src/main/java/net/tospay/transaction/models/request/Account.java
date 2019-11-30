@@ -1,9 +1,11 @@
 package net.tospay.transaction.models.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Account
 {
     @JsonProperty("id")
@@ -20,6 +22,21 @@ public class Account
 
     @JsonProperty("network")
     private Network network;
+
+    public String getPhone()
+    {
+        return phone;
+    }
+
+    public void setPhone(String phone)
+    {
+        this.phone = phone;
+    }
+
+    @JsonProperty("phone")
+    private String phone;
+
+
 
     public String getUserId()
     {

@@ -17,6 +17,19 @@ public class TransactionFetchRequest
     @JsonProperty("user_type")
     private AccountType userType;
 
+    @JsonProperty("offset")
+    private Integer offset;
+
+    public Integer getOffset()
+    {
+        return offset;
+    }
+
+    public void setOffset(Integer offset)
+    {
+        this.offset = offset;
+    }
+
     public UUID getUserId()
     {
         return userId;

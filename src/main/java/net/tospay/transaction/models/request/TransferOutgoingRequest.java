@@ -52,7 +52,7 @@ public class TransferOutgoingRequest implements Serializable
     private String description;
 
     @JsonProperty("external_reference")
-    private UUID externalReference;
+    private String externalReference;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -92,12 +92,12 @@ public class TransferOutgoingRequest implements Serializable
         this.description = description;
     }
 
-    public UUID getExternalReference()
+    public String getExternalReference()
     {
         return externalReference;
     }
 
-    public void setExternalReference(UUID externalReference)
+    public void setExternalReference(String externalReference)
     {
         this.externalReference = externalReference;
     }
