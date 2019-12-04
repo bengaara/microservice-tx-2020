@@ -5,15 +5,17 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-public enum MobilePayAction
+public enum UserType
 {
-    SOURCE("SOURCE"),
-    DESTINATION("DESTINATION");
+    PERSONAL("PERSONAL"),
+    AGENT("AGENT"),
+    MERCHANT("MERCHANT"),
+    PARTNER("PARTNER");
 
-    private static final Map<String, MobilePayAction> LABEL = new HashMap<>();
+    private static final Map<String, UserType> LABEL = new HashMap<>();
 
     static {
-        for (MobilePayAction e : values()) {
+        for (UserType e : values()) {
             LABEL.put(e.type, e);
         }
     }
@@ -22,15 +24,16 @@ public enum MobilePayAction
 
     // ... fields, constructor, methods
 
-     MobilePayAction(String type)
+     UserType(String type)
     {
         this.type = type;
     }
 
     @JsonCreator
-    public static MobilePayAction valueOfType(String label)
+    public static UserType valueOfType(String label)
     {
         label = label.toUpperCase();
         return LABEL.get(label);
+
     }
 }

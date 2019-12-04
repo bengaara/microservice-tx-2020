@@ -10,7 +10,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import net.tospay.transaction.enums.Transfer;
+import net.tospay.transaction.enums.TransactionType;
+import net.tospay.transaction.models.Account;
+import net.tospay.transaction.models.DeviceInfo;
+import net.tospay.transaction.models.UserInfo;
 import net.tospay.transaction.models.response.MerchantInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -52,14 +55,14 @@ public class TransferOutgoinBankRequest
     private String currency;
 
     @JsonProperty("type")
-    private Transfer.TransactionType type;
+    private TransactionType type;
 
-    public Transfer.TransactionType getType()
+    public TransactionType getType()
     {
         return type;
     }
 
-    public void setType(Transfer.TransactionType type)
+    public void setType(TransactionType type)
     {
         this.type = type;
     }

@@ -1,11 +1,8 @@
 package net.tospay.transaction.models.request;
 
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import net.tospay.transaction.enums.Transfer;
 import net.tospay.transaction.models.response.MerchantInfo;
 import net.tospay.transaction.models.response.UserInfo;
 

@@ -1,4 +1,4 @@
-package net.tospay.transaction.models.request;
+package net.tospay.transaction.models;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -7,11 +7,13 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({
         "amount",
         "currency"
@@ -46,7 +48,16 @@ public class Amount implements Serializable
         this.amount = amount;
         return this;
     }
+    public Amount()
+    {
 
+    }
+    public Amount(Double amount,String currency)
+    {
+        this.amount = amount;
+        this.currency = currency;
+
+    }
     @JsonProperty("currency")
     public String getCurrency()
     {

@@ -1,13 +1,21 @@
-package net.tospay.transaction.models.request;
+package net.tospay.transaction.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import net.tospay.transaction.enums.AccountType;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Account
 {
+
+    @JsonProperty("type")
+    private AccountType type;
+
+
+    //holds string or uuid
     @JsonProperty("id")
     private String id;
 

@@ -12,8 +12,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.MobilePayAction;
+import net.tospay.transaction.enums.UserType;
+import net.tospay.transaction.models.Account;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -28,13 +28,13 @@ public class TransferOutgoingRequest implements Serializable
     private final static long serialVersionUID = -9078608771772465581L;
 
     @JsonProperty("action")
-    private MobilePayAction action;
+    private String action;
 
     @JsonProperty("user_id")
     private UUID userId;
 
     @JsonProperty("user_type")
-    private AccountType userType;
+    private UserType userType;
 
     @JsonProperty("account")
     private Account account;
@@ -102,12 +102,12 @@ public class TransferOutgoingRequest implements Serializable
         this.externalReference = externalReference;
     }
 
-    public MobilePayAction getAction()
+    public String getAction()
     {
         return action;
     }
 
-    public void setAction(MobilePayAction action)
+    public void setAction(String action)
     {
         this.action = action;
     }
@@ -122,12 +122,12 @@ public class TransferOutgoingRequest implements Serializable
         this.userId = userId;
     }
 
-    public AccountType getUserType()
+    public UserType getUserType()
     {
         return userType;
     }
 
-    public void setUserType(AccountType userType)
+    public void setUserType(UserType userType)
     {
         this.userType = userType;
     }

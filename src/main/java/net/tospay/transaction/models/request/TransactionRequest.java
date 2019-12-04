@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import net.tospay.transaction.models.Amount;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "type",
@@ -32,7 +34,7 @@ public class TransactionRequest implements Serializable
     private net.tospay.transaction.models.request.Destination destination;
 
     @JsonProperty("amount")
-    private net.tospay.transaction.models.request.Amount amount;
+    private Amount amount;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -92,7 +94,7 @@ public class TransactionRequest implements Serializable
     }
 
     @JsonProperty("amount")
-    public net.tospay.transaction.models.request.Amount getAmount()
+    public Amount getAmount()
     {
         return amount;
     }
@@ -103,7 +105,7 @@ public class TransactionRequest implements Serializable
         this.amount = amount;
     }
 
-    public TransactionRequest withAmount(net.tospay.transaction.models.request.Amount amount)
+    public TransactionRequest withAmount(Amount amount)
     {
         this.amount = amount;
         return this;

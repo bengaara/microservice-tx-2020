@@ -2,6 +2,8 @@ package net.tospay.transaction.models.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import net.tospay.transaction.models.Amount;
+
 public class SplitInfo
 {
     @JsonProperty("amount")

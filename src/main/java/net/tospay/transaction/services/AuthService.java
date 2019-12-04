@@ -1,9 +1,6 @@
 package net.tospay.transaction.services;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -13,21 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import net.tospay.transaction.entities.Destination;
-import net.tospay.transaction.entities.Source;
 import net.tospay.transaction.enums.ResponseCode;
-import net.tospay.transaction.models.request.Account;
-import net.tospay.transaction.models.request.NotifyTransferOutgoingRequest;
-import net.tospay.transaction.models.request.NotifyTransferOutgoingSenderRequest;
-import net.tospay.transaction.models.request.TransferOutgoingRequest;
-import net.tospay.transaction.models.request.UserInfo;
+import net.tospay.transaction.models.Account;
+import net.tospay.transaction.models.UserInfo;
 import net.tospay.transaction.models.response.Error;
 import net.tospay.transaction.models.response.ResponseObject;
-import net.tospay.transaction.models.response.TransferIncomingResponse;
-import net.tospay.transaction.repositories.DestinationRepository;
-import net.tospay.transaction.repositories.SourceRepository;
-import net.tospay.transaction.repositories.TransactionRepository;
-import net.tospay.transaction.util.Utils;
 
 @Service
 public class AuthService extends BaseService

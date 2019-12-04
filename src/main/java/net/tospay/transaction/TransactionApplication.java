@@ -16,8 +16,7 @@ import net.tospay.transaction.repositories.BaseRepository;
 //@EnableConfigurationProperties
 @EnableJpaRepositories( basePackages={ "net.tospay.*.*" },repositoryBaseClass = BaseRepository.class)
 @EntityScan("net.tospay.*.*")
-@EnableScheduling
-@EnableAsync
+
 public class TransactionApplication implements CommandLineRunner
 {
     Logger logger = LoggerFactory.getLogger(this.getClass());

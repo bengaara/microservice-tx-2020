@@ -1,7 +1,7 @@
 package net.tospay.transaction.entities;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -23,9 +23,14 @@ import javax.transaction.Transactional;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import net.tospay.transaction.enums.Transfer;
-import net.tospay.transaction.models.request.TransferRequest;
+import net.tospay.transaction.enums.OrderType;
+import net.tospay.transaction.enums.TransactionStatus;
+import net.tospay.transaction.enums.TransactionType;
+import net.tospay.transaction.enums.UserType;
+import net.tospay.transaction.models.TransactionRequest;
+import net.tospay.transaction.models.UserInfo;
 
 @Entity
 @Table(name = "transactions",
@@ -45,25 +50,15 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     private UUID id;
 
     @Column(name = "transaction_id", nullable = true)
-
     private String transactionId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    private Transfer.TransactionType transactionType;
-
-    @Column(name = "amount", nullable = false)
-    private Double amount;
-
-    @Column(name = "currency", nullable = false)
-    private String currency;
-
-    @Column(name = "merchant_id", nullable = false)
-    private UUID merchantId;
 
     @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
     @Type(type = "jsonb")
-    private TransferRequest payload;
+    private TransactionRequest payload;
+
+    @Column(name = "userInfo", nullable = false, columnDefinition = "jsonb")
+    @Type(type = "jsonb")
+    private UserInfo userInfo; //owner of transaction
 
     @Column(name = "source_complete")
     private boolean sourceComplete;
@@ -76,16 +71,20 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Transfer.TransactionStatus transactionStatus = Transfer.TransactionStatus.CREATED;
+    private TransactionStatus transactionStatus = TransactionStatus.CREATED;
 
     @Column(name = "date_created", nullable = false)
-    private Timestamp dateCreated;
+    private LocalDateTime dateCreated;
 
     @Column(name = DATE_MODIFIED, nullable = false)
-    private Timestamp dateModified;
+    private LocalDateTime dateModified;
 
-    @Column(name = "external_reference")
-    private String externalReference;
+    @Column(name = "date_refunded")
+    private LocalDateTime dateRefunded;
+
+    @Column(name = "retryCount", nullable = false)
+    private int retryCount = 0;
+
 
     //  mappedBy = "source",
     @OneToMany(
@@ -157,93 +156,42 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     {
         this.transactionId = transactionId;
     }
-
-    public Transfer.TransactionType getTransactionType()
-    {
-        return transactionType;
-    }
-
-    public String getExternalReference()
-    {
-        return externalReference;
-    }
-
-    public void setExternalReference(String externalReference)
-    {
-        this.externalReference = externalReference;
-    }
-
-    public void setTransactionType(Transfer.TransactionType transactionType)
-    {
-        this.transactionType = transactionType;
-    }
-
-    public Double getAmount()
-    {
-        return amount;
-    }
-
-    public void setAmount(Double amount)
-    {
-        this.amount = amount;
-    }
-
-    public String getCurrency()
-    {
-        return currency;
-    }
-
-    public void setCurrency(String currency)
-    {
-        this.currency = currency;
-    }
-
-    public UUID getMerchantId()
-    {
-        return merchantId;
-    }
-
-    public void setMerchantId(UUID merchantId)
-    {
-        this.merchantId = merchantId;
-    }
-
-    public TransferRequest getPayload()
+    public TransactionRequest getPayload()
     {
         return payload;
     }
 
-    public void setPayload(TransferRequest payload)
+    public void setPayload(TransactionRequest payload)
     {
         this.payload = payload;
     }
 
-    public Transfer.TransactionStatus getTransactionStatus()
+    public TransactionStatus getTransactionStatus()
     {
         return transactionStatus;
     }
 
-    public void setTransactionStatus(Transfer.TransactionStatus transactionStatus)
+    public void setTransactionStatus(TransactionStatus transactionStatus)
     {
         this.transactionStatus = transactionStatus;
     }
 
-    public Timestamp getDateCreated()
+    public LocalDateTime getDateCreated()
     {
         return dateCreated;
     }
 
-    public void setDateCreated(Timestamp dateCreated)
+    public void setDateCreated(LocalDateTime dateCreated)
     {
         this.dateCreated = dateCreated;
     }
 
-    public Timestamp getDateModified()
+    public LocalDateTime getDateModified()
     {
         return dateModified;
     }
 
-    public void setDateModified(Timestamp dateModified)
+    public void setDateModified(LocalDateTime dateModified)
     {
         this.dateModified = dateModified;
     }
@@ -285,13 +233,13 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     @PreUpdate
     protected void preUpdate()
     {
-        dateModified = new Timestamp(System.currentTimeMillis());
+        dateModified = LocalDateTime.now();//new Timestamp(System.currentTimeMillis());
     }
 
     @PrePersist
     protected void prePersist()
     {
-        dateCreated = new Timestamp(System.currentTimeMillis());
+        dateCreated = LocalDateTime.now();//new Timestamp(System.currentTimeMillis());
         dateModified = dateCreated;
     }
 }

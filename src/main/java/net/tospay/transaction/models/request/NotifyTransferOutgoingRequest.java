@@ -5,8 +5,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import net.tospay.transaction.enums.Notify;
-import net.tospay.transaction.enums.Transfer;
+import net.tospay.transaction.enums.TransactionStatus;
+import net.tospay.transaction.enums.TransactionType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotifyTransferOutgoingRequest
@@ -17,9 +17,9 @@ public class NotifyTransferOutgoingRequest
 
  //   public void setCategory(Notify.Category category){this.category = category;}
 
-    @JsonProperty("topic") Transfer.TransactionType topic;
+    @JsonProperty("topic") TransactionType topic;
 
-    @JsonProperty("status") Transfer.TransactionStatus status;
+    @JsonProperty("status") TransactionStatus status;
 
     @JsonProperty("amount") String amount;
     @JsonProperty("currency") String currency;
@@ -60,22 +60,22 @@ public class NotifyTransferOutgoingRequest
         this.senders = senders;
     }
 
-    public Transfer.TransactionType getTopic()
+    public TransactionType getTopic()
     {
         return topic;
     }
 
-    public void setTopic(Transfer.TransactionType topic)
+    public void setTopic(TransactionType topic)
     {
         this.topic = topic;
     }
 
-    public Transfer.TransactionStatus getStatus()
+    public TransactionStatus getStatus()
     {
         return status;
     }
 
-    public void setStatus(Transfer.TransactionStatus status)
+    public void setStatus(TransactionStatus status)
     {
         this.status = status;
     }

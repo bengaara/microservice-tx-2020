@@ -187,7 +187,6 @@ public class TransactionFetchResponse
     public static TransactionFetchResponse from(Destination s){
         TransactionFetchResponse res = new TransactionFetchResponse();
         res.setAmount(s.getAmount());
-        res.setCharge(s.getCharge().toString());
         res.setCurrency(s.getCurrency());
         res.setDateCreated(s.getDateCreated());
         res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated().toLocalDateTime()));

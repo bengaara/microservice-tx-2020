@@ -60,31 +60,14 @@ public class FetchController extends BaseController
                 .filter(s-> {
                             boolean b = 0 == list2.stream()
                                     .filter(d ->
-                                            d.getTransaction().getId().equals(s.getTransaction().getId()) && s.getUserId()
-                                                    .equals(d.getUserId()
+                                            d.getTransaction().getId().equals(s.getTransaction().getId()) && s.getPayload().getAccount().getUserId()
+                                                    .equals(d.getPayload().getAccount().getUserId()
                                                     )
                                     ).limit(1).count();
                             return b;
                         }
                   ).collect(Collectors.toList());
 
-//
-//        list1.forEach(s -> {
-//            TransactionFetchResponse res = new TransactionFetchResponse();
-//            res.setAmount(s.getAmount());
-//            res.setCharge(s.getCharge().toString());
-//            res.setCurrency(s.getCurrency());
-//            res.setDateCreated(s.getDateCreated());
-//            res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated().toLocalDateTime()));
-//            res.setDateUpdated(s.getDateModified());
-//            res.setTransactionId(s.getTransaction().getTransactionId());
-//            res.setTransactionTransferId(s.getId().toString());
-//            res.settId(s.getTransaction().getId().toString());
-//            res.setSourceChannel(s.getType().name());
-//            res.setType(s.getTransaction().getTransactionType().name());
-//            res.setStatus(s.getTransactionStatus().name());
-//            list.add(res);
-//        });
         list.addAll( list1.stream().map(TransactionFetchResponse::from).collect(Collectors.toList()));
         list.addAll( list2.stream().map(TransactionFetchResponse::from).collect(Collectors.toList()));
 

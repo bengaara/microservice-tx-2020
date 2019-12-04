@@ -1,4 +1,4 @@
-package net.tospay.transaction.models.request;
+package net.tospay.transaction.models;
 
 import javax.validation.constraints.NotNull;
 

@@ -1,11 +1,9 @@
-package net.tospay.transaction.models.request;
+package net.tospay.transaction.models;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -15,35 +13,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.Transfer;
+import net.tospay.transaction.enums.UserType;
+import net.tospay.transaction.models.response.TopupMobileTransactionResponse;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "type",
-        "user_id",
-        "user_type",
-        "account",
-        "amount"
 })
-public class TopupValueSource implements Serializable
+public class StoreResponse implements Serializable
 {
     private final static long serialVersionUID = -9078608771772465581L;
 
-    @JsonProperty("type")
-    private Transfer.SourceType type;
+    @JsonProperty("channel")
+    private AccountType channel;
 
     @JsonProperty("user_id")
     private UUID userId;
 
     @JsonProperty("user_type")
-    private AccountType userType;
+    private UserType userType;
 
-    @JsonProperty("account")
-    private Account account;
+    @JsonProperty("transaction")
+    private TopupMobileTransactionResponse transaction;
 
-    @JsonProperty("amount")
-    @NotNull
-    private Double amount;
+    @JsonProperty("reason")
+    private String reason;
+
+    @JsonProperty("external_reference")
+    private UUID externalReference;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -53,14 +49,44 @@ public class TopupValueSource implements Serializable
         return serialVersionUID;
     }
 
-    public Transfer.SourceType getType()
+    public AccountType getChannel()
     {
-        return type;
+        return channel;
     }
 
-    public void setType(Transfer.SourceType type)
+    public void setChannel(AccountType channel)
     {
-        this.type = type;
+        this.channel = channel;
+    }
+
+    public TopupMobileTransactionResponse getTransaction()
+    {
+        return transaction;
+    }
+
+    public void setTransaction(TopupMobileTransactionResponse transaction)
+    {
+        this.transaction = transaction;
+    }
+
+    public String getReason()
+    {
+        return reason;
+    }
+
+    public void setReason(String reason)
+    {
+        this.reason = reason;
+    }
+
+    public UUID getExternalReference()
+    {
+        return externalReference;
+    }
+
+    public void setExternalReference(UUID externalReference)
+    {
+        this.externalReference = externalReference;
     }
 
     public UUID getUserId()
@@ -73,40 +99,14 @@ public class TopupValueSource implements Serializable
         this.userId = userId;
     }
 
-    public AccountType getUserType()
+    public UserType getUserType()
     {
         return userType;
     }
 
-    public void setUserType(AccountType userType)
+    public void setUserType(UserType userType)
     {
         this.userType = userType;
-    }
-
-    public Double getAmount()
-    {
-        return amount;
-    }
-
-    public void setAmount(Double amount)
-    {
-        this.amount = amount;
-    }
-
-    public Account getAccount()
-    {
-        return account;
-    }
-
-    public void setAccount(Account account)
-    {
-        this.account = account;
-    }
-
-    public TopupValueSource withAccount(Account account)
-    {
-        this.account = account;
-        return this;
     }
 
     @JsonAnyGetter
@@ -126,7 +126,7 @@ public class TopupValueSource implements Serializable
         this.additionalProperties.put(name, value);
     }
 
-    public TopupValueSource withAdditionalProperty(String name, Object value)
+    public StoreResponse withAdditionalProperty(String name, Object value)
     {
         this.additionalProperties.put(name, value);
         return this;

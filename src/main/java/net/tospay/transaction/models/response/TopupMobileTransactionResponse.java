@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import net.tospay.transaction.enums.Transfer;
+import net.tospay.transaction.enums.TransactionStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -31,7 +31,7 @@ public class TopupMobileTransactionResponse implements Serializable
     private String currency;
 
     @JsonProperty("status")
-    private Transfer.TransactionStatus status;
+    private TransactionStatus status;
 
     @JsonProperty("network")
     private String network;
@@ -67,12 +67,12 @@ public class TopupMobileTransactionResponse implements Serializable
         this.currency = currency;
     }
 
-    public Transfer.TransactionStatus getStatus()
+    public TransactionStatus getStatus()
     {
         return status;
     }
 
-    public void setStatus(Transfer.TransactionStatus status)
+    public void setStatus(TransactionStatus status)
     {
         this.status = status;
     }
