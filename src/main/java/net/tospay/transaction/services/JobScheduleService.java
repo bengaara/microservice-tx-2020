@@ -46,7 +46,7 @@ public class JobScheduleService extends BaseService
             List<Transaction> list =  crudService.fetchFailedTransactions(midnight);
 
             list.forEach(transaction -> {
-                fundService.moveFundsToWallet(transaction);
+                fundService.refundFloatingFundsToWallet(transaction);
             });
 
 

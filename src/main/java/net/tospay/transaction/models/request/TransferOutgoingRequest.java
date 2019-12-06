@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.tospay.transaction.enums.UserType;
 import net.tospay.transaction.models.Account;
+import net.tospay.transaction.models.Amount;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -30,29 +31,11 @@ public class TransferOutgoingRequest implements Serializable
     @JsonProperty("action")
     private String action;
 
-    @JsonProperty("user_id")
-    private UUID userId;
-
-    @JsonProperty("user_type")
-    private UserType userType;
-
     @JsonProperty("account")
     private Account account;
 
     @JsonProperty("amount")
-    private Double amount;
-
-    @JsonProperty("charges")
-    private Double charge;
-
-    @JsonProperty("currency")
-    private String currency;
-
-    @JsonProperty("description")
-    private String description;
-
-    @JsonProperty("external_reference")
-    private String externalReference;
+    private Amount amount;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -60,46 +43,6 @@ public class TransferOutgoingRequest implements Serializable
     public static long getSerialVersionUID()
     {
         return serialVersionUID;
-    }
-
-    public Double getCharge()
-    {
-        return charge;
-    }
-
-    public void setCharge(Double charge)
-    {
-        this.charge = charge;
-    }
-
-    public String getCurrency()
-    {
-        return currency;
-    }
-
-    public void setCurrency(String currency)
-    {
-        this.currency = currency;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription(String description)
-    {
-        this.description = description;
-    }
-
-    public String getExternalReference()
-    {
-        return externalReference;
-    }
-
-    public void setExternalReference(String externalReference)
-    {
-        this.externalReference = externalReference;
     }
 
     public String getAction()
@@ -112,32 +55,13 @@ public class TransferOutgoingRequest implements Serializable
         this.action = action;
     }
 
-    public UUID getUserId()
-    {
-        return userId;
-    }
 
-    public void setUserId(UUID userId)
-    {
-        this.userId = userId;
-    }
-
-    public UserType getUserType()
-    {
-        return userType;
-    }
-
-    public void setUserType(UserType userType)
-    {
-        this.userType = userType;
-    }
-
-    public Double getAmount()
+    public Amount getAmount()
     {
         return amount;
     }
 
-    public void setAmount(Double amount)
+    public void setAmount(Amount amount)
     {
         this.amount = amount;
     }

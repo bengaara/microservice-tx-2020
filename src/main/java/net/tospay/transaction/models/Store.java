@@ -1,21 +1,10 @@
 package net.tospay.transaction.models;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
-import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.UserType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -29,13 +18,31 @@ public class Store implements Serializable
 {
     private final static long serialVersionUID = -9078608771772465581L;
 
-
     @JsonProperty("account")
     private Account account;
+
+    @JsonProperty("order")
+    private Amount order;
+
+    @JsonProperty("charge")
+    private Amount charge;
+
+    @JsonProperty("total")
+    private Amount total;//add when source.. sub when destination
 
     public static long getSerialVersionUID()
     {
         return serialVersionUID;
+    }
+
+    public Amount getOrder()
+    {
+        return order;
+    }
+
+    public void setOrder(Amount order)
+    {
+        this.order = order;
     }
 
     public Account getAccount()
@@ -67,12 +74,4 @@ public class Store implements Serializable
     {
         this.total = total;
     }
-
-    @JsonProperty("charge")
-    private Amount charge;
-
-    @JsonProperty("total")
-    private Amount total;
-
-
 }

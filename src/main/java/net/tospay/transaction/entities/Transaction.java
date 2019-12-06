@@ -25,10 +25,8 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import net.tospay.transaction.enums.OrderType;
 import net.tospay.transaction.enums.TransactionStatus;
 import net.tospay.transaction.enums.TransactionType;
-import net.tospay.transaction.enums.UserType;
 import net.tospay.transaction.models.TransactionRequest;
 import net.tospay.transaction.models.UserInfo;
 
@@ -52,7 +50,20 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     @Column(name = "transaction_id", nullable = true)
     private String transactionId;
 
-    @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
+    public TransactionType getType()
+    {
+        return type;
+    }
+
+    public void setType(TransactionType type)
+    {
+        this.type = type;
+    }
+
+    @JsonProperty("type")
+    private TransactionType type;//redundancy but needed for when payload might b null like reversal time
+
+    @Column(name = "payload", columnDefinition = "jsonb")
     @Type(type = "jsonb")
     private TransactionRequest payload;
 
@@ -82,9 +93,8 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     @Column(name = "date_refunded")
     private LocalDateTime dateRefunded;
 
-    @Column(name = "retryCount", nullable = false)
-    private int retryCount = 0;
-
+    @Column(name = "refund_retry_count", nullable = false)
+    private int refundRetryCount = 0;
 
     //  mappedBy = "source",
     @OneToMany(
@@ -103,6 +113,41 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
 
     public Transaction()
     {
+    }
+
+    public static String getID()
+    {
+        return ID;
+    }
+
+    public UserInfo getUserInfo()
+    {
+        return userInfo;
+    }
+
+    public void setUserInfo(UserInfo userInfo)
+    {
+        this.userInfo = userInfo;
+    }
+
+    public LocalDateTime getDateRefunded()
+    {
+        return dateRefunded;
+    }
+
+    public void setDateRefunded(LocalDateTime dateRefunded)
+    {
+        this.dateRefunded = dateRefunded;
+    }
+
+    public int getRefundRetryCount()
+    {
+        return refundRetryCount;
+    }
+
+    public void setRefundRetryCount(int refundRetryCount)
+    {
+        this.refundRetryCount = refundRetryCount;
     }
 
     public boolean isDestinationStarted()
@@ -156,6 +201,7 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     {
         this.transactionId = transactionId;
     }
+
     public TransactionRequest getPayload()
     {
         return payload;

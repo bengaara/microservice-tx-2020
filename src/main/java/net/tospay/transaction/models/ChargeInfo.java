@@ -3,21 +3,23 @@ package net.tospay.transaction.models;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import net.tospay.transaction.models.Account;
-import net.tospay.transaction.models.Amount;
-import net.tospay.transaction.models.Fx;
-import net.tospay.transaction.models.response.MerchantInfo;
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChargeInfo
 {
-
-
-
     @JsonProperty("source")
     private Amount source;
+
     @JsonProperty("destination")
     private Amount destination;
+
+    @JsonProperty("partnerInfo")
+    private ChargeUser partnerInfo;
+
+    @JsonProperty("railInfo")
+    private ChargeUser railInfo;
+
+    @JsonProperty("fx")
+    private Fx fx;
 
     public Amount getSource()
     {
@@ -39,22 +41,22 @@ public class ChargeInfo
         this.destination = destination;
     }
 
-    public Account getPartnerInfo()
+    public ChargeUser getPartnerInfo()
     {
         return partnerInfo;
     }
 
-    public void setPartnerInfo(Account partnerInfo)
+    public void setPartnerInfo(ChargeUser partnerInfo)
     {
         this.partnerInfo = partnerInfo;
     }
 
-    public Account getRailInfo()
+    public ChargeUser getRailInfo()
     {
         return railInfo;
     }
 
-    public void setRailInfo(Account railInfo)
+    public void setRailInfo(ChargeUser railInfo)
     {
         this.railInfo = railInfo;
     }
@@ -68,14 +70,4 @@ public class ChargeInfo
     {
         this.fx = fx;
     }
-
-    @JsonProperty("partnerInfo")
-    private Account partnerInfo;
-
-    @JsonProperty("railInfo")
-    private Account railInfo;
-
-    @JsonProperty("fx")
-    private Fx fx;
-
 }

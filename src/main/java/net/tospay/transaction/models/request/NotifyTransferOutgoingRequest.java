@@ -11,18 +11,41 @@ import net.tospay.transaction.enums.TransactionType;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotifyTransferOutgoingRequest
 {
-  //  @JsonProperty("category") Notify.Category category;
+    //  @JsonProperty("category") Notify.Category category;
 
-   // public Notify.Category getCategory(){return category; }
+    // public Notify.Category getCategory(){return category; }
 
- //   public void setCategory(Notify.Category category){this.category = category;}
+    //   public void setCategory(Notify.Category category){this.category = category;}
 
     @JsonProperty("topic") TransactionType topic;
 
     @JsonProperty("status") TransactionStatus status;
 
-    @JsonProperty("amount") String amount;
+    @JsonProperty("amount") Number amount;
+
     @JsonProperty("currency") String currency;
+
+    @JsonProperty("reference") String reference;
+
+    @JsonProperty("date") String date; //DD MMM YYYY hh:mm a
+
+    @JsonProperty("recipient_id") String recipientId;
+
+    @JsonProperty("recipient_type") String recipientType;
+
+    @JsonProperty("senders") List<NotifyTransferOutgoingSenderRequest> senders;
+
+    @JsonProperty("receivers") List<NotifyTransferOutgoingSenderRequest> receivers;
+
+    public List<NotifyTransferOutgoingSenderRequest> getReceivers()
+    {
+        return receivers;
+    }
+
+    public void setReceivers(List<NotifyTransferOutgoingSenderRequest> receivers)
+    {
+        this.receivers = receivers;
+    }
 
     public String getReference()
     {
@@ -43,12 +66,6 @@ public class NotifyTransferOutgoingRequest
     {
         this.date = date;
     }
-
-    @JsonProperty("reference") String reference;
-   @JsonProperty("date") String date; //DD MMM YYYY hh:mm a
-    @JsonProperty("recipient_id") String recipientId;
-    @JsonProperty("recipient_type") String recipientType;
-    @JsonProperty("senders") List<NotifyTransferOutgoingSenderRequest> senders;
 
     public List<NotifyTransferOutgoingSenderRequest> getSenders()
     {
@@ -80,12 +97,12 @@ public class NotifyTransferOutgoingRequest
         this.status = status;
     }
 
-    public String getAmount()
+    public Number getAmount()
     {
         return amount;
     }
 
-    public void setAmount(String amount)
+    public void setAmount(Number amount)
     {
         this.amount = amount;
     }

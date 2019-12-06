@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import net.tospay.transaction.entities.BaseEntity;
 import net.tospay.transaction.entities.Destination;
 import net.tospay.transaction.entities.Source;
+import net.tospay.transaction.entities.Transaction;
 import net.tospay.transaction.enums.TransactionStatus;
 import net.tospay.transaction.enums.UserType;
 import net.tospay.transaction.repositories.DestinationRepository;
@@ -24,7 +25,8 @@ import net.tospay.transaction.repositories.TransactionRepository;
 @Service
 public class CrudService extends BaseService
 {
-    private static final int PAGE_SIZE = 10;
+
+    private static final int TRANSACTION_REFUND_RETRY_LIMIT =3;
 
     SourceRepository sourceRepository;
 
@@ -38,29 +40,39 @@ public class CrudService extends BaseService
         this.destinationRepository = destinationRepository;
         this.transactionRepository = transactionRepository;
     }
+    public @NotNull ArrayList<Transaction> fetchTransaction(UUID userId,Integer offset,Integer limit)
+    {
+        try {
+            logger.info(" {}", userId);
+            return transactionRepository.findByUserInfoUserId(userId,
+                    new OffsetBasedPageRequest(offset,limit,Sort.by(BaseEntity.toDbField(Destination.DATE_CREATED)).descending()));
 
-    public @NotNull ArrayList<Source> fetchSources(UUID userId, UserType userType,Integer offset)
+        } catch (Exception e) {
+            logger.error(" {}", e);
+            return new ArrayList<Transaction>();
+        }
+    }
+    public @NotNull ArrayList<Source> fetchSources(UUID userId, UserType userType,Integer offset,Integer limit)
     {
         try {
 
             logger.info(" {} {}", userId,userType);
          //   Sort.TypedSort<Source> s=Sort.sort(Source.class);
          //   Sort sort = s.by(Source::getDateModified).descending();
-            return sourceRepository.findByUserIdAndUserType(userId, userType,
-                    new OffsetBasedPageRequest(offset==null?0:offset,PAGE_SIZE,Sort.by(BaseEntity.toDbField(Destination.DATE_CREATED)).descending()));
+            return sourceRepository.findByUserId(userId,
+                    new OffsetBasedPageRequest(offset,limit,Sort.by(BaseEntity.toDbField(Destination.DATE_CREATED)).descending()));
         } catch (Exception e){
             logger.error(" {}", e);
             return new ArrayList<Source>();
         }
     }
 
-
-    public @NotNull ArrayList<Destination> fetchDestinations(UUID userId, UserType userType,Integer offset)
+    public @NotNull ArrayList<Destination> fetchDestinations(UUID userId, UserType userType,Integer offset,Integer limit)
     {
         try {
             logger.info(" {} {}", userId,userType);
-            return destinationRepository.findByUserIdAndUserType(userId, userType,
-                    new OffsetBasedPageRequest(offset==null?0:offset,PAGE_SIZE,Sort.by(BaseEntity.toDbField(Destination.DATE_CREATED)).descending()));
+            return destinationRepository.findByUserId(userId,
+                    new OffsetBasedPageRequest(offset,limit,Sort.by(BaseEntity.toDbField(Destination.DATE_CREATED)).descending()));
 
         } catch (Exception e) {
             logger.error(" {}", e);
@@ -83,7 +95,7 @@ public class CrudService extends BaseService
         try {
             logger.info("fetchFailedTransactions");
 
-            return transactionRepository.findByStatusAndDate(TransactionStatus.FAILED,midnight);
+            return transactionRepository.findByStatusAndDateAndRefundRetryCountLimit(TransactionStatus.FAILED,midnight,TRANSACTION_REFUND_RETRY_LIMIT);
         } catch (Exception e) {
             logger.error(" {}", e);
             return new ArrayList<>();

@@ -9,7 +9,7 @@ import net.tospay.transaction.models.Amount;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Fx
 {
-    @JsonProperty("multiplier") Double multiplier;
+    @JsonProperty("multiplier") Number multiplier;
 
     @JsonProperty("account")
     private Account account;
@@ -37,12 +37,12 @@ public class Fx
         this.amount = amount;
     }
 
-    public Double getMultiplier()
+    public Number getMultiplier()
     {
         return multiplier;
     }
 
-    public void setMultiplier(Double multiplier)
+    public void setMultiplier(Number multiplier)
     {
         this.multiplier = multiplier;
     }

@@ -1,24 +1,27 @@
 package net.tospay.transaction.models;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DeviceInfo
 {
-        @NotNull
-        @JsonProperty("ip")
-        private String ip;
-        @NotNull
-        @JsonProperty("userAgent")
-        private String userAgent;
+    @NotNull
+    @JsonProperty("ip")
+    private List<String> ip;
 
-    public String getIp()
+    @NotNull
+    @JsonProperty("userAgent")
+    private String userAgent;
+
+    public List<String> getIp()
     {
         return ip;
     }
 
-    public void setIp(String ip)
+    public void setIp(List<String> ip)
     {
         this.ip = ip;
     }

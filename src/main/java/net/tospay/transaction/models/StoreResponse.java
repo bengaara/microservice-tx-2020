@@ -13,8 +13,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.tospay.transaction.enums.AccountType;
+import net.tospay.transaction.enums.TransactionStatus;
 import net.tospay.transaction.enums.UserType;
-import net.tospay.transaction.models.response.TopupMobileTransactionResponse;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -29,11 +29,14 @@ public class StoreResponse implements Serializable
     @JsonProperty("user_id")
     private UUID userId;
 
+    @JsonProperty("amount")
+    private Amount amount;
+
     @JsonProperty("user_type")
     private UserType userType;
 
-    @JsonProperty("transaction")
-    private TopupMobileTransactionResponse transaction;
+    @JsonProperty("status")
+    private TransactionStatus status;
 
     @JsonProperty("reason")
     private String reason;
@@ -49,6 +52,26 @@ public class StoreResponse implements Serializable
         return serialVersionUID;
     }
 
+    public Amount getAmount()
+    {
+        return amount;
+    }
+
+    public void setAmount(Amount amount)
+    {
+        this.amount = amount;
+    }
+
+    public TransactionStatus getStatus()
+    {
+        return status;
+    }
+
+    public void setStatus(TransactionStatus status)
+    {
+        this.status = status;
+    }
+
     public AccountType getChannel()
     {
         return channel;
@@ -57,16 +80,6 @@ public class StoreResponse implements Serializable
     public void setChannel(AccountType channel)
     {
         this.channel = channel;
-    }
-
-    public TopupMobileTransactionResponse getTransaction()
-    {
-        return transaction;
-    }
-
-    public void setTransaction(TopupMobileTransactionResponse transaction)
-    {
-        this.transaction = transaction;
     }
 
     public String getReason()

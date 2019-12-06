@@ -32,18 +32,13 @@ import net.tospay.transaction.enums.TransactionStatus;
 import net.tospay.transaction.models.Store;
 import net.tospay.transaction.models.StoreResponse;
 
-@Entity
-@Table(name = "sources",
-        uniqueConstraints =
-        @UniqueConstraint(columnNames = { "id" }))
-@JsonIgnoreProperties
-public class Source extends BaseEntity<UUID> implements Serializable
+public abstract class  BaseSource extends BaseEntity<UUID> implements Serializable
 {
     public static final String DATE_CREATED = "date_created";
 
     @Id
     @Column(name = "id", columnDefinition = "uuid default gen_random_uuid()", updatable = false)
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    @Type(type = "org.hibernate.type.PostgresUUIDType")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
@@ -81,9 +76,9 @@ public class Source extends BaseEntity<UUID> implements Serializable
 
     @ManyToOne
     @JoinColumn(name = "transaction")
-    private net.tospay.transaction.entities.Transaction transaction;
+    private Transaction transaction;
 
-    public Source()
+    public BaseSource()
     {
     }
 

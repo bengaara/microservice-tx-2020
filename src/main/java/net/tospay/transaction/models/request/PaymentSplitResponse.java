@@ -3,57 +3,47 @@ package net.tospay.transaction.models.request;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import net.tospay.transaction.models.Account;
+import net.tospay.transaction.models.Amount;
 import net.tospay.transaction.models.response.MerchantInfo;
 import net.tospay.transaction.models.response.UserInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PaymentSplitResponse
 {
-    @JsonProperty("merchantInfo")  MerchantInfo merchantInfo;
+    @JsonProperty("pay")  boolean pay;
 
-    @JsonProperty("orderInfo") OrderInfo orderInfo;
+    @JsonProperty("orderInfo") Account account; //who initiated split
 
-    @JsonProperty("splitInfo")  SplitInfo splitInfo;
+    @JsonProperty("amount") Amount amount;
 
-    @JsonProperty("userInfo")  UserInfo userInfo;
-
-    public MerchantInfo getMerchantInfo()
+    public Amount getAmount()
     {
-        return merchantInfo;
+        return amount;
     }
 
-    public void setMerchantInfo(MerchantInfo merchantInfo)
+    public void setAmount(Amount amount)
     {
-        this.merchantInfo = merchantInfo;
+        this.amount = amount;
     }
 
-    public OrderInfo getOrderInfo()
+    public boolean isPay()
     {
-        return orderInfo;
+        return pay;
     }
 
-    public void setOrderInfo(OrderInfo orderInfo)
+    public void setPay(boolean pay)
     {
-        this.orderInfo = orderInfo;
+        this.pay = pay;
     }
 
-    public SplitInfo getSplitInfo()
+    public Account getAccount()
     {
-        return splitInfo;
+        return account;
     }
 
-    public void setSplitInfo(SplitInfo splitInfo)
+    public void setAccount(Account account)
     {
-        this.splitInfo = splitInfo;
-    }
-
-    public UserInfo getUserInfo()
-    {
-        return userInfo;
-    }
-
-    public void setUserInfo(UserInfo userInfo)
-    {
-        this.userInfo = userInfo;
+        this.account = account;
     }
 }

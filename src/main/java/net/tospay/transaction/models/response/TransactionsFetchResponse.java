@@ -35,7 +35,7 @@ public class TransactionsFetchResponse
     private String sourceChannel;
 
     @JsonProperty("amount")
-    private Double amount;
+    private Number amount;
 
     @JsonProperty("currency")
     private String currency;
@@ -95,12 +95,12 @@ public class TransactionsFetchResponse
         this.sourceChannel = sourceChannel;
     }
 
-    public Double getAmount()
+    public Number getAmount()
     {
         return amount;
     }
 
-    public void setAmount(Double amount)
+    public void setAmount(Number amount)
     {
         this.amount = amount;
     }

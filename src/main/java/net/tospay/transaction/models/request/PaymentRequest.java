@@ -10,7 +10,6 @@ import net.tospay.transaction.enums.TransactionStatus;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PaymentRequest
 {
-
     @JsonProperty("email") String email;
 
     @JsonProperty("merchant") UUID merchant;
@@ -19,7 +18,7 @@ public class PaymentRequest
 
     @JsonProperty("reference") String reference;
 
-    @JsonProperty("transaction_id") String transactionId;
+    @JsonProperty("transaction_id") UUID transactionId;//t.id
 
     @JsonProperty("sender_id") String senderId;
 
@@ -33,12 +32,12 @@ public class PaymentRequest
         this.senderId = senderId;
     }
 
-    public String getTransactionId()
+    public UUID getTransactionId()
     {
         return transactionId;
     }
 
-    public void setTransactionId(String transactionId)
+    public void setTransactionId(UUID transactionId)
     {
         this.transactionId = transactionId;
     }

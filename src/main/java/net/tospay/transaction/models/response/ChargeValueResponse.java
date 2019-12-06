@@ -16,7 +16,7 @@ public class ChargeValueResponse implements Serializable
     private final static long serialVersionUID = -4737973646400075962L;
 
     @JsonProperty("amount")
-    private Double amount;
+    private Number amount;
 
     @JsonProperty("currency")
     private String currency;
@@ -26,12 +26,12 @@ public class ChargeValueResponse implements Serializable
         return serialVersionUID;
     }
 
-    public Double getAmount()
+    public Number getAmount()
     {
         return amount;
     }
 
-    public void setAmount(Double amount)
+    public void setAmount(Number amount)
     {
         this.amount = amount;
     }
