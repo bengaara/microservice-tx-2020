@@ -15,18 +15,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import net.tospay.transaction.enums.UserType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "user_id",
-        "type_id",
-        "email",
-        "email_verified",
-        "name",
-        "phone",
-        "phone_verified",
-        "profile_pic",
-        "country",
-        "address"
-})
+
 public class UserInfo implements Serializable
 {
     private final static long serialVersionUID = -1250620497979241622L;
@@ -36,6 +25,7 @@ public class UserInfo implements Serializable
 
     @JsonProperty("type_id")
     private UserType typeId;
+
 
     @JsonProperty("email")
     private String email;

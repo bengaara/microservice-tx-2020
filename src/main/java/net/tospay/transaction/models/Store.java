@@ -7,13 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "type",
-        "user_id",
-        "user_type",
-        "account",
-        "amount"
-})
+
 public class Store implements Serializable
 {
     private final static long serialVersionUID = -9078608771772465581L;
@@ -27,7 +21,7 @@ public class Store implements Serializable
     @JsonProperty("charge")
     private Amount charge;
 
-    @JsonProperty("total")
+    @JsonProperty(value = "total",required = true)
     private Amount total;//add when source.. sub when destination
 
     public static long getSerialVersionUID()

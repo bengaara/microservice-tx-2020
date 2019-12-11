@@ -2,18 +2,16 @@ package net.tospay.transaction.models;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.tospay.transaction.enums.TransactionType;
 import net.tospay.transaction.models.request.OrderInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "sources",
-        "delivery"
-})
+@JsonIgnoreProperties(ignoreUnknown = true)
+
 public class TransactionRequest
 {
     @JsonProperty("deviceInfo")

@@ -29,6 +29,7 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import net.tospay.transaction.enums.TransactionStatus;
+import net.tospay.transaction.models.AsyncCallbackResponse;
 import net.tospay.transaction.models.Store;
 import net.tospay.transaction.models.StoreResponse;
 
@@ -71,7 +72,7 @@ public class Source extends BaseEntity<UUID> implements Serializable
 
     @Column(name = "response_async", columnDefinition = "jsonb")
     @Type(type = "jsonb")
-    @NotNull private Map<LocalDateTime, StoreResponse> responseAsync = new HashMap<>();
+    @NotNull private Map<LocalDateTime, AsyncCallbackResponse> responseAsync = new HashMap<>();
 
     @Column(name = DATE_CREATED, nullable = false)
     private LocalDateTime dateCreated;
@@ -132,13 +133,12 @@ public class Source extends BaseEntity<UUID> implements Serializable
         return response;
     }
 
-
     public List<LocalDateTime> getDateRequest()
     {
         return dateRequest;
     }
 
-    public Map<LocalDateTime, StoreResponse> getResponseAsync()
+    public Map<LocalDateTime, AsyncCallbackResponse> getResponseAsync()
     {
         return responseAsync;
     }

@@ -1,5 +1,11 @@
 package net.tospay.transaction.models;
 
+import java.io.Serializable;
+import java.util.UUID;
+
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,8 +15,9 @@ import net.tospay.transaction.enums.UserType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Account
+public class Account  implements Serializable
 {
+    @Enumerated(EnumType.STRING)
     @JsonProperty("type")
     private AccountType type;
 
@@ -19,8 +26,9 @@ public class Account
     private String id;
 
     @JsonProperty("user_id")
-    private String userId;
+    private UUID userId;
 
+    @Enumerated(EnumType.STRING)
     @JsonProperty("user_type")
     private UserType userType;
 
@@ -66,12 +74,12 @@ public class Account
         this.phone = phone;
     }
 
-    public String getUserId()
+    public UUID getUserId()
     {
         return userId;
     }
 
-    public void setUserId(String userId)
+    public void setUserId(UUID userId)
     {
         this.userId = userId;
     }

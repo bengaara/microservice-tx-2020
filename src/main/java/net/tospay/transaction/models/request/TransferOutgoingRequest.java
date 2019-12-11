@@ -31,6 +31,32 @@ public class TransferOutgoingRequest implements Serializable
     @JsonProperty("action")
     private String action;
 
+    @JsonProperty("description")
+    private String description;
+
+    @JsonProperty("external_reference")
+    private UUID externalReference;
+
+    public UUID getExternalReference()
+    {
+        return externalReference;
+    }
+
+    public void setExternalReference(UUID externalReference)
+    {
+        this.externalReference = externalReference;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
     @JsonProperty("account")
     private Account account;
 

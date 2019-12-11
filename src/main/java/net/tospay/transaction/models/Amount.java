@@ -11,70 +11,61 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import net.tospay.transaction.configs.BigDecimalMoneyDeserializer;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonPropertyOrder({
-        "amount",
-        "currency"
-})
+
 public class Amount implements Serializable
 {
     private final static long serialVersionUID = -4737973646400075962L;
 
-    @JsonDeserialize(using = BigDecimalMoneyDeserializer.class )
-    //@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS,defaultImpl =BigDecimal.class )
-    //  @JsonDeserialize(as = BigDecimal.class)
+    // @JsonDeserialize(using = BigDecimalMoneyDeserializer.class)//(using = BigDecimalMoneyDeserializer.class)
+    // @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, defaultImpl = String.class)
+    @JsonDeserialize(as = BigDecimal.class)
     @JsonProperty("amount")
     private BigDecimal amount;
 
     @JsonProperty("currency")
     private String currency;
 
+    @JsonProperty("type")
+    private String type;
+
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    public Amount()
-    {
-
-    }
-
-    public Amount(BigDecimal amount, String currency)
+    public Amount(BigDecimal amount, String currency, String type)
     {
         this.amount = amount;
         this.currency = currency;
+        this.type = type;
     }
 
-    @JsonProperty("amount")
+    public String getType()
+    {
+        return type;
+    }
+
+    public void setType(String type)
+    {
+        this.type = type;
+    }
+
     public BigDecimal getAmount()
     {
         return amount;
     }
-
-    @JsonProperty("amount")
     public void setAmount(BigDecimal amount)
     {
         this.amount = amount;
     }
 
-    public Amount withAmount(BigDecimal amount)
-    {
-        this.amount = amount;
-        return this;
-    }
-
-    @JsonProperty("currency")
     public String getCurrency()
     {
         return currency;
     }
 
-    @JsonProperty("currency")
     public void setCurrency(String currency)
     {
         this.currency = currency;

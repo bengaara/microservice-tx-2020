@@ -1,10 +1,12 @@
 package net.tospay.transaction.models.request;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import net.tospay.transaction.enums.OrderType;
 import net.tospay.transaction.models.Amount;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderInfo
 {
     @JsonProperty("type")

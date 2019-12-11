@@ -10,16 +10,20 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.tospay.transaction.enums.AccountType;
 import net.tospay.transaction.enums.TransactionStatus;
-import net.tospay.transaction.enums.UserType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class StoreResponse implements Serializable
+public class AsyncCallbackResponse implements Serializable
 {
     private final static long serialVersionUID = -9078608771772465581L;
+
+    @JsonProperty("transaction")
+    Body transaction;
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("channel")
     private AccountType channel;
@@ -27,47 +31,25 @@ public class StoreResponse implements Serializable
     @JsonProperty("user_id")
     private UUID userId;
 
-    @JsonProperty("amount")
-    private Amount amount;
-
-    @JsonProperty("user_type")
-    private UserType userType;
-
-    @JsonProperty("status")
-    private TransactionStatus status;
-
     @JsonProperty("reason")
     private String reason;
 
     @JsonProperty("external_reference")
     private UUID externalReference;
 
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
-
     public static long getSerialVersionUID()
     {
         return serialVersionUID;
     }
 
-    public Amount getAmount()
+    public Body getTransaction()
     {
-        return amount;
+        return transaction;
     }
 
-    public void setAmount(Amount amount)
+    public void setTransaction(Body transaction)
     {
-        this.amount = amount;
-    }
-
-    public TransactionStatus getStatus()
-    {
-        return status;
-    }
-
-    public void setStatus(TransactionStatus status)
-    {
-        this.status = status;
+        this.transaction = transaction;
     }
 
     public AccountType getChannel()
@@ -110,16 +92,6 @@ public class StoreResponse implements Serializable
         this.userId = userId;
     }
 
-    public UserType getUserType()
-    {
-        return userType;
-    }
-
-    public void setUserType(UserType userType)
-    {
-        this.userType = userType;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties()
     {
@@ -137,9 +109,78 @@ public class StoreResponse implements Serializable
         this.additionalProperties.put(name, value);
     }
 
-    public StoreResponse withAdditionalProperty(String name, Object value)
+    public AsyncCallbackResponse withAdditionalProperty(String name, Object value)
     {
         this.additionalProperties.put(name, value);
         return this;
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public class Body implements Serializable
+    {
+        @JsonProperty("id")
+        private String id;
+
+        @JsonProperty("amount")
+        private Amount amount;
+
+        @JsonProperty("trunc")
+        private String trunc;//last 4 digits of number?
+
+        @JsonProperty("network")
+        private String network;//eg safaricom
+
+        @JsonProperty("status")
+        private TransactionStatus status;
+
+        public String getId()
+        {
+            return id;
+        }
+
+        public void setId(String id)
+        {
+            this.id = id;
+        }
+
+        public Amount getAmount()
+        {
+            return amount;
+        }
+
+        public void setAmount(Amount amount)
+        {
+            this.amount = amount;
+        }
+
+        public String getTrunc()
+        {
+            return trunc;
+        }
+
+        public void setTrunc(String trunc)
+        {
+            this.trunc = trunc;
+        }
+
+        public String getNetwork()
+        {
+            return network;
+        }
+
+        public void setNetwork(String network)
+        {
+            this.network = network;
+        }
+
+        public TransactionStatus getStatus()
+        {
+            return status;
+        }
+
+        public void setStatus(TransactionStatus status)
+        {
+            this.status = status;
+        }
     }
 }

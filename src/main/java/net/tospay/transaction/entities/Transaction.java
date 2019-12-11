@@ -11,6 +11,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -20,6 +21,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.transaction.Transactional;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -50,16 +53,7 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     @Column(name = "transaction_id", nullable = true)
     private String transactionId;
 
-    public TransactionType getType()
-    {
-        return type;
-    }
-
-    public void setType(TransactionType type)
-    {
-        this.type = type;
-    }
-
+    @Enumerated(EnumType.STRING)
     @JsonProperty("type")
     private TransactionType type;//redundancy but needed for when payload might b null like reversal time
 
@@ -67,7 +61,7 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     @Type(type = "jsonb")
     private TransactionRequest payload;
 
-    @Column(name = "userInfo", nullable = false, columnDefinition = "jsonb")
+    @Column(name = "userInfo", columnDefinition = "jsonb")
     @Type(type = "jsonb")
     private UserInfo userInfo; //owner of transaction
 
@@ -97,17 +91,18 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     private int refundRetryCount = 0;
 
     //  mappedBy = "source",
+    @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(
-
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
     private List<Source> sources = new ArrayList<>();
 
+    @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(
 
             cascade = CascadeType.ALL,
-            orphanRemoval = true
+            orphanRemoval = true, fetch = FetchType.EAGER
     )
     private List<net.tospay.transaction.entities.Destination> destinations = new ArrayList<>();
 
@@ -118,6 +113,16 @@ public class Transaction extends BaseEntity<UUID> implements Serializable
     public static String getID()
     {
         return ID;
+    }
+
+    public TransactionType getType()
+    {
+        return type;
+    }
+
+    public void setType(TransactionType type)
+    {
+        this.type = type;
     }
 
     public UserInfo getUserInfo()

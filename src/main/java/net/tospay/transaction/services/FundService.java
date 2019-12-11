@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -36,6 +35,7 @@ import net.tospay.transaction.enums.TransactionType;
 import net.tospay.transaction.enums.UserType;
 import net.tospay.transaction.models.Account;
 import net.tospay.transaction.models.Amount;
+import net.tospay.transaction.models.AsyncCallbackResponse;
 import net.tospay.transaction.models.Store;
 import net.tospay.transaction.models.StoreResponse;
 import net.tospay.transaction.models.request.PaymentRequest;
@@ -71,15 +71,6 @@ public class FundService extends BaseService
     @Value("#{${STORE_PAY_URLS}}")
     Map<String, String> STORE_PAY_URLS;
 
-    @Value("${splitpay.url}")
-    private String splitPaymentUrl;
-
-    @Value("${invoicepay.url}")
-    private String invoicePaymentUrl;
-
-    @Value("${paymentpay.url}")
-    private String paymentPaymentUrl;
-
     public FundService(RestTemplate restTemplate, TransactionRepository transactionRepository,
             SourceRepository sourceRepository, DestinationRepository destinationRepository, NotifyService notifyService)
     {
@@ -109,7 +100,12 @@ public class FundService extends BaseService
                 source.setTransactionStatus(TransactionStatus.PROCESSING);
                 TransferOutgoingRequest request = new TransferOutgoingRequest();
                 request.setAccount(source.getPayload().getAccount());
+                request.getAccount().setUserId(source.getTransaction().getUserInfo().getUserId());
+                request.getAccount().setUserType(source.getTransaction().getUserInfo().getTypeId());
                 request.setAction("SOURCE");
+                request.setAmount(source.getPayload().getTotal());
+                request.setExternalReference(source.getId());
+                request.setDescription("Source Pay");
 
                 ResponseObject<StoreResponse> response = hitStore(source.getPayload().getAccount().getType(), request);
 
@@ -163,20 +159,21 @@ public class FundService extends BaseService
             return;
         }
 
-        BigDecimal amount = BigDecimal.ZERO;
+        Double amount = 0d;
         for (Source source : transaction.getSources()) {
             if (TransactionStatus.SUCCESS.equals(source.getTransactionStatus())) {
-                amount.add(source.getPayload().getTotal().getAmount());//TODO transaction cost je? zirudi?
+                amount = amount + source.getPayload().getTotal().getAmount()
+                        .doubleValue();//TODO transaction cost je? zirudi?
                 logger.debug("adding sourced amount {} ", source.getPayload().getTotal().getAmount());
             }
         }
         for (Destination destination : transaction.getDestinations()) {
             if (TransactionStatus.SUCCESS.equals(destination.getTransactionStatus())) {
-                amount.add(destination.getPayload().getTotal().getAmount());
+                amount = amount - destination.getPayload().getTotal().getAmount().doubleValue();
                 logger.debug("deducting delivered amount {} ", destination.getPayload().getTotal().getAmount());
             }
         }
-        if (amount.compareTo(BigDecimal.ZERO) != 1) {
+        if (amount <= 1) {
             logger.debug("cant refund transaction amount {} should this transaction be marked as failed really? {}",
                     amount, transaction.getId());
             return;
@@ -187,7 +184,8 @@ public class FundService extends BaseService
         Source source = transaction.getSources().get(0);
         logger.debug("refunding transaction {} amount {}", transaction.getId(), amount);
 
-        Amount total = new Amount(amount, transaction.getPayload().getOrderInfo().getAmount().getCurrency());
+        Amount total = new Amount(BigDecimal.valueOf(amount),
+                transaction.getPayload().getOrderInfo().getAmount().getCurrency(), "refund");
         Store store = new Store();
         store.setAccount(source.getPayload()
                 .getAccount());//NB no transaction has 2 different users.. so single source gives us recipient
@@ -197,6 +195,9 @@ public class FundService extends BaseService
         request.setAccount(store.getAccount());
         request.setAction("DESTINATION");
         request.setAmount(store.getTotal());
+        request.setExternalReference(source.getId());
+        request.setDescription("Refund");
+
         ResponseObject<StoreResponse> response = hitStore(AccountType.WALLET, request);
 
         //A refund has a new destination added to the transaction leg
@@ -220,16 +221,17 @@ public class FundService extends BaseService
         transactionRepository.saveAndFlush(transaction);
     }
 
-    public void checkSourceAndDestinationTransactionStatusAndAct(
-            net.tospay.transaction.entities.Transaction transaction)
+    public void checkSourceAndDestinationTransactionStatusAndAct(Transaction transaction)
     {
+
         ObjectMapper objectMapper = new ObjectMapper();
         //if all success - mark transaction source complete
         if (transaction == null) {
             logger.debug("null transaction ");
             return;
         }
-
+       transaction = transactionRepository.findById(transaction.getId()).get();
+        //  transactionRepository.refresh(transaction);
         //only process incomplete transactions
         if (!Arrays.asList(TransactionStatus.PROCESSING, TransactionStatus.CREATED)
                 .contains(transaction.getTransactionStatus()))
@@ -324,14 +326,14 @@ public class FundService extends BaseService
             logger.debug("TODO destinations success {}", transaction);
             notifyService.notifyDestination(transaction);
 
-            //if payment transaction notify paymentservice
-            if (TransactionType.PAYMENT.equals(transaction.getPayload().getType())) {
-                hitPaymentPayService(transaction);
-            }
-
             return;
         } else {
             logger.debug("TODO transaction status  {} {}", transaction.getId(), transaction.getTransactionStatus());
+        }
+
+        //if payment transaction notify paymentservice
+        if (TransactionType.PAYMENT.equals(transaction.getPayload().getType())) {
+            hitPaymentPayService(transaction);
         }
     }
 
@@ -344,10 +346,9 @@ public class FundService extends BaseService
 
             PaymentRequest request = new PaymentRequest();
             request.setEmail(transaction.getPayload().getUserInfo().getEmail());
-            request.setMerchant(
-                    UUID.fromString(transaction.getPayload().getDelivery().get(0).getAccount().getUserId()));
+            request.setMerchant(transaction.getPayload().getDelivery().get(0).getAccount().getUserId());
             request.setReference(transaction.getPayload().getOrderInfo().getReference());
-            request.setTransactionId(transaction.getId());
+            request.setTransactionId(transaction.getId().toString());
             request.setStatus(transaction.getTransactionStatus());
 
             HttpHeaders headers = new org.springframework.http.HttpHeaders();
@@ -355,7 +356,7 @@ public class FundService extends BaseService
             HttpEntity entity = new HttpEntity<PaymentRequest>(request, headers);
 
             ResponseObject<PaymentSplitResponse> response =
-                    restTemplate.postForObject(splitPaymentUrl, entity, ResponseObject.class);
+                    restTemplate.postForObject("splitPaymentUrl", entity, ResponseObject.class);
             logger.debug(" {}", response);
 
             return response;
@@ -379,26 +380,13 @@ public class FundService extends BaseService
             logger.debug("hitPaymentPayService {}", transaction);
             String url = null;
             OrderType orderType = transaction.getPayload().getOrderInfo().getType();
-            switch (orderType) {
-                case PAYBILL:
-                case QR:
-                    url = paymentPaymentUrl;
+            url = STORE_PAY_URLS.get(orderType);
 
-                case INVOICE:
-                    url = invoicePaymentUrl;
-                    break;
-                case SPLIT:
-                    logger.error("unhandled transaction subtype for {} {}", transaction.getId(), orderType);
-                default:
-                    logger.error("unhandled transaction subtype for {} {}", transaction.getId(), orderType);
-                    break;
-            }
             PaymentRequest request = new PaymentRequest();
             request.setEmail(transaction.getPayload().getUserInfo().getEmail());
-            request.setMerchant(
-                    UUID.fromString(transaction.getPayload().getDelivery().get(0).getAccount().getUserId()));
+            request.setMerchant(transaction.getPayload().getDelivery().get(0).getAccount().getUserId());
             request.setReference(transaction.getPayload().getOrderInfo().getReference());
-            request.setTransactionId(transaction.getId());
+            request.setTransactionId(transaction.getId().toString());
             request.setSenderId(transaction.getPayload().getUserInfo().getPhone());
             request.setStatus(transaction.getTransactionStatus());
 
@@ -527,8 +515,12 @@ public class FundService extends BaseService
 
             TransferOutgoingRequest request = new TransferOutgoingRequest();
             request.setAccount(destination.getPayload().getAccount());
+            request.getAccount().setUserId(destination.getTransaction().getUserInfo().getUserId());
+            request.getAccount().setUserType(destination.getTransaction().getUserInfo().getTypeId());
             request.setAction("DESTINATION");
             request.setAmount(destination.getPayload().getTotal());
+            request.setExternalReference(destination.getId());
+            request.setDescription("Deliver funds");
 
             ResponseObject<StoreResponse> response =
                     hitStore(destination.getPayload().getAccount().getType(), request);
@@ -583,7 +575,7 @@ public class FundService extends BaseService
     }
 
     //NB: External Reference here is UUID of Source or Destination.
-    public void processPaymentCallback(StoreResponse response)
+    public boolean processPaymentCallback(AsyncCallbackResponse response)
 
     {
         try {
@@ -593,26 +585,28 @@ public class FundService extends BaseService
                     response.getExternalReference() == null ? Optional.empty() :
                             destinationRepository.findById(response.getExternalReference());
 
+            Transaction transaction = null;
             if (optionalSource.isPresent()) {
                 net.tospay.transaction.entities.Source source = optionalSource.get();
-                source.setTransactionStatus(response.getStatus());
+                transaction = source.getTransaction();
+                source.setTransactionStatus(response.getTransaction().getStatus());
                 source.getResponseAsync().put(LocalDateTime.now(), response);
-                source.setTransactionStatus(response.getStatus());
-                source = sourceRepository.save(source);
-                checkSourceAndDestinationTransactionStatusAndAct(source.getTransaction());
+                sourceRepository.save(source);
             } else if (optionalDestination.isPresent()) {
                 net.tospay.transaction.entities.Destination source = optionalDestination.get();
-                source.setTransactionStatus(response.getStatus());
+                transaction = source.getTransaction();
+                source.setTransactionStatus(response.getTransaction().getStatus());
                 source.getResponseAsync().put(LocalDateTime.now(), response);
-                source.setTransactionStatus(response.getStatus());
-                source = sourceRepository.save(source);
-                checkSourceAndDestinationTransactionStatusAndAct(source.getTransaction());
+                sourceRepository.save(source);
             } else {
                 //TODO: callback from where?
                 logger.error("callback called but no Record found {}", response);
             }
+            checkSourceAndDestinationTransactionStatusAndAct(transaction);
+            return true;
         } catch (Exception e) {
             logger.error(" {}", e);
+            return false;
         }
     }
 }

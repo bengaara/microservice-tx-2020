@@ -3,6 +3,7 @@ package net.tospay.transaction.controllers;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -16,14 +17,14 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.tospay.transaction.entities.Transaction;
 import net.tospay.transaction.enums.ResponseCode;
 import net.tospay.transaction.enums.TransactionStatus;
-import net.tospay.transaction.models.Account;
+import net.tospay.transaction.models.AsyncCallbackResponse;
 import net.tospay.transaction.models.TransactionRequest;
 import net.tospay.transaction.models.response.BaseResponse;
 import net.tospay.transaction.models.response.Error;
 import net.tospay.transaction.models.response.ResponseObject;
-import net.tospay.transaction.models.StoreResponse;
 import net.tospay.transaction.repositories.DestinationRepository;
 import net.tospay.transaction.repositories.SourceRepository;
 import net.tospay.transaction.repositories.TransactionRepository;
@@ -65,40 +66,47 @@ public class RestController extends BaseController
         return process(request);
     }
 
+    @SuppressWarnings("unchecked")
     public ResponseObject<BaseResponse> process(TransactionRequest request)
             throws Exception
     {
 
-        AtomicReference<BigDecimal> sumSourceAmount = new AtomicReference<>(BigDecimal.ZERO);
+        AtomicReference<Number> sumSourceAmount = new AtomicReference<>(BigDecimal.ZERO);
         request.getSource().forEach((topupValue) -> {
-            sumSourceAmount.updateAndGet(v -> v.add(topupValue.getTotal().getAmount()));
+            sumSourceAmount.updateAndGet(v -> v = v.doubleValue() + topupValue.getTotal().getAmount().doubleValue());
         });
+        // AtomicReference<BigDecimal> deliveryAmount = new AtomicReference<>(BigDecimal.ZERO);
 
-        if (!sumSourceAmount.get().equals(request.getOrderInfo().getAmount().getAmount())) {
+        if (sumSourceAmount.get().doubleValue() != request.getOrderInfo().getAmount().getAmount().doubleValue()) {
             logger.debug("source amount and totals don't tally {} {}", sumSourceAmount.get(),
                     request.getOrderInfo().getAmount().getAmount());
             return new ResponseObject(ResponseCode.FAILURE.type, ResponseCode.FAILURE.name(),
                     Arrays.asList(new Error(ResponseCode.FAILURE.type,
                             String.format("destination amount and source don't tally %s %s", sumSourceAmount.get(),
-                                    request.getOrderInfo().getAmount()))), request);
+                                    request.getOrderInfo().getAmount().getAmount()))), request);
         }
 
-        AtomicReference<BigDecimal> destSourceAmount = new AtomicReference<>(BigDecimal.ZERO);
+        AtomicReference<Number> destSourceAmount = new AtomicReference<>(BigDecimal.ZERO);
         request.getDelivery().forEach((topupValue) -> {
-            destSourceAmount.updateAndGet(v -> v.add(topupValue.getTotal().getAmount()));
+            destSourceAmount.updateAndGet(v -> v = v.doubleValue() + topupValue.getTotal().getAmount().doubleValue());
         });
-        BigDecimal chargetotal = request.getChargeInfo().getDestination().getAmount();
-        chargetotal.add(request.getChargeInfo().getFx().getAmount().getAmount());
-        chargetotal.add(request.getChargeInfo().getPartnerInfo().getAmount().getAmount());
-        chargetotal.add(request.getChargeInfo().getRailInfo().getAmount().getAmount());
 
-        if (!request.getOrderInfo().getAmount().getAmount().equals(destSourceAmount.get().add(chargetotal))) {
+        Double chargetotal = request.getChargeInfo().getDestination().getAmount().doubleValue();
+        chargetotal = chargetotal + request.getChargeInfo().getFx().getAmount().getAmount().doubleValue();
+        chargetotal = chargetotal + request.getChargeInfo().getPartnerInfo().getAmount().getAmount().doubleValue();
+        chargetotal = chargetotal + request.getChargeInfo().getRailInfo().getAmount().getAmount().doubleValue();
+        chargetotal = chargetotal + request.getChargeInfo().getSource().getAmount().doubleValue();
+
+        if (request.getOrderInfo().getAmount().getAmount().doubleValue() != (destSourceAmount.get().doubleValue()
+                + chargetotal))
+        {
             logger.debug("destination amount and source don't tally {} {}", destSourceAmount.get(),
-                    request.getOrderInfo().getAmount());
+                    request.getOrderInfo().getAmount().getAmount());
             return new ResponseObject(ResponseCode.FAILURE.type, ResponseCode.FAILURE.name(),
                     Arrays.asList(new Error(ResponseCode.FAILURE.type,
-                            String.format("destination amount and source don't tally %s %s", destSourceAmount.get(),
-                                    request.getOrderInfo().getAmount()))), request);
+                            String.format("destination amount and source don't tally %s %s",
+                                    destSourceAmount.get().doubleValue() + chargetotal,
+                                    request.getOrderInfo().getAmount().getAmount()))), request);
         }
 
         //create transaction
@@ -107,13 +115,14 @@ public class RestController extends BaseController
         net.tospay.transaction.entities.Transaction transaction = new net.tospay.transaction.entities.Transaction();
         //  JsonNode node = mapper.valueToTree(request);
 
+        transaction.setUserInfo(request.getUserInfo());
         transaction.setPayload(request);
         transaction.setTransactionStatus(TransactionStatus.CREATED);
 
         request.getSource().forEach((topupValue) -> {
 
             net.tospay.transaction.entities.Source sourceEntity = new net.tospay.transaction.entities.Source();
-            sourceEntity.setTransaction(transaction);
+            // sourceEntity.setTransaction(transaction);
             sourceEntity.setPayload(topupValue);
             sourceEntity.setTransactionStatus(transaction.getTransactionStatus());
 
@@ -123,8 +132,8 @@ public class RestController extends BaseController
         request.getDelivery().forEach((topupValue) -> {
             net.tospay.transaction.entities.Destination destinationEntity =
                     new net.tospay.transaction.entities.Destination();
-            destinationEntity.setTransaction(transaction);
-
+            // destinationEntity.setTransaction(transaction);
+            destinationEntity.setPayload(topupValue);
             destinationEntity.setTransactionStatus(transaction.getTransactionStatus());
 
             transaction.addDestination(destinationEntity);
@@ -142,12 +151,17 @@ public class RestController extends BaseController
     }
 
     @PostMapping(Constants.URL.CALLBACK_MOBILE)
-    public ResponseObject<BaseResponse> processCallback(@RequestBody ResponseObject<StoreResponse> response)
+    public ResponseObject<BaseResponse> processCallback(@RequestBody ResponseObject<AsyncCallbackResponse> response)
     {
         Map node = mapper.convertValue(response, Map.class);
         logger.debug(" {}", node);
 
-        fundService.processPaymentCallback(response.getData());
+        boolean sta = fundService.processPaymentCallback(response.getData());
+
+        if (sta) {
+            Optional<Transaction> opt = transactionRepository.findById(response.getData().getExternalReference());
+            fundService.refundFloatingFundsToWallet(opt.get());
+        }
 
         String status = ResponseCode.SUCCESS.type;
         String description = ResponseCode.SUCCESS.name();
