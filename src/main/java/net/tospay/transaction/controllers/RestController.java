@@ -82,7 +82,7 @@ public class RestController extends BaseController
                     request.getOrderInfo().getAmount().getAmount());
             return new ResponseObject(ResponseCode.FAILURE.type, ResponseCode.FAILURE.name(),
                     Arrays.asList(new Error(ResponseCode.FAILURE.type,
-                            String.format("destination amount and source don't tally %s %s", sumSourceAmount.get(),
+                            String.format("source amount and source don't tally %s %s", sumSourceAmount.get(),
                                     request.getOrderInfo().getAmount().getAmount()))), request);
         }
 
@@ -91,23 +91,23 @@ public class RestController extends BaseController
             destSourceAmount.updateAndGet(v -> v = v.doubleValue() + topupValue.getTotal().getAmount().doubleValue());
         });
 
-        Double chargetotal = request.getChargeInfo().getDestination().getAmount().doubleValue();
-        chargetotal = chargetotal + request.getChargeInfo().getFx().getAmount().getAmount().doubleValue();
-        chargetotal = chargetotal + request.getChargeInfo().getPartnerInfo().getAmount().getAmount().doubleValue();
-        chargetotal = chargetotal + request.getChargeInfo().getRailInfo().getAmount().getAmount().doubleValue();
-        chargetotal = chargetotal + request.getChargeInfo().getSource().getAmount().doubleValue();
-
-        if (request.getOrderInfo().getAmount().getAmount().doubleValue() != (destSourceAmount.get().doubleValue()
-                + chargetotal))
-        {
-            logger.debug("destination amount and source don't tally {} {}", destSourceAmount.get(),
-                    request.getOrderInfo().getAmount().getAmount());
-            return new ResponseObject(ResponseCode.FAILURE.type, ResponseCode.FAILURE.name(),
-                    Arrays.asList(new Error(ResponseCode.FAILURE.type,
-                            String.format("destination amount and source don't tally %s %s",
-                                    destSourceAmount.get().doubleValue() + chargetotal,
-                                    request.getOrderInfo().getAmount().getAmount()))), request);
-        }
+//        Double chargetotal = request.getChargeInfo().getDestination().getAmount().doubleValue();
+//        chargetotal = chargetotal + request.getChargeInfo().getFx().getAmount().getAmount().doubleValue();
+//        chargetotal = chargetotal + request.getChargeInfo().getPartnerInfo().getAmount().getAmount().doubleValue();
+//        chargetotal = chargetotal + request.getChargeInfo().getRailInfo().getAmount().getAmount().doubleValue();
+//        chargetotal = chargetotal + request.getChargeInfo().getSource().getAmount().doubleValue();
+//
+//        if (request.getOrderInfo().getAmount().getAmount().doubleValue() != (destSourceAmount.get().doubleValue()
+//                + chargetotal))
+//        {
+//            logger.debug("destination amount and source don't tally {} {}", destSourceAmount.get(),
+//                    request.getOrderInfo().getAmount().getAmount());
+//            return new ResponseObject(ResponseCode.FAILURE.type, ResponseCode.FAILURE.name(),
+//                    Arrays.asList(new Error(ResponseCode.FAILURE.type,
+//                            String.format("destination amount and source don't tally %s %s",
+//                                    destSourceAmount.get().doubleValue() + chargetotal,
+//                                    request.getOrderInfo().getAmount().getAmount()))), request);
+//        }
 
         //create transaction
         //create source & Destination
@@ -158,9 +158,13 @@ public class RestController extends BaseController
 
         boolean sta = fundService.processPaymentCallback(response.getData());
 
-        if (sta) {
+        if (!sta) {
             Optional<Transaction> opt = transactionRepository.findById(response.getData().getExternalReference());
             fundService.refundFloatingFundsToWallet(opt.get());
+            String status = ResponseCode.FAILURE.type;
+            String description = ResponseCode.FAILURE.name();
+            return new ResponseObject(status, description, Arrays.asList(new Error(status, description)),
+                    response.getData().getExternalReference());
         }
 
         String status = ResponseCode.SUCCESS.type;

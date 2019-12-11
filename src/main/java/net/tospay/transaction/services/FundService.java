@@ -112,7 +112,7 @@ public class FundService extends BaseService
                 source.getResponse().put(LocalDateTime.now(), response.getData());
                 if (ResponseCode.FAILURE.type.equalsIgnoreCase(response.getStatus())) {//failure
                     source.setTransactionStatus(TransactionStatus.FAILED);
-                    logger.debug("sourcing failed  {}", source);
+                    logger.error("sourcing failed  {}", source);
                 } else {
 
                     TransactionStatus status =
@@ -152,6 +152,10 @@ public class FundService extends BaseService
     @Transactional
     public void refundFloatingFundsToWallet(net.tospay.transaction.entities.Transaction transaction)
     {
+        if (transaction == null) {
+            logger.debug("refundFloatingFundsToWallet no transaction");
+            return;
+        }
 
         if (!TransactionStatus.FAILED.equals(transaction.getTransactionStatus())) {
             logger.debug("no refund for transaction {} status {}", transaction.getId(),
@@ -189,6 +193,8 @@ public class FundService extends BaseService
         Store store = new Store();
         store.setAccount(source.getPayload()
                 .getAccount());//NB no transaction has 2 different users.. so single source gives us recipient
+        store.getAccount().setUserId(source.getTransaction().getUserInfo().getUserId());
+        store.getAccount().setUserType(source.getTransaction().getUserInfo().getTypeId());
         store.setTotal(total);
 
         TransferOutgoingRequest request = new TransferOutgoingRequest();
@@ -230,7 +236,7 @@ public class FundService extends BaseService
             logger.debug("null transaction ");
             return;
         }
-       transaction = transactionRepository.findById(transaction.getId()).get();
+        transaction = transactionRepository.findById(transaction.getId()).get();
         //  transactionRepository.refresh(transaction);
         //only process incomplete transactions
         if (!Arrays.asList(TransactionStatus.PROCESSING, TransactionStatus.CREATED)
