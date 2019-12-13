@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -115,7 +116,7 @@ public class FetchController extends BaseController
         List<Destination> list2 =
                 crudServiced.fetchDestinations(request.getUserId(), request.getUserType(), request.getOffset(),request.getLimit());
 
-        Map<String, TransactionsFetchResponse> transactions = new HashMap<String, TransactionsFetchResponse>();
+        Map<UUID, TransactionsFetchResponse> transactions = new HashMap<UUID, TransactionsFetchResponse>();
 
         list1.forEach(s -> {
             TransactionFetchResponse res = TransactionFetchResponse.from(s);

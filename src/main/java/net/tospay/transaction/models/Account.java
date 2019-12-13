@@ -15,7 +15,7 @@ import net.tospay.transaction.enums.UserType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Account  implements Serializable
+public class Account implements Serializable
 {
     @Enumerated(EnumType.STRING)
     @JsonProperty("type")
@@ -43,6 +43,32 @@ public class Account  implements Serializable
 
     @JsonProperty("email")
     private String email;
+
+    @JsonProperty("profile_pic")
+    private String profilePic;
+
+    @JsonProperty("name")
+    private String name;
+
+    public String getProfilePic()
+    {
+        return profilePic;
+    }
+
+    public void setProfilePic(String profilePic)
+    {
+        this.profilePic = profilePic;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
 
     public String getEmail()
     {

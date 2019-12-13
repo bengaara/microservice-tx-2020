@@ -62,9 +62,13 @@ public class RestTemplateConfig
                         }
 
                         //  while (node.fieldNames().hasNext()) {
-                        String currency = node.get("currency") == null ? null : node.get("currency").textValue();
+                        String currency =
+                                node.get("currency") == null ? null : node.get("currency").toString().replace("\"", "");
                         BigDecimal b = node.get("amount") == null ? null :
-                                new BigDecimal(node.get("amount").textValue()).setScale(2, RoundingMode.HALF_UP);
+                                new BigDecimal(
+                                        node.get("amount").toString().replace("\"", "").equalsIgnoreCase("") ? "0" :
+                                                node.get("amount").toString().replace("\"", ""))
+                                        .setScale(2, RoundingMode.HALF_UP);
                         ///  parser.clearCurrentToken();
                         String type = node.get("type") == null ? null : node.get("type").textValue();
                         return new Amount(b, currency, type);

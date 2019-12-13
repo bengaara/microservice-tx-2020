@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.tospay.transaction.entities.Transaction;
+import net.tospay.transaction.entities.Source;
 import net.tospay.transaction.enums.ResponseCode;
 import net.tospay.transaction.enums.TransactionStatus;
 import net.tospay.transaction.models.AsyncCallbackResponse;
@@ -71,19 +71,20 @@ public class RestController extends BaseController
             throws Exception
     {
 
-        AtomicReference<Number> sumSourceAmount = new AtomicReference<>(BigDecimal.ZERO);
+        AtomicReference<BigDecimal> sumSourceAmount = new AtomicReference<>(BigDecimal.ZERO);
         request.getSource().forEach((topupValue) -> {
-            sumSourceAmount.updateAndGet(v -> v = v.doubleValue() + topupValue.getTotal().getAmount().doubleValue());
+            sumSourceAmount.updateAndGet(v -> v = v.add(topupValue.getTotal().getAmount()));
         });
         // AtomicReference<BigDecimal> deliveryAmount = new AtomicReference<>(BigDecimal.ZERO);
-
-        if (sumSourceAmount.get().doubleValue() != request.getOrderInfo().getAmount().getAmount().doubleValue()) {
+//total sum should equal orderinfo plus charge
+        BigDecimal charge = request.getChargeInfo().getSource().getAmount();
+        if (sumSourceAmount.get().compareTo(request.getOrderInfo().getAmount().getAmount().add(charge)) != 0) {
             logger.debug("source amount and totals don't tally {} {}", sumSourceAmount.get(),
                     request.getOrderInfo().getAmount().getAmount());
             return new ResponseObject(ResponseCode.FAILURE.type, ResponseCode.FAILURE.name(),
                     Arrays.asList(new Error(ResponseCode.FAILURE.type,
-                            String.format("source amount and source don't tally %s %s", sumSourceAmount.get(),
-                                    request.getOrderInfo().getAmount().getAmount()))), request);
+                            String.format("source amount and order info total don't tally %s %s", sumSourceAmount.get(),
+                                    request.getOrderInfo().getAmount().getAmount().add(charge)))), request);
         }
 
         AtomicReference<Number> destSourceAmount = new AtomicReference<>(BigDecimal.ZERO);
@@ -118,6 +119,7 @@ public class RestController extends BaseController
         transaction.setUserInfo(request.getUserInfo());
         transaction.setPayload(request);
         transaction.setTransactionStatus(TransactionStatus.CREATED);
+        transaction.setType(request.getType());
 
         request.getSource().forEach((topupValue) -> {
 
@@ -156,11 +158,24 @@ public class RestController extends BaseController
         Map node = mapper.convertValue(response, Map.class);
         logger.debug(" {}", node);
 
+        Optional<Source> optionalSource = response.getData().getExternalReference() == null ? Optional.empty() :
+                sourceRepository.findById(response.getData().getExternalReference());
+        Optional<net.tospay.transaction.entities.Destination> optionalDestination =
+                response.getData().getExternalReference() == null ? Optional.empty() :
+                        destinationRepository.findById(response.getData().getExternalReference());
+        if (!optionalSource.isPresent() && !optionalDestination.isPresent()) {
+            logger.debug("no transaction found");
+            String status = ResponseCode.FAILURE.type;
+            String description = ResponseCode.FAILURE.name();
+            return new ResponseObject(status, description, Arrays.asList(new Error(status, description)),
+                    "no transaction found");
+        }
         boolean sta = fundService.processPaymentCallback(response.getData());
 
         if (!sta) {
-            Optional<Transaction> opt = transactionRepository.findById(response.getData().getExternalReference());
-            fundService.refundFloatingFundsToWallet(opt.get());
+            //Optional<Transaction> opt = transactionRepository.findById(response.getData().getExternalReference());
+            fundService.refundFloatingFundsToWallet(optionalSource.isPresent() ? optionalSource.get().getTransaction() :
+                    optionalDestination.get().getTransaction());
             String status = ResponseCode.FAILURE.type;
             String description = ResponseCode.FAILURE.name();
             return new ResponseObject(status, description, Arrays.asList(new Error(status, description)),

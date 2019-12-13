@@ -38,6 +38,7 @@ import net.tospay.transaction.models.Amount;
 import net.tospay.transaction.models.AsyncCallbackResponse;
 import net.tospay.transaction.models.Store;
 import net.tospay.transaction.models.StoreResponse;
+import net.tospay.transaction.models.UserInfo;
 import net.tospay.transaction.models.request.PaymentRequest;
 import net.tospay.transaction.models.request.PaymentSplitResponse;
 import net.tospay.transaction.models.request.TransactionIdRequest;
@@ -100,8 +101,6 @@ public class FundService extends BaseService
                 source.setTransactionStatus(TransactionStatus.PROCESSING);
                 TransferOutgoingRequest request = new TransferOutgoingRequest();
                 request.setAccount(source.getPayload().getAccount());
-                request.getAccount().setUserId(source.getTransaction().getUserInfo().getUserId());
-                request.getAccount().setUserType(source.getTransaction().getUserInfo().getTypeId());
                 request.setAction("SOURCE");
                 request.setAmount(source.getPayload().getTotal());
                 request.setExternalReference(source.getId());
@@ -124,9 +123,10 @@ public class FundService extends BaseService
                     //one success.. generate TR id
                     if (source.getTransaction().getTransactionId() == null) {
 
-                        Account merchantInfo = source.getTransaction().getPayload().getDelivery().get(0).getAccount();
-                        ResponseObject<String> tr = generateTransactionId(merchantInfo.getUserType(),
-                                source.getTransaction().getPayload().getType(), merchantInfo.getCountry().getIso());
+                    //    Account merchantInfo = source.getTransaction().getPayload().getDelivery().get(0).getAccount();
+                        UserInfo userInfo = source.getTransaction().getPayload().getUserInfo();
+                        ResponseObject<String> tr = generateTransactionId(userInfo.getTypeId(),
+                                source.getTransaction().getPayload().getType(), userInfo.getCountry().getIso());
                         if (tr != null && ResponseCode.SUCCESS.type.equals(tr.getStatus())) {
                             logger.debug("transaction id {}", tr.getData());
                             source.getTransaction().setTransactionId(tr.getData());
@@ -521,8 +521,6 @@ public class FundService extends BaseService
 
             TransferOutgoingRequest request = new TransferOutgoingRequest();
             request.setAccount(destination.getPayload().getAccount());
-            request.getAccount().setUserId(destination.getTransaction().getUserInfo().getUserId());
-            request.getAccount().setUserType(destination.getTransaction().getUserInfo().getTypeId());
             request.setAction("DESTINATION");
             request.setAmount(destination.getPayload().getTotal());
             request.setExternalReference(destination.getId());

@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -18,16 +16,9 @@ import org.springframework.web.client.RestTemplate;
 import net.tospay.transaction.entities.Destination;
 import net.tospay.transaction.entities.Source;
 import net.tospay.transaction.entities.Transaction;
-import net.tospay.transaction.enums.OrderType;
-import net.tospay.transaction.enums.ResponseCode;
 import net.tospay.transaction.enums.TransactionStatus;
-import net.tospay.transaction.enums.TransactionType;
 import net.tospay.transaction.models.request.NotifyTransferOutgoingRequest;
 import net.tospay.transaction.models.request.NotifyTransferOutgoingSenderRequest;
-import net.tospay.transaction.models.request.PaymentRequest;
-import net.tospay.transaction.models.request.PaymentSplitResponse;
-import net.tospay.transaction.models.response.Error;
-import net.tospay.transaction.models.response.ResponseObject;
 import net.tospay.transaction.repositories.DestinationRepository;
 import net.tospay.transaction.repositories.SourceRepository;
 import net.tospay.transaction.repositories.TransactionRepository;
@@ -46,7 +37,6 @@ public class NotifyService extends BaseService
 
     @Value("${notify.transfer.url}")
     String notifyTransferUrl;
-
 
     DateTimeFormatter FOMATTER = DateTimeFormatter.ofPattern("d MMM yyyy h:mm a");
 
@@ -73,9 +63,7 @@ public class NotifyService extends BaseService
 
                 logger.debug("notifyDestination {}", d.getId());
                 notifyGateway(d);
-
             });
-
         } catch (Exception e) {
             logger.error("", e);
             return;
@@ -129,15 +117,15 @@ public class NotifyService extends BaseService
         });
         request.setSenders(list1.size() > 0 ? list1 : null);
         List<NotifyTransferOutgoingSenderRequest> list2 = new ArrayList<>();
-        entity.getTransaction().getSources().forEach(ds -> {
+        entity.getTransaction().getDestinations().forEach(ds -> {
 
-            NotifyTransferOutgoingSenderRequest sender =
-                    new NotifyTransferOutgoingSenderRequest(
-                            String.valueOf(ds.getPayload().getAccount().getUserId()),
-                            String.valueOf(ds.getPayload().getAccount().getUserType()));
+            NotifyTransferOutgoingSenderRequest receiver =
+                    new NotifyTransferOutgoingSenderRequest();
+            receiver.setReceiverId(String.valueOf(ds.getPayload().getAccount().getUserId()));
+            receiver.setReceiverType(String.valueOf(ds.getPayload().getAccount().getUserType()));
 //                                    sender.setSenderName(s.getAccount()!=null?s.getAccount().getName():null);
 //                                    sender.setSenderEmail(s.getAccount()!=null?s.getAccount().getEmail():null);
-            list2.add(sender);
+            list2.add(receiver);
         });
         request.setReceivers(list2.size() > 0 ? list2 : null);
 
@@ -165,5 +153,4 @@ public class NotifyService extends BaseService
             return null;
         }
     }
-
 }
