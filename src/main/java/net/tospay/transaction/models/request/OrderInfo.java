@@ -1,46 +1,42 @@
 package net.tospay.transaction.models.request;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class OrderInfo
+import net.tospay.transaction.enums.OrderType;
+import net.tospay.transaction.models.Amount;
+import net.tospay.transaction.models.BaseModel;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class OrderInfo extends BaseModel
 {
+    @JsonProperty("type")
+    private OrderType type;
+
     @JsonProperty("amount")
-    private Double amount;
-    @JsonProperty("currency")
-    private String currency;
-    @JsonProperty("description")
-    private String description;
+    private Amount amount;
+
     @JsonProperty("reference")
     private String reference;
 
-    public Double getAmount()
+    public OrderType getType()
+    {
+        return type;
+    }
+
+    public void setType(OrderType type)
+    {
+        this.type = type;
+    }
+
+    public Amount getAmount()
     {
         return amount;
     }
 
-    public void setAmount(Double amount)
+    public void setAmount(Amount amount)
     {
         this.amount = amount;
-    }
-
-    public String getCurrency()
-    {
-        return currency;
-    }
-
-    public void setCurrency(String currency)
-    {
-        this.currency = currency;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription(String description)
-    {
-        this.description = description;
     }
 
     public String getReference()
@@ -52,18 +48,4 @@ public class OrderInfo
     {
         this.reference = reference;
     }
-
-    public Amount getCharge()
-    {
-        return charge;
-    }
-
-    public void setCharge(Amount charge)
-    {
-        this.charge = charge;
-    }
-
-    @JsonProperty("charge")
-    private Amount charge;
-
-  }
+}

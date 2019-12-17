@@ -1,56 +1,211 @@
 package net.tospay.transaction.models.response;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import net.tospay.transaction.entities.Destination;
 import net.tospay.transaction.entities.Source;
+import net.tospay.transaction.enums.AccountType;
+import net.tospay.transaction.enums.OrderType;
+import net.tospay.transaction.enums.TransactionType;
 import net.tospay.transaction.util.Utils;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransactionFetchResponse
 {
     @JsonProperty("transactionId")
-    private String transactionId;
+    private String transactionId;//friendly name
 
     @JsonProperty("tId")
-    private String tId;
-
-    public String gettId()
-    {
-        return tId;
-    }
-
-    public void settId(String tId)
-    {
-        this.tId = tId;
-    }
+    private UUID tId;
 
     @JsonProperty("transactionTransferId")
-    private String transactionTransferId;//source/destination id
-    @JsonProperty("type")
-    private String type;
+    private UUID transactionTransferId;//source/destination id
 
-    @JsonProperty("source_channel")
-    private String sourceChannel;
+    @JsonProperty("type")
+    private TransactionType type;
+
+    @JsonProperty("orderType")
+    private OrderType orderType;//qr split etc..
+
+    @JsonProperty("sourceChannel")
+    private AccountType sourceChannel;
 
     @JsonProperty("amount")
-    private Double amount;
+    private Number amount;
 
     @JsonProperty("currency")
     private String currency;
 
     @JsonProperty("charge")
-    private String charge;
+    private Number charge;
+
+    @JsonProperty("accountName")
+    private String accountName;
+
+    @JsonProperty("profile_pic")
+    private String profilePic;
+
+    @JsonProperty("dateCreatedFormatted")
+    private String dateCreatedFormatted;
 
     @JsonProperty("date_created")
-    private Date dateCreated;
+    private LocalDateTime dateCreated;
 
-    public String getDateCreatedFormatted()
+    @JsonProperty("date_updated")
+    private LocalDateTime dateUpdated;
+
+    @JsonProperty("status")
+    private String status;
+
+    @JsonProperty("description")
+    private String description;
+
+    @JsonProperty("operation")
+    private String operation;//debit/credit
+
+    public static TransactionFetchResponse from(Source s)
     {
-        return dateCreatedFormatted;
+        TransactionFetchResponse res = new TransactionFetchResponse();
+        res.setAmount(s.getPayload().getTotal().getAmount());
+        res.setCurrency(s.getPayload().getTotal().getCurrency());
+        if (s.getPayload().getCharge() != null) {
+            res.setCharge(s.getPayload().getCharge().getAmount());
+        }
+        res.setDateCreated(s.getDateCreated());
+        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated()));
+        res.setDateUpdated(s.getDateModified());
+//        if(s.getPayload().getAccount().getCountry() !=null){
+//            final List<String> timeZones = Stream.of(TimeZone.getAvailableIDs())
+//                    .filter(zoneId -> zoneId.startsWith(s.getPayload().getAccount().getCountry().getIso())).collect(
+//                            Collectors.toList());
+//            String date =  Utils.FORMATTER.format(s.getDateCreated().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of(timeZones.get(0))) .toLocalDateTime());
+//            res.setDateCreatedFormatted(date);
+//
+//        }
+        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated().atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(ZoneId.of("Africa/Nairobi")).toLocalDateTime()));
+
+        res.setTransactionId(s.getTransaction().getTransactionId());
+        res.setTransactionTransferId(s.getId());
+        res.settId(s.getTransaction().getId());
+        res.setSourceChannel(s.getPayload().getAccount().getType());
+        res.setType(s.getTransaction().getPayload().getType());
+        res.setSubType(s.getTransaction().getPayload().getOrderInfo().getType());
+        res.setAccountName(s.getPayload().getAccount().getName());
+        res.setProfilePic(s.getPayload().getAccount().getProfilePic());
+        res.setOperation("Debit");
+        // res.setDescription();
+        res.setStatus(s.getTransactionStatus().name());
+
+        return res;
+    }
+
+    public static TransactionFetchResponse from(Destination s)
+    {
+        TransactionFetchResponse res = new TransactionFetchResponse();
+        res.setAmount(s.getPayload().getTotal().getAmount());
+        res.setCurrency(s.getPayload().getTotal().getCurrency());
+        if (s.getPayload().getCharge() != null) {
+            res.setCharge(s.getPayload().getCharge().getAmount());
+        }
+
+        res.setDateCreated(s.getDateCreated());
+        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated()));
+        res.setDateUpdated(s.getDateModified());
+//        if(s.getPayload().getAccount().getCountry() !=null){
+//            final List<String> timeZones = Stream.of(TimeZone.getAvailableIDs())
+//                    .filter(zoneId -> zoneId.startsWith(s.getPayload().getAccount().getCountry().getIso())).collect(
+//                            Collectors.toList());
+//            String date =  Utils.FORMATTER.format(s.getDateCreated().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of(timeZones.get(0))) .toLocalDateTime());
+//            res.setDateCreatedFormatted(date);
+//
+//        }
+        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated().atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(ZoneId.of("Africa/Nairobi")).toLocalDateTime()));
+
+        res.setTransactionId(s.getTransaction().getTransactionId());
+        res.setTransactionTransferId(s.getId());
+        res.settId(s.getTransaction().getId());
+        res.setSourceChannel(s.getPayload().getAccount().getType());
+        res.setType(s.getTransaction().getPayload().getType());
+        res.setSubType(s.getTransaction().getPayload().getOrderInfo().getType());
+        res.setAccountName(s.getPayload().getAccount().getName());
+        res.setProfilePic(s.getPayload().getAccount().getProfilePic());
+        res.setOperation("Credit");
+        // res.setDescription();
+        res.setStatus(s.getTransactionStatus().name());
+
+        return res;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+    public String getOperation()
+    {
+        return operation;
+    }
+
+    public void setOperation(String operation)
+    {
+        this.operation = operation;
+    }
+
+    public OrderType getOrderType()
+    {
+        return orderType;
+    }
+
+    public void setOrderType(OrderType orderType)
+    {
+        this.orderType = orderType;
+    }
+
+    public void setSubType(OrderType orderType)
+    {
+        this.orderType = orderType;
+    }
+
+    public String getAccountName()
+    {
+        return accountName;
+    }
+
+    public void setAccountName(String accountName)
+    {
+        this.accountName = accountName;
+    }
+
+    public String getProfilePic()
+    {
+        return profilePic;
+    }
+
+    public void setProfilePic(String profilePic)
+    {
+        this.profilePic = profilePic;
+    }
+
+    public UUID gettId()
+    {
+        return tId;
+    }
+
+    public void settId(UUID tId)
+    {
+        this.tId = tId;
     }
 
     public void setDateCreatedFormatted(String dateCreatedFormatted)
@@ -58,41 +213,32 @@ public class TransactionFetchResponse
         this.dateCreatedFormatted = dateCreatedFormatted;
     }
 
-    @JsonProperty("date_created_formatted")
-    private String dateCreatedFormatted;
-
-    @JsonProperty("date_updated")
-    private Date dateUpdated;
-
-    @JsonProperty("status")
-    private String status;
-
-    public String getType()
+    public TransactionType getType()
     {
         return type;
     }
 
-    public void setType(String type)
+    public void setType(TransactionType type)
     {
         this.type = type;
     }
 
-    public String getSourceChannel()
+    public AccountType getSourceChannel()
     {
         return sourceChannel;
     }
 
-    public void setSourceChannel(String sourceChannel)
+    public void setSourceChannel(AccountType sourceChannel)
     {
         this.sourceChannel = sourceChannel;
     }
 
-    public Double getAmount()
+    public Number getAmount()
     {
         return amount;
     }
 
-    public void setAmount(Double amount)
+    public void setAmount(Number amount)
     {
         this.amount = amount;
     }
@@ -107,32 +253,32 @@ public class TransactionFetchResponse
         this.currency = currency;
     }
 
-    public String getCharge()
+    public Number getCharge()
     {
         return charge;
     }
 
-    public void setCharge(String charge)
+    public void setCharge(Number charge)
     {
         this.charge = charge;
     }
 
-    public Date getDateCreated()
+    public LocalDateTime getDateCreated()
     {
         return dateCreated;
     }
 
-    public void setDateCreated(Date dateCreated)
+    public void setDateCreated(LocalDateTime dateCreated)
     {
         this.dateCreated = dateCreated;
     }
 
-    public Date getDateUpdated()
+    public LocalDateTime getDateUpdated()
     {
         return dateUpdated;
     }
 
-    public void setDateUpdated(Date dateUpdated)
+    public void setDateUpdated(LocalDateTime dateUpdated)
     {
         this.dateUpdated = dateUpdated;
     }
@@ -157,48 +303,13 @@ public class TransactionFetchResponse
         this.transactionId = transactionId;
     }
 
-    public String getTransactionTransferId()
+    public UUID getTransactionTransferId()
     {
         return transactionTransferId;
     }
 
-    public void setTransactionTransferId(String transactionTransferId)
+    public void setTransactionTransferId(UUID transactionTransferId)
     {
         this.transactionTransferId = transactionTransferId;
-    }
-
-    public static TransactionFetchResponse from(Source s){
-        TransactionFetchResponse res = new TransactionFetchResponse();
-        res.setAmount(s.getAmount());
-        res.setCharge(s.getCharge().toString());
-        res.setCurrency(s.getCurrency());
-        res.setDateCreated(s.getDateCreated());
-        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated().toLocalDateTime()));
-        res.setDateUpdated(s.getDateModified());
-        res.setTransactionId(s.getTransaction().getTransactionId());
-        res.setTransactionTransferId(s.getId().toString());
-        res.settId(s.getTransaction().getId().toString());
-        res.setSourceChannel(s.getType().name());
-        res.setType(s.getTransaction().getTransactionType().name());
-        res.setStatus(s.getTransactionStatus().name());
-
-        return res;
-    }
-    public static TransactionFetchResponse from(Destination s){
-        TransactionFetchResponse res = new TransactionFetchResponse();
-        res.setAmount(s.getAmount());
-        res.setCharge(s.getCharge().toString());
-        res.setCurrency(s.getCurrency());
-        res.setDateCreated(s.getDateCreated());
-        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated().toLocalDateTime()));
-        res.setDateUpdated(s.getDateModified());
-        res.setTransactionId(s.getTransaction().getTransactionId());
-        res.setTransactionTransferId(s.getId().toString());
-        res.settId(s.getTransaction().getId().toString());
-        res.setSourceChannel(s.getType().name());
-        res.setType(s.getTransaction().getTransactionType().name());
-        res.setStatus(s.getTransactionStatus().name());
-
-        return res;
     }
 }

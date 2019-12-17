@@ -7,19 +7,16 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import net.tospay.transaction.enums.Transfer;
+import net.tospay.transaction.enums.AccountType;
+import net.tospay.transaction.models.Amount;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "account",
-        "platform",
-        "id",
-        "channel"
-})
+@JsonIgnoreProperties(ignoreUnknown = true)
+
 public class Source implements Serializable
 {
     private final static long serialVersionUID = -9078608771772465581L;
@@ -34,7 +31,7 @@ public class Source implements Serializable
     private String id;
 
     @JsonProperty("channel")
-    private Transfer.SourceType channel;
+    private AccountType channel;
 
     @JsonProperty("amount")
     private Amount amount;
@@ -62,13 +59,11 @@ public class Source implements Serializable
         this.platform = platform;
     }
 
-    @JsonProperty("account")
     public Map<String, Object> getAccount()
     {
         return account;
     }
 
-    @JsonProperty("account")
     public void setAccount(Map<String, Object> account)
     {
         this.account = account;
@@ -99,18 +94,18 @@ public class Source implements Serializable
     }
 
     @JsonProperty("from")
-    public Transfer.SourceType getChannel()
+    public AccountType getChannel()
     {
         return channel;
     }
 
     @JsonProperty("from")
-    public void setChannel(Transfer.SourceType channel)
+    public void setChannel(AccountType channel)
     {
         this.channel = channel;
     }
 
-    public Source withChannel(Transfer.SourceType channel)
+    public Source withChannel(AccountType channel)
     {
         this.channel = channel;
         return this;

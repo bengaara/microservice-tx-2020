@@ -10,15 +10,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import net.tospay.transaction.enums.Transfer;
-import net.tospay.transaction.models.response.MerchantInfo;
+import net.tospay.transaction.enums.TransactionType;
+import net.tospay.transaction.models.Account;
+import net.tospay.transaction.models.BaseModel;
+import net.tospay.transaction.models.DeviceInfo;
+import net.tospay.transaction.models.UserInfo;
+import net.tospay.transaction.models.MerchantInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "sources",
         "delivery"
 })
-public class TransferOutgoinBankRequest
+public class TransferOutgoinBankRequest  extends BaseModel
 {
     @JsonProperty("orderInfo")
     private TransferOutgoingRequest orderInfo;
@@ -46,20 +50,20 @@ public class TransferOutgoinBankRequest
     private Account account;
 
     @JsonProperty("amount")
-    private Double amount;
+    private Number amount;
 
     @JsonProperty("currency")
     private String currency;
 
     @JsonProperty("type")
-    private Transfer.TransactionType type;
+    private TransactionType type;
 
-    public Transfer.TransactionType getType()
+    public TransactionType getType()
     {
         return type;
     }
 
-    public void setType(Transfer.TransactionType type)
+    public void setType(TransactionType type)
     {
         this.type = type;
     }
@@ -104,12 +108,12 @@ public class TransferOutgoinBankRequest
         this.account = account;
     }
 
-    public Double getAmount()
+    public Number getAmount()
     {
         return amount;
     }
 
-    public void setAmount(Double amount)
+    public void setAmount(Number amount)
     {
         this.amount = amount;
     }

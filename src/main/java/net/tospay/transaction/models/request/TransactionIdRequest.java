@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.Transfer;
+import net.tospay.transaction.enums.TransactionType;
+import net.tospay.transaction.enums.UserType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -18,10 +18,10 @@ public class TransactionIdRequest implements Serializable
     private String country;
 
     @JsonProperty("transaction_type")
-    private Transfer.TransactionType transactionType;
+    private TransactionType transactionType;
 
     @JsonProperty("account_type")
-    private AccountType accountType;
+    private UserType userType;
 
     public String getCountry()
     {
@@ -33,23 +33,23 @@ public class TransactionIdRequest implements Serializable
         this.country = country;
     }
 
-    public Transfer.TransactionType getTransactionType()
+    public TransactionType getTransactionType()
     {
         return transactionType;
     }
 
-    public void setTransactionType(Transfer.TransactionType transactionType)
+    public void setTransactionType(TransactionType transactionType)
     {
         this.transactionType = transactionType;
     }
 
-    public AccountType getAccountType()
+    public UserType getUserType()
     {
-        return accountType;
+        return userType;
     }
 
-    public void setAccountType(AccountType accountType)
+    public void setUserType(UserType userType)
     {
-        this.accountType = accountType;
+        this.userType = userType;
     }
 }

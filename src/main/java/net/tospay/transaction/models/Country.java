@@ -1,4 +1,4 @@
-package net.tospay.transaction.models.request;
+package net.tospay.transaction.models;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -12,20 +12,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "id",
-        "iso",
-        "name",
-        "nicename",
-        "iso3",
-        "numcode",
-        "phonecode",
-        "currency"
-})
-public class Country implements Serializable
-{
-    private final static long serialVersionUID = 7387601059382747089L;
 
+public class Country  extends BaseModel
+{
     @JsonProperty("id")
     private String id;
 

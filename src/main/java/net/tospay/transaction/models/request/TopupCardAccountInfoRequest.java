@@ -2,6 +2,9 @@ package net.tospay.transaction.models.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import net.tospay.transaction.models.Address;
+import net.tospay.transaction.models.Country;
+
 public class TopupCardAccountInfoRequest
 {
     @JsonProperty("user_id")

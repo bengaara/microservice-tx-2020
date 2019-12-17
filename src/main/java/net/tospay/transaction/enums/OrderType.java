@@ -5,17 +5,18 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-public enum AccountType
+public enum OrderType
 {
-    MOBILE("MOBILE"),
-    BANK("BANK"),
-    WALLET("WALLET"),
-    CARD("CARD");
 
-    private static final Map<String, AccountType> LABEL = new HashMap<>();
+    QR("QR"),
+    INVOICE("INVOICE"),
+    PAYBILL("PAYBILL"),
+    SPLIT("SPLIT");
+
+    private static final Map<String, OrderType> LABEL = new HashMap<>();
 
     static {
-        for (AccountType e : AccountType.values()) {
+        for (OrderType e : OrderType.values()) {
             LABEL.put(e.type, e);
         }
     }
@@ -24,14 +25,15 @@ public enum AccountType
 
     // ... fields, constructor, methods
 
-    AccountType(String type)
+    OrderType(String type)
     {
         this.type = type;
     }
 
     @JsonCreator
-    public static AccountType valueOfType(String label)
+    public static OrderType valueOfType(String label)
     {
+
         label = label.toUpperCase();
         return LABEL.get(label);
     }

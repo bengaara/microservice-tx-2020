@@ -11,8 +11,6 @@ import com.vladmihalcea.hibernate.type.json.JsonNodeBinaryType;
 import com.vladmihalcea.hibernate.type.json.JsonNodeStringType;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
-import net.tospay.transaction.models.request.Account;
-
 public class CustomPostgreSQLDialect extends PostgreSQL95Dialect
 {
     public CustomPostgreSQLDialect()

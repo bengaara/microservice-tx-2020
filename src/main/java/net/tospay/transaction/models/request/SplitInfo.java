@@ -2,10 +2,12 @@ package net.tospay.transaction.models.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import net.tospay.transaction.models.Amount;
+
 public class SplitInfo
 {
     @JsonProperty("amount")
-    private Double amount;
+    private Number amount;
 
     @JsonProperty("currency")
     private String currency;
@@ -19,12 +21,12 @@ public class SplitInfo
     @JsonProperty("charge")
     private Amount charge;
 
-    public Double getAmount()
+    public Number getAmount()
     {
         return amount;
     }
 
-    public void setAmount(Double amount)
+    public void setAmount(Number amount)
     {
         this.amount = amount;
     }

@@ -1,4 +1,4 @@
-package net.tospay.transaction.models.request;
+package net.tospay.transaction.models;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -12,22 +12,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import net.tospay.transaction.enums.AccountType;
+import net.tospay.transaction.enums.UserType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "user_id",
-        "type_id",
-        "email",
-        "email_verified",
-        "name",
-        "phone",
-        "phone_verified",
-        "profile_pic",
-        "country",
-        "address"
-})
-public class UserInfo implements Serializable
+
+public class UserInfo  extends BaseModel
 {
     private final static long serialVersionUID = -1250620497979241622L;
 
@@ -35,7 +24,8 @@ public class UserInfo implements Serializable
     private UUID userId;
 
     @JsonProperty("type_id")
-    private AccountType typeId;
+    private UserType typeId;
+
 
     @JsonProperty("email")
     private String email;
@@ -83,18 +73,18 @@ public class UserInfo implements Serializable
     }
 
     @JsonProperty("type_id")
-    public AccountType getTypeId()
+    public UserType getTypeId()
     {
         return typeId;
     }
 
     @JsonProperty("type_id")
-    public void setTypeId(AccountType typeId)
+    public void setTypeId(UserType typeId)
     {
         this.typeId = typeId;
     }
 
-    public UserInfo withTypeId(AccountType typeId)
+    public UserInfo withTypeId(UserType typeId)
     {
         this.typeId = typeId;
         return this;

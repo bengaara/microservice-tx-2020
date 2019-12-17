@@ -9,14 +9,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import net.tospay.transaction.entities.Destination;
-import net.tospay.transaction.enums.AccountType;
 
 @Repository
 public interface DestinationRepository extends BaseRepositoryInterface<Destination, UUID>
 {
     Optional<Destination> findById(UUID uuid);
 
-    ArrayList<Destination> findByUserIdAndUserType(UUID userId, AccountType userType, Pageable pageable);
-
-
+    @Query(value = "select * from destinations where payload ->'account'->>'user_id' = :userId", nativeQuery = true)
+    ArrayList<Destination> findByUserId(String userId, Pageable pageable);
 }

@@ -1,12 +1,14 @@
 package net.tospay.transaction.entities;
 
-import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -19,276 +21,177 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import net.tospay.transaction.configs.HashMapConverter;
-import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.Transfer;
-import net.tospay.transaction.models.request.Account;
+import net.tospay.transaction.enums.TransactionStatus;
+import net.tospay.transaction.models.Store;
 
 @Entity
 @Table(name = "destinations",
         uniqueConstraints =
         @UniqueConstraint(columnNames = { "id" }))
 @JsonIgnoreProperties
-public class Destination
+public class Destination extends BaseSource
 {
-    public static final String ID = "id";
-
-    public static final String TYPE = "type";
-
-    public static final String USER_TYPE = "user_type";
-
-    public static final String USER_ID = "user_id";
-
-    public static final String ACCOUNT = "account";
-
-    public static final String AMOUNT = "amount";
-
-    public static final String CHARGE = "charge";
-
-
-    public static final String RESPONSE = "response";
-
-    public static final String CURRENCY ="currency" ;
-
-    public static final String STATUS = "status";
-
-    public static final String RESPONSE_ASYNC = "response_async";
-
-    public static final String TRANSACTION = "transaction";
-
-    public static final String DATE_CREATED ="date_created" ;
-
-    public static final String DATE_MODIFIED ="date_modified" ;
-
-    public static final String DATE_RESPONSE = "date_response";
-
-    @Id
-    @Column(name = ID, columnDefinition = "uuid default gen_random_uuid()", updatable = false)
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = TYPE, nullable = false)
-    private Transfer.SourceType type;
-
-    @Column(name = USER_TYPE, nullable = false)
-    private AccountType userType;
-
-    @Column(name = USER_ID, nullable = false)
-    private UUID userId;
-
-    @Column(name = ACCOUNT, columnDefinition = "jsonb")
-    @Type(type = "jsonb")
-    private Account account;
-
-    @Column(name = AMOUNT, nullable = false)
-    private Double amount;
-
-    @Column(name = CHARGE)
-    private Double charge;
-
-    @Column(name = CURRENCY, nullable = false)
-    private String currency;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = STATUS, nullable = false)
-    private Transfer.TransactionStatus transactionStatus = Transfer.TransactionStatus.CREATED;
-
-    @Column(name = RESPONSE, columnDefinition = "jsonb")
-    @Convert(converter = HashMapConverter.class)
-    private Map<String, Object> response;
-
-    @Column(name = RESPONSE_ASYNC, columnDefinition = "jsonb")
-    @Convert(converter = HashMapConverter.class)
-    private Map<String, Object> responseAsync;
-
-    @Column(name = DATE_CREATED, nullable = false)
-    private Timestamp dateCreated;
-
-    @Column(name = DATE_MODIFIED, nullable = false)
-    private Timestamp dateModified;
-
-    @Column(name = DATE_RESPONSE)
-    private Timestamp dateResponse;
-
-    @ManyToOne
-    @JoinColumn(name = TRANSACTION)
-    private Transaction transaction;
-
-
-    public Destination()
-    {
-    }
-
-    public Timestamp getDateResponse()
-    {
-        return dateResponse;
-    }
-
-    public void setDateResponse(Timestamp dateResponse)
-    {
-        this.dateResponse = dateResponse;
-    }
-
-    public Transfer.SourceType getType()
-    {
-        return type;
-    }
-
-    public void setType(Transfer.SourceType type)
-    {
-        this.type = type;
-    }
-
-    public AccountType getUserType()
-    {
-        return userType;
-    }
-
-    public void setUserType(AccountType userType)
-    {
-        this.userType = userType;
-    }
-
-    public UUID getUserId()
-    {
-        return userId;
-    }
-
-    public void setUserId(UUID userId)
-    {
-        this.userId = userId;
-    }
-
-    public Account getAccount()
-    {
-        return account;
-    }
-
-    public void setAccount(Account account)
-    {
-
-        this.account = account;
-    }
-
-    public Double getAmount()
-    {
-        return amount;
-    }
-
-    public void setAmount(Double amount)
-    {
-        this.amount = amount;
-    }
-
-    public Double getCharge()
-    {
-        return charge;
-    }
-
-    public void setCharge(Double charge)
-    {
-        this.charge = charge;
-    }
-
-    public String getCurrency()
-    {
-        return currency;
-    }
-
-    public void setCurrency(String currency)
-    {
-        this.currency = currency;
-    }
-
-    public Transfer.TransactionStatus getTransactionStatus()
-    {
-        return transactionStatus;
-    }
-
-    public void setTransactionStatus(Transfer.TransactionStatus transactionStatus)
-    {
-        this.transactionStatus = transactionStatus;
-    }
-
-    public Map<String, Object> getResponse()
-    {
-        return response;
-    }
-
-    public void setResponse(Map<String, Object> response)
-    {
-        this.response = response;
-    }
-
-    public Map<String, Object> getResponseAsync()
-    {
-        return responseAsync;
-    }
-
-    public void setResponseAsync(Map<String, Object> responseAsync)
-    {
-        this.responseAsync = responseAsync;
-    }
-
-    public Timestamp getDateCreated()
-    {
-        return dateCreated;
-    }
-
-    public void setDateCreated(Timestamp dateCreated)
-    {
-        this.dateCreated = dateCreated;
-    }
-
-    public Timestamp getDateModified()
-    {
-        return dateModified;
-    }
-
-    public void setDateModified(Timestamp dateModified)
-    {
-        this.dateModified = dateModified;
-    }
-
-    public Transaction getTransaction()
-    {
-        return transaction;
-    }
-
-    public void setTransaction(Transaction transaction)
-    {
-        this.transaction = transaction;
-    }
-
-
-    public UUID getId()
-    {
-        return id;
-    }
-
-
-    public void setId(UUID id)
-    {
-        this.id = id;
-    }
-
-    @PreUpdate
-    protected void preUpdate()
-    {
-        dateModified = new Timestamp(System.currentTimeMillis());
-    }
-
-    @PrePersist
-    protected void prePersist()
-    {
-        dateCreated = new Timestamp(System.currentTimeMillis());
-        dateModified = dateCreated;
-    }
+        @Id
+        @Column(name = "id", columnDefinition = "uuid default gen_random_uuid()", updatable = false)
+        @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+        @GeneratedValue(strategy = GenerationType.AUTO)
+        private UUID id;
+
+        @Column(name = "payload", columnDefinition = "jsonb")
+        @Type(type = "jsonb")
+        private Store payload;
+
+        @Column(name = "date_refunded")
+        private LocalDateTime dateRefunded;
+
+        @Column(name = "retry_count", nullable = false)
+        private int retryCount = 0;
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "status", nullable = false)
+        private TransactionStatus transactionStatus = TransactionStatus.CREATED;
+
+        @Column(name = "response", columnDefinition = "jsonb")
+        @Type(type = "jsonb")
+        @NotNull private Map<LocalDateTime, Object> response = new HashMap<>();
+
+        @ElementCollection
+        @Column(name = "date_request")
+        @NotNull private List<LocalDateTime> dateRequest = new ArrayList<>();
+
+        @Column(name = "response_async", columnDefinition = "jsonb")
+        @Type(type = "jsonb")
+        @NotNull private Map<LocalDateTime, Object> responseAsync = new HashMap<>();
+
+        @Column(name = DATE_CREATED, nullable = false)
+        private LocalDateTime dateCreated;
+
+        @Column(name = "date_modified", nullable = false)
+        private LocalDateTime dateModified;
+
+        @JsonIgnore
+        @ManyToOne
+        @JoinColumn(name = "transaction")
+        private net.tospay.transaction.entities.Transaction transaction;
+
+        public Destination()
+        {
+        }
+
+        public LocalDateTime getDateRefunded()
+        {
+                return dateRefunded;
+        }
+
+        public void setDateRefunded(LocalDateTime dateRefunded)
+        {
+                this.dateRefunded = dateRefunded;
+        }
+
+        public int getRetryCount()
+        {
+                return retryCount;
+        }
+
+        public void setRetryCount(int retryCount)
+        {
+                this.retryCount = retryCount;
+        }
+
+        public Store getPayload()
+        {
+                return payload;
+        }
+
+        public void setPayload(Store payload)
+        {
+                this.payload = payload;
+        }
+
+        public TransactionStatus getTransactionStatus()
+        {
+                return transactionStatus;
+        }
+
+        public void setTransactionStatus(TransactionStatus transactionStatus)
+        {
+                this.transactionStatus = transactionStatus;
+        }
+
+        public Map<LocalDateTime, Object> getResponse()
+        {
+                return response;
+        }
+
+        public List<LocalDateTime> getDateRequest()
+        {
+                return dateRequest;
+        }
+
+        public Map<LocalDateTime, Object> getResponseAsync()
+        {
+                return responseAsync;
+        }
+
+        public LocalDateTime getDateCreated()
+        {
+                return dateCreated;
+        }
+
+        public void setDateCreated(LocalDateTime dateCreated)
+        {
+                this.dateCreated = dateCreated;
+        }
+
+        public LocalDateTime getDateModified()
+        {
+                return dateModified;
+        }
+
+        public void setDateModified(LocalDateTime dateModified)
+        {
+                this.dateModified = dateModified;
+        }
+
+        public Transaction getTransaction()
+        {
+                return transaction;
+        }
+
+        public void setTransaction(Transaction transaction)
+        {
+                this.transaction = transaction;
+        }
+
+        @Override
+        public UUID getId()
+        {
+                return id;
+        }
+
+        @Override
+        public void setId(UUID id)
+        {
+                this.id = id;
+        }
+
+        @PreUpdate
+        protected void preUpdate()
+        {
+                dateModified = LocalDateTime.now();//System.currentTimeMillis();
+        }
+
+        @PrePersist
+        protected void prePersist()
+        {
+                dateCreated = LocalDateTime.now();//new Timestamp(System.currentTimeMillis());
+                dateModified = dateCreated;
+        }
 }

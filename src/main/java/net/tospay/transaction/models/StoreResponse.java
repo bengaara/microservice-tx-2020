@@ -1,4 +1,4 @@
-package net.tospay.transaction.models.response;
+package net.tospay.transaction.models;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -13,26 +13,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.Transfer;
+import net.tospay.transaction.enums.TransactionStatus;
+import net.tospay.transaction.enums.UserType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-})
-public class TransferIncomingResponse implements Serializable
+public class StoreResponse  extends BaseModel
 {
     private final static long serialVersionUID = -9078608771772465581L;
 
     @JsonProperty("channel")
-    private Transfer.SourceType channel;
+    private AccountType channel;
 
     @JsonProperty("user_id")
     private UUID userId;
 
-    @JsonProperty("user_type")
-    private AccountType userType;
+    @JsonProperty("amount")
+    private Amount amount;
 
-    @JsonProperty("transaction")
-    private TopupMobileTransactionResponse transaction;
+    @JsonProperty("user_type")
+    private UserType userType;
+
+    @JsonProperty("status")
+    private TransactionStatus status;
 
     @JsonProperty("reason")
     private String reason;
@@ -48,24 +50,34 @@ public class TransferIncomingResponse implements Serializable
         return serialVersionUID;
     }
 
-    public Transfer.SourceType getChannel()
+    public Amount getAmount()
+    {
+        return amount;
+    }
+
+    public void setAmount(Amount amount)
+    {
+        this.amount = amount;
+    }
+
+    public TransactionStatus getStatus()
+    {
+        return status;
+    }
+
+    public void setStatus(TransactionStatus status)
+    {
+        this.status = status;
+    }
+
+    public AccountType getChannel()
     {
         return channel;
     }
 
-    public void setChannel(Transfer.SourceType channel)
+    public void setChannel(AccountType channel)
     {
         this.channel = channel;
-    }
-
-    public TopupMobileTransactionResponse getTransaction()
-    {
-        return transaction;
-    }
-
-    public void setTransaction(TopupMobileTransactionResponse transaction)
-    {
-        this.transaction = transaction;
     }
 
     public String getReason()
@@ -98,12 +110,12 @@ public class TransferIncomingResponse implements Serializable
         this.userId = userId;
     }
 
-    public AccountType getUserType()
+    public UserType getUserType()
     {
         return userType;
     }
 
-    public void setUserType(AccountType userType)
+    public void setUserType(UserType userType)
     {
         this.userType = userType;
     }
@@ -125,7 +137,7 @@ public class TransferIncomingResponse implements Serializable
         this.additionalProperties.put(name, value);
     }
 
-    public TransferIncomingResponse withAdditionalProperty(String name, Object value)
+    public StoreResponse withAdditionalProperty(String name, Object value)
     {
         this.additionalProperties.put(name, value);
         return this;

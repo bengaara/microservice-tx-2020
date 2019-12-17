@@ -5,20 +5,43 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import net.tospay.transaction.enums.Transfer;
-import net.tospay.transaction.models.response.MerchantInfo;
-import net.tospay.transaction.models.response.UserInfo;
+import net.tospay.transaction.enums.TransactionStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PaymentSplitRequest
+public class PaymentRequest
 {
+
     @JsonProperty("email") String email;
 
     @JsonProperty("merchant") UUID merchant;
 
-    @JsonProperty("status") Transfer.TransactionStatus status;
+    @JsonProperty("status") TransactionStatus status;
 
     @JsonProperty("reference") String reference;
+
+    @JsonProperty("transaction_id") String transactionId;
+
+    @JsonProperty("sender_id") String senderId;
+
+    public String getSenderId()
+    {
+        return senderId;
+    }
+
+    public void setSenderId(String senderId)
+    {
+        this.senderId = senderId;
+    }
+
+    public String getTransactionId()
+    {
+        return transactionId;
+    }
+
+    public void setTransactionId(String transactionId)
+    {
+        this.transactionId = transactionId;
+    }
 
     public String getEmail()
     {
@@ -40,12 +63,12 @@ public class PaymentSplitRequest
         this.merchant = merchant;
     }
 
-    public Transfer.TransactionStatus getStatus()
+    public TransactionStatus getStatus()
     {
         return status;
     }
 
-    public void setStatus(Transfer.TransactionStatus status)
+    public void setStatus(TransactionStatus status)
     {
         this.status = status;
     }

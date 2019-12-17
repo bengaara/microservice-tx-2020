@@ -12,8 +12,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.enums.MobilePayAction;
+import net.tospay.transaction.models.Account;
+import net.tospay.transaction.models.Amount;
+import net.tospay.transaction.models.BaseModel;
+import net.tospay.transaction.models.CardOrderInfo;
+import net.tospay.transaction.models.DeviceInfo;
+import net.tospay.transaction.models.MerchantInfo;
+import net.tospay.transaction.models.UserInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -23,36 +28,37 @@ import net.tospay.transaction.enums.MobilePayAction;
         "account",
         "amount"
 })
-public class TransferOutgoingRequest implements Serializable
+public class TransferOutgoingRequest extends BaseModel implements Serializable
 {
     private final static long serialVersionUID = -9078608771772465581L;
 
+    @JsonProperty("merchantInfo")
+    MerchantInfo merchantInfo;
+
     @JsonProperty("action")
-    private MobilePayAction action;
-
-    @JsonProperty("user_id")
-    private UUID userId;
-
-    @JsonProperty("user_type")
-    private AccountType userType;
-
-    @JsonProperty("account")
-    private Account account;
-
-    @JsonProperty("amount")
-    private Double amount;
-
-    @JsonProperty("charges")
-    private Double charge;
-
-    @JsonProperty("currency")
-    private String currency;
+    private String action;
 
     @JsonProperty("description")
     private String description;
 
     @JsonProperty("external_reference")
-    private String externalReference;
+    private UUID externalReference;
+
+    @JsonProperty("account")
+    private Account account;
+
+    @JsonProperty("amount")
+    private Amount amount;
+
+    //TODO:Fix later? fields for card
+    @JsonProperty("userInfo")
+    private UserInfo userInfo;
+
+    @JsonProperty("orderInfo")
+    private CardOrderInfo orderInfo;
+
+    @JsonProperty("deviceInfo")
+    private DeviceInfo deviceInfo;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -62,24 +68,54 @@ public class TransferOutgoingRequest implements Serializable
         return serialVersionUID;
     }
 
-    public Double getCharge()
+    public MerchantInfo getMerchantInfo()
     {
-        return charge;
+        return merchantInfo;
     }
 
-    public void setCharge(Double charge)
+    public void setMerchantInfo(MerchantInfo merchantInfo)
     {
-        this.charge = charge;
+        this.merchantInfo = merchantInfo;
     }
 
-    public String getCurrency()
+    public UserInfo getUserInfo()
     {
-        return currency;
+        return userInfo;
     }
 
-    public void setCurrency(String currency)
+    public void setUserInfo(UserInfo userInfo)
     {
-        this.currency = currency;
+        this.userInfo = userInfo;
+    }
+
+    public CardOrderInfo getOrderInfo()
+    {
+        return orderInfo;
+    }
+
+    public void setOrderInfo(CardOrderInfo orderInfo)
+    {
+        this.orderInfo = orderInfo;
+    }
+
+    public DeviceInfo getDeviceInfo()
+    {
+        return deviceInfo;
+    }
+
+    public void setDeviceInfo(DeviceInfo deviceInfo)
+    {
+        this.deviceInfo = deviceInfo;
+    }
+
+    public UUID getExternalReference()
+    {
+        return externalReference;
+    }
+
+    public void setExternalReference(UUID externalReference)
+    {
+        this.externalReference = externalReference;
     }
 
     public String getDescription()
@@ -92,52 +128,22 @@ public class TransferOutgoingRequest implements Serializable
         this.description = description;
     }
 
-    public String getExternalReference()
-    {
-        return externalReference;
-    }
-
-    public void setExternalReference(String externalReference)
-    {
-        this.externalReference = externalReference;
-    }
-
-    public MobilePayAction getAction()
+    public String getAction()
     {
         return action;
     }
 
-    public void setAction(MobilePayAction action)
+    public void setAction(String action)
     {
         this.action = action;
     }
 
-    public UUID getUserId()
-    {
-        return userId;
-    }
-
-    public void setUserId(UUID userId)
-    {
-        this.userId = userId;
-    }
-
-    public AccountType getUserType()
-    {
-        return userType;
-    }
-
-    public void setUserType(AccountType userType)
-    {
-        this.userType = userType;
-    }
-
-    public Double getAmount()
+    public Amount getAmount()
     {
         return amount;
     }
 
-    public void setAmount(Double amount)
+    public void setAmount(Amount amount)
     {
         this.amount = amount;
     }

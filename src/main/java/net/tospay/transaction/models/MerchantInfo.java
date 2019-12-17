@@ -1,4 +1,4 @@
-package net.tospay.transaction.models.response;
+package net.tospay.transaction.models;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -12,8 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import net.tospay.transaction.enums.AccountType;
-import net.tospay.transaction.models.request.Address;
+import net.tospay.transaction.enums.UserType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -27,7 +26,7 @@ import net.tospay.transaction.models.request.Address;
         "country",
         "address"
 })
-public class MerchantInfo implements Serializable
+public class MerchantInfo extends BaseModel
 {
     private final static long serialVersionUID = 4711076389786494367L;
 
@@ -35,7 +34,7 @@ public class MerchantInfo implements Serializable
     private UUID userId;
 
     @JsonProperty("type_id")
-    private AccountType typeId;
+    private UserType typeId;
 
     @JsonProperty("email")
     private String email;
@@ -73,19 +72,17 @@ public class MerchantInfo implements Serializable
         this.userId = userId;
     }
 
-
     @JsonProperty("type_id")
-    public AccountType getTypeId()
+    public UserType getTypeId()
     {
         return typeId;
     }
 
     @JsonProperty("type_id")
-    public void setTypeId(AccountType typeId)
+    public void setTypeId(UserType typeId)
     {
         this.typeId = typeId;
     }
-
 
     @JsonProperty("email")
     public String getEmail()
