@@ -5,9 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import net.tospay.transaction.enums.OrderType;
 import net.tospay.transaction.models.Amount;
+import net.tospay.transaction.models.BaseModel;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class OrderInfo
+public class OrderInfo extends BaseModel
 {
     @JsonProperty("type")
     private OrderType type;

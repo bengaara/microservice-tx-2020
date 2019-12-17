@@ -7,7 +7,7 @@ import net.tospay.transaction.models.Account;
 import net.tospay.transaction.models.Amount;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Fx
+public class Fx extends BaseModel
 {
     @JsonProperty("multiplier") Number multiplier;
 

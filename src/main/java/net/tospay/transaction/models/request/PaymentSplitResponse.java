@@ -5,11 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import net.tospay.transaction.models.Account;
 import net.tospay.transaction.models.Amount;
-import net.tospay.transaction.models.response.MerchantInfo;
-import net.tospay.transaction.models.response.UserInfo;
+import net.tospay.transaction.models.BaseModel;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PaymentSplitResponse
+public class PaymentSplitResponse  extends BaseModel
 {
     @JsonProperty("pay")  boolean pay;
 

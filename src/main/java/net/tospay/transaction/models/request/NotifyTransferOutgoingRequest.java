@@ -7,9 +7,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import net.tospay.transaction.enums.TransactionStatus;
 import net.tospay.transaction.enums.TransactionType;
+import net.tospay.transaction.models.BaseModel;
+import net.tospay.transaction.util.Utils;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class NotifyTransferOutgoingRequest
+public class NotifyTransferOutgoingRequest extends BaseModel
 {
     //  @JsonProperty("category") Notify.Category category;
 
@@ -36,6 +38,19 @@ public class NotifyTransferOutgoingRequest
     @JsonProperty("senders") List<NotifyTransferOutgoingSenderRequest> senders;
 
     @JsonProperty("receivers") List<NotifyTransferOutgoingSenderRequest> receivers;
+
+    @JsonProperty("operation")
+    private String operation;
+
+    public String getOperation()
+    {
+        return operation;
+    }
+
+    public void setOperation(String operation)
+    {
+        this.operation = operation;
+    }
 
     public List<NotifyTransferOutgoingSenderRequest> getReceivers()
     {
@@ -135,5 +150,11 @@ public class NotifyTransferOutgoingRequest
     public void setRecipientType(String recipientType)
     {
         this.recipientType = recipientType;
+    }
+
+    @Override
+    public String toString()
+    {
+        return Utils.inspect(this);
     }
 }

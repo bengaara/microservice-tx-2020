@@ -1,6 +1,7 @@
 package net.tospay.transaction.services;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import net.tospay.transaction.entities.BaseSource;
 import net.tospay.transaction.entities.Destination;
 import net.tospay.transaction.entities.Source;
 import net.tospay.transaction.entities.Transaction;
@@ -62,7 +64,7 @@ public class NotifyService extends BaseService
             }).forEach(d -> {
 
                 logger.debug("notifyDestination {}", d.getId());
-                notifyGateway(d);
+                notifyGateway(d, "credit");
             });
         } catch (Exception e) {
             logger.error("", e);
@@ -81,7 +83,7 @@ public class NotifyService extends BaseService
             }).forEach(d -> {
 
                         logger.debug("notifySource {}", d.getId());
-                        notifyGateway(d);
+                        notifyGateway(d, "debit");
                     }
             );
         } catch (Exception e) {
@@ -90,7 +92,7 @@ public class NotifyService extends BaseService
         }
     }
 
-    void notifyGateway(Source entity)
+    void notifyGateway(BaseSource entity, String operation)
     {
         logger.debug("notifySource {}", entity.getId());
 
@@ -103,6 +105,16 @@ public class NotifyService extends BaseService
         request.setRecipientType(String.valueOf(entity.getPayload().getAccount().getUserType()));
         request.setReference(entity.getTransaction().getTransactionId());
         request.setDate(Utils.FORMATTER.format(LocalDateTime.now()));
+        request.setOperation(operation);
+//        if(entity.getPayload().getAccount().getCountry() !=null){
+//            final List<String> timeZones = Stream.of(TimeZone.getAvailableIDs())
+//                    .filter(zoneId -> zoneId.startsWith(entity.getPayload().getAccount().getCountry().getIso())).collect(Collectors.toList());
+//          String date =  Utils.FORMATTER.format(ZonedDateTime.now().withZoneSameInstant(ZoneId.of(timeZones.get(0))) .toLocalDateTime());
+//            request.setDate(date);
+//
+//        }
+        request.setDate(Utils.FORMATTER.format(LocalDateTime.now().atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(ZoneId.of("Africa/Nairobi")).toLocalDateTime()));
 
         List<NotifyTransferOutgoingSenderRequest> list1 = new ArrayList<>();
         entity.getTransaction().getSources().forEach(ds -> {
@@ -139,10 +151,10 @@ public class NotifyService extends BaseService
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity entity = new HttpEntity<NotifyTransferOutgoingRequest>(request, headers);
 
-            logger.debug("sending notify{}", objectMapper.writeValueAsString(request));
+            logger.debug("sending notify{}", request);
             NotifyTransferOutgoingRequest response =
                     restTemplate.postForObject(notifyTransferUrl, entity, NotifyTransferOutgoingRequest.class);
-            logger.debug("{}", objectMapper.writeValueAsString(response));
+            logger.debug("{}", response);
 
             return response;
         } catch (HttpClientErrorException e) {

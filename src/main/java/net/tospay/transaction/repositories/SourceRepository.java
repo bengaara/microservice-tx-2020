@@ -18,6 +18,6 @@ public interface SourceRepository extends BaseRepositoryInterface<Source, UUID>
 {
     Optional<Source> findById(UUID uuid);
 
-     @Query(value = "select * from sources where payload ->'account'->'user_d' like  %:userId%",nativeQuery = true)
-    ArrayList< Source> findByUserId(UUID userId,Pageable p);
+     @Query(value = "select * from sources where payload ->'account'->>'user_id' = :userId",nativeQuery = true)
+    ArrayList< Source> findByUserId(String userId,Pageable p);
 }

@@ -17,7 +17,7 @@ import net.tospay.transaction.enums.TransactionStatus;
 import net.tospay.transaction.enums.UserType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class StoreResponse implements Serializable
+public class StoreResponse  extends BaseModel
 {
     private final static long serialVersionUID = -9078608771772465581L;
 

@@ -15,7 +15,7 @@ import net.tospay.transaction.enums.AccountType;
 import net.tospay.transaction.enums.TransactionStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AsyncCallbackResponse implements Serializable
+public class AsyncCallbackResponse  extends BaseModel
 {
     private final static long serialVersionUID = -9078608771772465581L;
 

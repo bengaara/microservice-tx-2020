@@ -13,10 +13,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 
-public class Country implements Serializable
+public class Country  extends BaseModel
 {
-    private final static long serialVersionUID = 7387601059382747089L;
-
     @JsonProperty("id")
     private String id;
 

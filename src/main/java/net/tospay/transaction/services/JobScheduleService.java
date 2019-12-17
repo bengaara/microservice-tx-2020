@@ -28,7 +28,7 @@ public class JobScheduleService extends BaseService
         this.crudService = crudService;
     }
 
-    // @Scheduled(cron ="${cron.job.autoreversal}")
+    //  @Scheduled(cron ="${cron.job.autoreversal}")
     @Transactional
     public void checkFailedTransactions()
     {
@@ -38,7 +38,7 @@ public class JobScheduleService extends BaseService
             LocalDateTime now = LocalDateTime.now(); // current date and time
             LocalDateTime midnight = now.toLocalDate().atStartOfDay();
 
-            List<Transaction> list = crudService.fetchFailedTransactions(midnight);
+            List<Transaction> list = crudService.fetchFailedSourcedTransactions(midnight);
 
             list.forEach(transaction -> {
                 fundService.refundFloatingFundsToWallet(transaction);

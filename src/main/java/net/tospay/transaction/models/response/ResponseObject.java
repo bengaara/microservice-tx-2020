@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import net.tospay.transaction.util.Utils;
+
 /**
  * @author : Clifford Owino
  * @Email : owinoclifford@gmail.com
@@ -116,5 +118,9 @@ public class ResponseObject<T>
     {
         this.data = data;
         return this;
+    }
+    @Override
+    public String toString(){
+        return Utils.inspect(this);
     }
 }

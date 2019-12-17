@@ -87,9 +87,9 @@ public class RestController extends BaseController
                                     request.getOrderInfo().getAmount().getAmount().add(charge)))), request);
         }
 
-        AtomicReference<Number> destSourceAmount = new AtomicReference<>(BigDecimal.ZERO);
+        AtomicReference<BigDecimal> destSourceAmount = new AtomicReference<>(BigDecimal.ZERO);
         request.getDelivery().forEach((topupValue) -> {
-            destSourceAmount.updateAndGet(v -> v = v.doubleValue() + topupValue.getTotal().getAmount().doubleValue());
+            destSourceAmount.updateAndGet(v -> v = v.add(topupValue.getTotal().getAmount()));
         });
 
 //        Double chargetotal = request.getChargeInfo().getDestination().getAmount().doubleValue();

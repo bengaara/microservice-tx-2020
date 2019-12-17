@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 
-public class Store implements Serializable
+public class Store extends BaseModel
 {
     private final static long serialVersionUID = -9078608771772465581L;
 

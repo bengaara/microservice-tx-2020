@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class DeviceInfo
+public class DeviceInfo extends BaseModel
 {
     @NotNull
     @JsonProperty("ip")

@@ -25,6 +25,10 @@ public interface TransactionRepository extends BaseRepositoryInterface<net.tospa
     @Query(value = "from Transaction where status LIKE %:status%  and dateModified  >:dateFrom and refundRetryCount <= :refundRetryCount")
     List<Transaction> findByStatusAndDateAndRefundRetryCountLimit( TransactionStatus status, LocalDateTime dateFrom,int refundRetryCount);
 
+    @Query(value = "select distinct t from Transaction t left join Source s on s.transaction=t.id where s.transactionStatus like 'SUCCESS'  and t.transactionStatus = :status  and t.dateModified  >:dateFrom and t.refundRetryCount <= :refundRetryCount")
+    List<Transaction> findByStatusAndDateAndRefundRetryCountLimitAndSourceStatus( TransactionStatus status, LocalDateTime dateFrom,int refundRetryCount);
+
+
     @Query(value = "select * from transactions where user_info ->'userId' like  %:userId%",nativeQuery = true)
     ArrayList<Transaction> findByUserInfoUserId(UUID userId,  Pageable p);
 }

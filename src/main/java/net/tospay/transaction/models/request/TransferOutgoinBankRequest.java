@@ -12,16 +12,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.tospay.transaction.enums.TransactionType;
 import net.tospay.transaction.models.Account;
+import net.tospay.transaction.models.BaseModel;
 import net.tospay.transaction.models.DeviceInfo;
 import net.tospay.transaction.models.UserInfo;
-import net.tospay.transaction.models.response.MerchantInfo;
+import net.tospay.transaction.models.MerchantInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "sources",
         "delivery"
 })
-public class TransferOutgoinBankRequest
+public class TransferOutgoinBankRequest  extends BaseModel
 {
     @JsonProperty("orderInfo")
     private TransferOutgoingRequest orderInfo;

@@ -12,8 +12,11 @@ import net.tospay.transaction.models.request.OrderInfo;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 
-public class TransactionRequest
+public class TransactionRequest extends BaseModel
 {
+    @JsonProperty("merchantInfo")
+    MerchantInfo merchantInfo;
+
     @JsonProperty("deviceInfo")
     private DeviceInfo deviceInfo;
 
@@ -34,6 +37,16 @@ public class TransactionRequest
 
     @JsonProperty("chargeInfo")
     private ChargeInfo chargeInfo;
+
+    public MerchantInfo getMerchantInfo()
+    {
+        return merchantInfo;
+    }
+
+    public void setMerchantInfo(MerchantInfo merchantInfo)
+    {
+        this.merchantInfo = merchantInfo;
+    }
 
     public DeviceInfo getDeviceInfo()
     {

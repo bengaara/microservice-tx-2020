@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "postal_address",
         "postal_code"
 })
-public class Address implements Serializable
+public class Address extends BaseModel
 {
     private final static long serialVersionUID = -5445788562091130288L;
 

@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 
-public class Amount implements Serializable
+public class Amount  extends BaseModel
 {
     private final static long serialVersionUID = -4737973646400075962L;
 
@@ -29,28 +29,16 @@ public class Amount implements Serializable
     @JsonProperty("currency")
     private String currency;
 
-    @JsonProperty("type")
-    private String type;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    public Amount(BigDecimal amount, String currency, String type)
+    public Amount(BigDecimal amount, String currency)
     {
         this.amount = amount;
         this.currency = currency;
-        this.type = type;
     }
 
-    public String getType()
-    {
-        return type;
-    }
-
-    public void setType(String type)
-    {
-        this.type = type;
-    }
 
     public BigDecimal getAmount()
     {

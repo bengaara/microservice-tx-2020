@@ -15,7 +15,7 @@ import net.tospay.transaction.enums.UserType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Account implements Serializable
+public class Account extends BaseModel
 {
     @Enumerated(EnumType.STRING)
     @JsonProperty("type")

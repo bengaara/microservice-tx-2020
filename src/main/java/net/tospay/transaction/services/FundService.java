@@ -1,6 +1,7 @@
 package net.tospay.transaction.services;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +37,9 @@ import net.tospay.transaction.enums.UserType;
 import net.tospay.transaction.models.Account;
 import net.tospay.transaction.models.Amount;
 import net.tospay.transaction.models.AsyncCallbackResponse;
+import net.tospay.transaction.models.CardOrderInfo;
+import net.tospay.transaction.models.ChargeInfo;
+import net.tospay.transaction.models.MerchantInfo;
 import net.tospay.transaction.models.Store;
 import net.tospay.transaction.models.StoreResponse;
 import net.tospay.transaction.models.UserInfo;
@@ -65,6 +69,9 @@ public class FundService extends BaseService
 
     @Autowired
     NotifyService notifyService;
+
+    @Autowired
+    CrudService crudService;
 
     @Value("${numbergenerator.transaction.url}")
     String numberGeneratorTransactionUrl;
@@ -106,7 +113,28 @@ public class FundService extends BaseService
                 request.setExternalReference(source.getId());
                 request.setDescription("Source Pay");
 
-                ResponseObject<StoreResponse> response = hitStore(source.getPayload().getAccount().getType(), request);
+                ResponseObject<StoreResponse> response = null;
+                //TODO. hack for card
+                if (AccountType.CARD.equals(source.getPayload().getAccount().getType())) {
+                    request.setDeviceInfo(transaction.getPayload().getDeviceInfo());
+                    request.setUserInfo(transaction.getPayload().getUserInfo());
+                    request.setMerchantInfo(transaction.getPayload().getMerchantInfo());
+                    if (request.getMerchantInfo() == null) {
+                        MerchantInfo MerchantInfo = new MerchantInfo();
+                        MerchantInfo.setCountry(transaction.getPayload().getUserInfo().getCountry());
+                        MerchantInfo.setAddress(transaction.getPayload().getUserInfo().getAddress());
+                        MerchantInfo.setUserId(transaction.getPayload().getUserInfo().getUserId());
+                        MerchantInfo.setTypeId(transaction.getPayload().getUserInfo().getTypeId());
+                        request.setMerchantInfo(MerchantInfo);
+                    }
+                            request.getMerchantInfo().setName("jommo kenyatta");
+                    request.getMerchantInfo().setPhone("0724654695");
+
+                    request.setOrderInfo(CardOrderInfo.from(source));
+                    response = hitStore(source.getPayload().getAccount().getType(), request);
+                } else {
+                    response = hitStore(source.getPayload().getAccount().getType(), request);
+                }
 
                 source.getResponse().put(LocalDateTime.now(), response.getData());
                 if (ResponseCode.FAILURE.type.equalsIgnoreCase(response.getStatus())) {//failure
@@ -123,7 +151,7 @@ public class FundService extends BaseService
                     //one success.. generate TR id
                     if (source.getTransaction().getTransactionId() == null) {
 
-                    //    Account merchantInfo = source.getTransaction().getPayload().getDelivery().get(0).getAccount();
+                        //    Account merchantInfo = source.getTransaction().getPayload().getDelivery().get(0).getAccount();
                         UserInfo userInfo = source.getTransaction().getPayload().getUserInfo();
                         ResponseObject<String> tr = generateTransactionId(userInfo.getTypeId(),
                                 source.getTransaction().getPayload().getType(), userInfo.getCountry().getIso());
@@ -134,10 +162,10 @@ public class FundService extends BaseService
                     }
                 }
 
-                source = sourceRepository.save(source);
-                transactionRepository.saveAndFlush(transaction);
+                // sourceRepository.save(source);
+                //transactionRepository.saveAndFlush(transaction);
             });
-
+            transactionRepository.saveAndFlush(transaction);
             //transaction = transactionRepository.save(transaction);//transactionRepository.refresh(transaction);
             checkSourceAndDestinationTransactionStatusAndAct(sources.get(0).getTransaction());
 
@@ -163,23 +191,22 @@ public class FundService extends BaseService
             return;
         }
 
-        Double amount = 0d;
+        BigDecimal amount = BigDecimal.ZERO;
         for (Source source : transaction.getSources()) {
             if (TransactionStatus.SUCCESS.equals(source.getTransactionStatus())) {
-                amount = amount + source.getPayload().getTotal().getAmount()
-                        .doubleValue();//TODO transaction cost je? zirudi?
+                amount = amount.add(source.getPayload().getOrder().getAmount());//TODO transaction cost je? zirudi?
                 logger.debug("adding sourced amount {} ", source.getPayload().getTotal().getAmount());
             }
         }
         for (Destination destination : transaction.getDestinations()) {
             if (TransactionStatus.SUCCESS.equals(destination.getTransactionStatus())) {
-                amount = amount - destination.getPayload().getTotal().getAmount().doubleValue();
+                amount = amount.subtract(destination.getPayload().getTotal().getAmount());
                 logger.debug("deducting delivered amount {} ", destination.getPayload().getTotal().getAmount());
             }
         }
-        if (amount <= 1) {
-            logger.debug("cant refund transaction amount {} should this transaction be marked as failed really? {}",
-                    amount, transaction.getId());
+        if (amount.compareTo(BigDecimal.ZERO) != 1) {
+            logger.debug("cant refund transaction amount {} orderinfo {} transaction {}",
+                    amount, transaction.getPayload().getOrderInfo().getAmount().getAmount(), transaction.getId());
             return;
         }
 
@@ -188,8 +215,8 @@ public class FundService extends BaseService
         Source source = transaction.getSources().get(0);
         logger.debug("refunding transaction {} amount {}", transaction.getId(), amount);
 
-        Amount total = new Amount(BigDecimal.valueOf(amount),
-                transaction.getPayload().getOrderInfo().getAmount().getCurrency(), "refund");
+        Amount total = new Amount(amount,
+                transaction.getPayload().getOrderInfo().getAmount().getCurrency());
         Store store = new Store();
         store.setAccount(source.getPayload()
                 .getAccount());//NB no transaction has 2 different users.. so single source gives us recipient
@@ -197,20 +224,21 @@ public class FundService extends BaseService
         store.getAccount().setUserType(source.getTransaction().getUserInfo().getTypeId());
         store.setTotal(total);
 
+        Destination destination = new Destination();
+        destination.setTransaction(transaction);
+        transaction.addDestination(destination);
+        destination.setPayload(store);
+        destination.setTransactionStatus(TransactionStatus.CREATED);
+        destinationRepository.save(destination);
+
         TransferOutgoingRequest request = new TransferOutgoingRequest();
         request.setAccount(store.getAccount());
         request.setAction("DESTINATION");
         request.setAmount(store.getTotal());
         request.setExternalReference(source.getId());
-        request.setDescription("Refund");
+        request.setDescription("REFUND");
 
         ResponseObject<StoreResponse> response = hitStore(AccountType.WALLET, request);
-
-        //A refund has a new destination added to the transaction leg
-        Destination destination = new Destination();
-        destination.setTransaction(transaction);
-        transaction.addDestination(destination);
-        destination.setPayload(store);
 
         if (ResponseCode.FAILURE.type.equalsIgnoreCase(response.getStatus())) {//failure
             destination.setTransactionStatus(TransactionStatus.FAILED);
@@ -223,7 +251,7 @@ public class FundService extends BaseService
         }
 
         transaction.setRefundRetryCount(transaction.getRefundRetryCount() + 1);
-        destination = destinationRepository.save(destination);
+        destinationRepository.save(destination);
         transactionRepository.saveAndFlush(transaction);
     }
 
@@ -273,6 +301,14 @@ public class FundService extends BaseService
             notifyService.notifySource(transaction);
             //auto rollback funds to wallet?
             refundFloatingFundsToWallet(transaction);
+
+            //check other failed ones:
+            LocalDateTime midnight = LocalDate.now().atStartOfDay();
+            List<Transaction> list = crudService.fetchFailedSourcedTransactions(midnight);
+
+            list.forEach(t -> {
+                refundFloatingFundsToWallet(t);
+            });
 
             return;
         } else if (transaction.isSourceComplete() && !transaction.isDestinationStarted()) {
@@ -422,15 +458,14 @@ public class FundService extends BaseService
     {
         try {
             String url = STORE_PAY_URLS.get(accountType.name());
-            logger.debug(" {}", request);
+            logger.debug("request: {}", request);
             HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity entity = new HttpEntity<TransferOutgoingRequest>(request, headers);
 
-            logger.debug(" {}", objectMapper.writeValueAsString(request));
             ResponseObject<StoreResponse> response =
                     restTemplate.postForObject(url, entity, ResponseObject.class);
-            logger.debug(" {}", objectMapper.writeValueAsString(response));
+            logger.debug("response {}", response);
 
             return response;
         } catch (HttpClientErrorException e) {
@@ -526,8 +561,28 @@ public class FundService extends BaseService
             request.setExternalReference(destination.getId());
             request.setDescription("Deliver funds");
 
-            ResponseObject<StoreResponse> response =
-                    hitStore(destination.getPayload().getAccount().getType(), request);
+            ResponseObject<StoreResponse> response = null;
+
+            //TODO. hack for card
+            if (AccountType.CARD.equals(destination.getPayload().getAccount().getType())) {
+                request.setDeviceInfo(transaction.getPayload().getDeviceInfo());
+                request.setUserInfo(transaction.getPayload().getUserInfo());
+                request.setMerchantInfo(transaction.getPayload().getMerchantInfo());
+                if (request.getMerchantInfo() == null) {
+                    MerchantInfo MerchantInfo = new MerchantInfo();
+                    MerchantInfo.setCountry(transaction.getPayload().getUserInfo().getCountry());
+                    MerchantInfo.setAddress(transaction.getPayload().getUserInfo().getAddress());
+                    MerchantInfo.setUserId(transaction.getPayload().getUserInfo().getUserId());
+                    MerchantInfo.setTypeId(transaction.getPayload().getUserInfo().getTypeId());
+                    request.setMerchantInfo(MerchantInfo);
+                }
+                request.getMerchantInfo().setName("jommo kenyatta");
+                request.getMerchantInfo().setPhone("0724654695");
+                request.setOrderInfo(CardOrderInfo.from(destination));
+                response = hitStore(destination.getPayload().getAccount().getType(), request);
+            } else {
+                response = hitStore(destination.getPayload().getAccount().getType(), request);
+            }
 
             destination.getResponse().put(LocalDateTime.now(), response.getData());
 
@@ -541,9 +596,29 @@ public class FundService extends BaseService
                 logger.debug("destination ok  {} {}", destination, status);
             }
 
-            destination = destinationRepository.save(destination);
-            transactionRepository.save(transaction);
+            //java-util-concurrentmodificationexception for(int i = 0; i<myList.size(); i++){
+            //destinationRepository.save(destination);
+            // transactionRepository.save(transaction);
         });
+
+        //pay merchants and partner
+        ChargeInfo chargeInfo = transaction.getPayload().getChargeInfo();
+        if (chargeInfo.getFx().getAmount().getAmount().compareTo(BigDecimal.ZERO) == 1) {
+            logger.debug("saving  FX revenue  {} {}", chargeInfo.getFx().getAmount().getAmount(),
+                    chargeInfo.getFx().getAccount().getUserId());
+            payPartners(transaction, chargeInfo.getFx().getAccount(), chargeInfo.getFx().getAmount());
+        }
+        if (chargeInfo.getRailInfo().getAmount().getAmount().compareTo(BigDecimal.ZERO) == 1) {
+            logger.debug("saving  Rail revenue  {} {}", chargeInfo.getRailInfo().getAmount().getAmount(),
+                    chargeInfo.getRailInfo().getAccount().getUserId());
+            payPartners(transaction, chargeInfo.getRailInfo().getAccount(), chargeInfo.getRailInfo().getAmount());
+        }
+        if (chargeInfo.getPartnerInfo().getAmount().getAmount().compareTo(BigDecimal.ZERO) == 1) {
+            logger.debug("saving  Partner revenue  {} {}", chargeInfo.getPartnerInfo().getAmount().getAmount(),
+                    chargeInfo.getPartnerInfo().getAccount().getUserId());
+            payPartners(transaction, chargeInfo.getPartnerInfo().getAccount(), chargeInfo.getPartnerInfo().getAmount());
+        }
+
         transactionRepository.saveAndFlush(transaction);
         // transaction = transactionRepository.save(transaction);//transactionRepository.refresh(transaction);
         checkSourceAndDestinationTransactionStatusAndAct(destinations.get(0).getTransaction());
@@ -601,7 +676,7 @@ public class FundService extends BaseService
                 transaction = source.getTransaction();
                 source.setTransactionStatus(response.getTransaction().getStatus());
                 source.getResponseAsync().put(LocalDateTime.now(), response);
-                sourceRepository.save(source);
+                destinationRepository.save(source);
             } else {
                 //TODO: callback from where?
                 logger.error("callback called but no Record found {}", response);
@@ -612,5 +687,42 @@ public class FundService extends BaseService
             logger.error(" {}", e);
             return false;
         }
+    }
+
+    void payPartners(Transaction transaction, Account account, Amount amount)
+    {
+
+        logger.debug("revenue for transaction {} user {} amount {}", transaction.getId(), account.getUserId(), amount);
+
+        Store store = new Store();
+        store.setAccount(account);
+        store.setTotal(amount);
+
+        //A revenue has a new destination added to the transaction leg
+        Destination destination = new Destination();
+        destination.setTransaction(transaction);
+        transaction.addDestination(destination);
+        destination.setPayload(store);
+        destination.setTransactionStatus(TransactionStatus.CREATED);
+        destinationRepository.save(destination);
+
+        TransferOutgoingRequest request = new TransferOutgoingRequest();
+        request.setAccount(store.getAccount());
+        request.setAction("DESTINATION");
+        request.setAmount(store.getTotal());
+        request.setExternalReference(destination.getId());
+        request.setDescription("REVENUE");
+
+        ResponseObject<StoreResponse> response = hitStore(AccountType.WALLET, request);
+
+        if (ResponseCode.FAILURE.type.equalsIgnoreCase(response.getStatus())) {//failure
+            destination.setTransactionStatus(TransactionStatus.FAILED);
+        } else {
+            destination.setTransactionStatus(TransactionStatus.SUCCESS);
+            logger.debug("charges/revenue ok transaction status : {}  {}", transaction.getTransactionStatus(),
+                    destination);
+        }
+        destinationRepository.save(destination);
+        //transactionRepository.saveAndFlush(transaction);
     }
 }

@@ -12,9 +12,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import net.tospay.transaction.enums.UserType;
 import net.tospay.transaction.models.Account;
 import net.tospay.transaction.models.Amount;
+import net.tospay.transaction.models.BaseModel;
+import net.tospay.transaction.models.CardOrderInfo;
+import net.tospay.transaction.models.DeviceInfo;
+import net.tospay.transaction.models.MerchantInfo;
+import net.tospay.transaction.models.UserInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -24,9 +28,12 @@ import net.tospay.transaction.models.Amount;
         "account",
         "amount"
 })
-public class TransferOutgoingRequest implements Serializable
+public class TransferOutgoingRequest extends BaseModel implements Serializable
 {
     private final static long serialVersionUID = -9078608771772465581L;
+
+    @JsonProperty("merchantInfo")
+    MerchantInfo merchantInfo;
 
     @JsonProperty("action")
     private String action;
@@ -36,6 +43,70 @@ public class TransferOutgoingRequest implements Serializable
 
     @JsonProperty("external_reference")
     private UUID externalReference;
+
+    @JsonProperty("account")
+    private Account account;
+
+    @JsonProperty("amount")
+    private Amount amount;
+
+    //TODO:Fix later? fields for card
+    @JsonProperty("userInfo")
+    private UserInfo userInfo;
+
+    @JsonProperty("orderInfo")
+    private CardOrderInfo orderInfo;
+
+    @JsonProperty("deviceInfo")
+    private DeviceInfo deviceInfo;
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+
+    public static long getSerialVersionUID()
+    {
+        return serialVersionUID;
+    }
+
+    public MerchantInfo getMerchantInfo()
+    {
+        return merchantInfo;
+    }
+
+    public void setMerchantInfo(MerchantInfo merchantInfo)
+    {
+        this.merchantInfo = merchantInfo;
+    }
+
+    public UserInfo getUserInfo()
+    {
+        return userInfo;
+    }
+
+    public void setUserInfo(UserInfo userInfo)
+    {
+        this.userInfo = userInfo;
+    }
+
+    public CardOrderInfo getOrderInfo()
+    {
+        return orderInfo;
+    }
+
+    public void setOrderInfo(CardOrderInfo orderInfo)
+    {
+        this.orderInfo = orderInfo;
+    }
+
+    public DeviceInfo getDeviceInfo()
+    {
+        return deviceInfo;
+    }
+
+    public void setDeviceInfo(DeviceInfo deviceInfo)
+    {
+        this.deviceInfo = deviceInfo;
+    }
 
     public UUID getExternalReference()
     {
@@ -57,20 +128,6 @@ public class TransferOutgoingRequest implements Serializable
         this.description = description;
     }
 
-    @JsonProperty("account")
-    private Account account;
-
-    @JsonProperty("amount")
-    private Amount amount;
-
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
-
-    public static long getSerialVersionUID()
-    {
-        return serialVersionUID;
-    }
-
     public String getAction()
     {
         return action;
@@ -80,7 +137,6 @@ public class TransferOutgoingRequest implements Serializable
     {
         this.action = action;
     }
-
 
     public Amount getAmount()
     {

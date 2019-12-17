@@ -57,6 +57,10 @@ public class RestTemplateConfig
                     {
                         JsonNode n = parser.getCodec().readTree(parser);
                         JsonNode node = n.get("amount");
+                        if (node == null) {
+                            logger.debug("null amount {}", n);
+                            return null;
+                        }
                         if (!node.iterator().hasNext()) {
                             node = n;
                         }
@@ -70,8 +74,8 @@ public class RestTemplateConfig
                                                 node.get("amount").toString().replace("\"", ""))
                                         .setScale(2, RoundingMode.HALF_UP);
                         ///  parser.clearCurrentToken();
-                        String type = node.get("type") == null ? null : node.get("type").textValue();
-                        return new Amount(b, currency, type);
+                        //    String type = node.get("type") == null ? null : node.get("type").textValue();
+                        return new Amount(b, currency);
                         //      }
 
                     }

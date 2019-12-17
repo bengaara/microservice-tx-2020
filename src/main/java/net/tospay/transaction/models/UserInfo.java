@@ -16,7 +16,7 @@ import net.tospay.transaction.enums.UserType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 
-public class UserInfo implements Serializable
+public class UserInfo  extends BaseModel
 {
     private final static long serialVersionUID = -1250620497979241622L;
 

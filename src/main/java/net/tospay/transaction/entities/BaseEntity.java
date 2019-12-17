@@ -17,6 +17,8 @@ import com.vladmihalcea.hibernate.type.json.JsonNodeBinaryType;
 import com.vladmihalcea.hibernate.type.json.JsonNodeStringType;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
+import net.tospay.transaction.util.Utils;
+
 /**
  * @author : Clifford Owino
  * @Email : owinoclifford@gmail.com
@@ -43,4 +45,10 @@ public abstract class BaseEntity<T>
                 .reduce((s1, s2) -> s1 +s2.substring(0,1).toUpperCase()+s2.substring(1).toLowerCase()).get();
 
     }
+
+    @Override
+    public String toString(){
+       return Utils.inspect(this);
+    }
+
 }

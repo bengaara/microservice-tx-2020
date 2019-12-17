@@ -1,6 +1,7 @@
 package net.tospay.transaction.models.response;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -71,11 +72,24 @@ public class TransactionFetchResponse
     {
         TransactionFetchResponse res = new TransactionFetchResponse();
         res.setAmount(s.getPayload().getTotal().getAmount());
-        res.setCharge(s.getPayload().getCharge().getAmount());
         res.setCurrency(s.getPayload().getTotal().getCurrency());
+        if (s.getPayload().getCharge() != null) {
+            res.setCharge(s.getPayload().getCharge().getAmount());
+        }
         res.setDateCreated(s.getDateCreated());
-        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated().toLocalDate()));
+        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated()));
         res.setDateUpdated(s.getDateModified());
+//        if(s.getPayload().getAccount().getCountry() !=null){
+//            final List<String> timeZones = Stream.of(TimeZone.getAvailableIDs())
+//                    .filter(zoneId -> zoneId.startsWith(s.getPayload().getAccount().getCountry().getIso())).collect(
+//                            Collectors.toList());
+//            String date =  Utils.FORMATTER.format(s.getDateCreated().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of(timeZones.get(0))) .toLocalDateTime());
+//            res.setDateCreatedFormatted(date);
+//
+//        }
+        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated().atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(ZoneId.of("Africa/Nairobi")).toLocalDateTime()));
+
         res.setTransactionId(s.getTransaction().getTransactionId());
         res.setTransactionTransferId(s.getId());
         res.settId(s.getTransaction().getId());
@@ -95,11 +109,25 @@ public class TransactionFetchResponse
     {
         TransactionFetchResponse res = new TransactionFetchResponse();
         res.setAmount(s.getPayload().getTotal().getAmount());
-        res.setCharge(s.getPayload().getCharge().getAmount());
         res.setCurrency(s.getPayload().getTotal().getCurrency());
+        if (s.getPayload().getCharge() != null) {
+            res.setCharge(s.getPayload().getCharge().getAmount());
+        }
+
         res.setDateCreated(s.getDateCreated());
-        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated().toLocalDate()));
+        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated()));
         res.setDateUpdated(s.getDateModified());
+//        if(s.getPayload().getAccount().getCountry() !=null){
+//            final List<String> timeZones = Stream.of(TimeZone.getAvailableIDs())
+//                    .filter(zoneId -> zoneId.startsWith(s.getPayload().getAccount().getCountry().getIso())).collect(
+//                            Collectors.toList());
+//            String date =  Utils.FORMATTER.format(s.getDateCreated().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of(timeZones.get(0))) .toLocalDateTime());
+//            res.setDateCreatedFormatted(date);
+//
+//        }
+        res.setDateCreatedFormatted(Utils.FORMATTER.format(s.getDateCreated().atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(ZoneId.of("Africa/Nairobi")).toLocalDateTime()));
+
         res.setTransactionId(s.getTransaction().getTransactionId());
         res.setTransactionTransferId(s.getId());
         res.settId(s.getTransaction().getId());

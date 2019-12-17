@@ -33,12 +33,11 @@ import net.tospay.transaction.models.Store;
 import net.tospay.transaction.models.StoreResponse;
 
 public abstract class  BaseSource extends BaseEntity<UUID> implements Serializable
-{
-    public static final String DATE_CREATED = "date_created";
+{  public static final String DATE_CREATED = "date_created";
 
     @Id
     @Column(name = "id", columnDefinition = "uuid default gen_random_uuid()", updatable = false)
-    @Type(type = "org.hibernate.type.PostgresUUIDType")
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
@@ -58,7 +57,7 @@ public abstract class  BaseSource extends BaseEntity<UUID> implements Serializab
 
     @Column(name = "response", columnDefinition = "jsonb")
     @Type(type = "jsonb")
-    @NotNull private Map<LocalDateTime, StoreResponse> response = new HashMap<>();
+    @NotNull private Map<LocalDateTime, Object> response = new HashMap<>();
 
     @ElementCollection
     @Column(name = "date_request")
@@ -66,7 +65,7 @@ public abstract class  BaseSource extends BaseEntity<UUID> implements Serializab
 
     @Column(name = "response_async", columnDefinition = "jsonb")
     @Type(type = "jsonb")
-    @NotNull private Map<LocalDateTime, StoreResponse> responseAsync = new HashMap<>();
+    @NotNull private Map<LocalDateTime, Object> responseAsync = new HashMap<>();
 
     @Column(name = DATE_CREATED, nullable = false)
     private LocalDateTime dateCreated;
@@ -76,7 +75,7 @@ public abstract class  BaseSource extends BaseEntity<UUID> implements Serializab
 
     @ManyToOne
     @JoinColumn(name = "transaction")
-    private Transaction transaction;
+    private net.tospay.transaction.entities.Transaction transaction;
 
     public BaseSource()
     {
@@ -122,18 +121,17 @@ public abstract class  BaseSource extends BaseEntity<UUID> implements Serializab
         this.transactionStatus = transactionStatus;
     }
 
-    public Map<LocalDateTime, StoreResponse> getResponse()
+    public Map<LocalDateTime, Object> getResponse()
     {
         return response;
     }
-
 
     public List<LocalDateTime> getDateRequest()
     {
         return dateRequest;
     }
 
-    public Map<LocalDateTime, StoreResponse> getResponseAsync()
+    public Map<LocalDateTime, Object> getResponseAsync()
     {
         return responseAsync;
     }
