@@ -2,18 +2,13 @@ package net.tospay.transaction.controllers;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,8 +44,10 @@ public class FetchController extends BaseController
     {
         logger.info(" {}", request);
 
-        List<Source> list1 = crudServiced.fetchSources(request.getUserId(), request.getUserType(), request.getOffset(), request.getLimit());
-        List<Destination> list2 = crudServiced.fetchDestinations(request.getUserId(), request.getUserType(), request.getOffset(), request.getLimit());
+        List<Source> list1 = crudServiced
+                .fetchSources(request.getUserId(), request.getUserType(), request.getOffset(), request.getLimit());
+        List<Destination> list2 = crudServiced
+                .fetchDestinations(request.getUserId(), request.getUserType(), request.getOffset(), request.getLimit());
 
         List<TransactionFetchResponse> list = new ArrayList<>();
 
@@ -83,12 +80,14 @@ public class FetchController extends BaseController
         return new ResponseObject(ResponseCode.SUCCESS.type, ResponseCode.SUCCESS.name(), null, list);
     }
 
-    @GetMapping(Constants.URL.TRANSACTIONS_ID)
-    public ResponseObject<List<TransactionFetchResponse>> fetchTransaction(@PathVariable String transactionId)
+    @PostMapping(Constants.URL.TRANSACTIONS_ID)
+    public ResponseObject<List<TransactionFetchResponse>> fetchTransaction(@RequestBody TransactionFetchRequest request)
     {
-        logger.info(" {}", transactionId);
+        logger.info(" {}", request);
+        //only retrieve your data
 
-        Optional<Transaction> optional = crudServiced.fetchTransactionByTransactionId(transactionId);
+        Optional<Transaction> optional =
+                crudServiced.fetchTransactionByTransactionIdAndUserId(request.getTransactionId(), request.getUserId());
         Transaction tr = optional.orElse(new Transaction());
 
         TransactionsFetchResponse t = new TransactionsFetchResponse();
@@ -104,45 +103,5 @@ public class FetchController extends BaseController
         });
 
         return new ResponseObject(ResponseCode.SUCCESS.type, ResponseCode.SUCCESS.name(), null, t);
-    }
-
-    @PostMapping(Constants.URL.TRANSACTIONS_ALL)
-    public ResponseObject<List<TransactionFetchResponse>> fetchTransactions(
-            @Valid @RequestBody TransactionFetchRequest request)
-    {
-        logger.info(" {}", request);
-
-        List<Source> list1 = crudServiced.fetchSources(request.getUserId(), request.getUserType(), request.getOffset(),request.getLimit());
-        List<Destination> list2 =
-                crudServiced.fetchDestinations(request.getUserId(), request.getUserType(), request.getOffset(),request.getLimit());
-
-        Map<UUID, TransactionsFetchResponse> transactions = new HashMap<UUID, TransactionsFetchResponse>();
-
-        list1.forEach(s -> {
-            TransactionFetchResponse res = TransactionFetchResponse.from(s);
-            TransactionsFetchResponse t = transactions.get(res.gettId());
-            if (t == null) {
-                t = new TransactionsFetchResponse();
-                t.setAmount(s.getPayload().getTotal().getAmount());
-                t.setCurrency(s.getPayload().getTotal().getCurrency());
-                transactions.put(res.gettId(), t);
-            }
-            t.getSource().add(res);
-        });
-        list2.forEach(s -> {
-            TransactionFetchResponse res = TransactionFetchResponse.from(s);
-            TransactionsFetchResponse t = transactions.get(res.gettId());
-            if (t == null) {
-                t = new TransactionsFetchResponse();
-                t.setAmount(s.getPayload().getTotal().getAmount());
-                t.setCurrency(s.getPayload().getTotal().getCurrency());
-                transactions.put(res.gettId(), t);
-            }
-            t.getDelivery().add(res);
-        });
-        List<TransactionsFetchResponse> transactionsList = transactions.values().stream()
-                .collect(Collectors.toList());
-
-        return new ResponseObject(ResponseCode.SUCCESS.type, ResponseCode.SUCCESS.name(), null, transactionsList);
     }
 }

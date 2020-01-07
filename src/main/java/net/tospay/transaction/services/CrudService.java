@@ -84,12 +84,14 @@ public class CrudService extends BaseService
         }
     }
 
-    public @NotNull Optional<net.tospay.transaction.entities.Transaction> fetchTransactionByTransactionId(
-            String transactionId)
+
+
+    public @NotNull Optional<net.tospay.transaction.entities.Transaction> fetchTransactionByTransactionIdAndUserId(
+            String transactionId,UUID userId)
     {
         try {
             logger.info(" {}", transactionId);
-            return transactionRepository.findByTransactionId(transactionId);
+            return transactionRepository.findByTransactionIdAndUserId(transactionId,userId);
         } catch (Exception e) {
             logger.error(" {}", e);
             return Optional.empty();

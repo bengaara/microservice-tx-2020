@@ -20,7 +20,8 @@ public interface TransactionRepository extends BaseRepositoryInterface<net.tospa
 {
     Optional<net.tospay.transaction.entities.Transaction> findById(UUID uuid);
 
-    Optional<net.tospay.transaction.entities.Transaction> findByTransactionId(String transactionId);
+    @Query(value = "select * from transactions where user_info ->'userId' like  %:userId% and transactionId = :transactionId",nativeQuery = true)
+    Optional<net.tospay.transaction.entities.Transaction> findByTransactionIdAndUserId(String transactionId,UUID userId);
 
     @Query(value = "from Transaction where status LIKE %:status%  and dateModified  >:dateFrom and refundRetryCount <= :refundRetryCount")
     List<Transaction> findByStatusAndDateAndRefundRetryCountLimit( TransactionStatus status, LocalDateTime dateFrom,int refundRetryCount);

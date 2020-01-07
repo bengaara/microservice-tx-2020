@@ -9,6 +9,22 @@ public class ChargeUser extends BaseModel
     @JsonProperty("amount")
     private Amount amount;
 
+    @JsonProperty("account")
+    private Account account;
+
+    @JsonProperty("callback_url")
+    private String callbackUrl;
+
+    public String getCallbackUrl()
+    {
+        return callbackUrl;
+    }
+
+    public void setCallbackUrl(String callbackUrl)
+    {
+        this.callbackUrl = callbackUrl;
+    }
+
     public Amount getAmount()
     {
         return amount;
@@ -28,9 +44,4 @@ public class ChargeUser extends BaseModel
     {
         this.account = account;
     }
-
-    @JsonProperty("account")
-    private Account account;
-
-
 }

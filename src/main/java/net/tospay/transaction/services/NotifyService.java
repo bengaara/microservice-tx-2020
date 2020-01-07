@@ -106,6 +106,7 @@ public class NotifyService extends BaseService
         request.setReference(entity.getTransaction().getTransactionId());
         request.setDate(Utils.FORMATTER.format(LocalDateTime.now()));
         request.setOperation(operation);
+        request.setCallbackUrl(entity.getTransaction().getPayload().getChargeInfo().getPartnerInfo().getCallbackUrl());
 //        if(entity.getPayload().getAccount().getCountry() !=null){
 //            final List<String> timeZones = Stream.of(TimeZone.getAvailableIDs())
 //                    .filter(zoneId -> zoneId.startsWith(entity.getPayload().getAccount().getCountry().getIso())).collect(Collectors.toList());

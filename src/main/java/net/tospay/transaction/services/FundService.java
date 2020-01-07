@@ -119,17 +119,6 @@ public class FundService extends BaseService
                     request.setDeviceInfo(transaction.getPayload().getDeviceInfo());
                     request.setUserInfo(transaction.getPayload().getUserInfo());
                     request.setMerchantInfo(transaction.getPayload().getMerchantInfo());
-                    if (request.getMerchantInfo() == null) {
-                        MerchantInfo MerchantInfo = new MerchantInfo();
-                        MerchantInfo.setCountry(transaction.getPayload().getUserInfo().getCountry());
-                        MerchantInfo.setAddress(transaction.getPayload().getUserInfo().getAddress());
-                        MerchantInfo.setUserId(transaction.getPayload().getUserInfo().getUserId());
-                        MerchantInfo.setTypeId(transaction.getPayload().getUserInfo().getTypeId());
-                        request.setMerchantInfo(MerchantInfo);
-                    }
-                            request.getMerchantInfo().setName("jommo kenyatta");
-                    request.getMerchantInfo().setPhone("0724654695");
-
                     request.setOrderInfo(CardOrderInfo.from(source));
                     response = hitStore(source.getPayload().getAccount().getType(), request);
                 } else {
@@ -568,16 +557,7 @@ public class FundService extends BaseService
                 request.setDeviceInfo(transaction.getPayload().getDeviceInfo());
                 request.setUserInfo(transaction.getPayload().getUserInfo());
                 request.setMerchantInfo(transaction.getPayload().getMerchantInfo());
-                if (request.getMerchantInfo() == null) {
-                    MerchantInfo MerchantInfo = new MerchantInfo();
-                    MerchantInfo.setCountry(transaction.getPayload().getUserInfo().getCountry());
-                    MerchantInfo.setAddress(transaction.getPayload().getUserInfo().getAddress());
-                    MerchantInfo.setUserId(transaction.getPayload().getUserInfo().getUserId());
-                    MerchantInfo.setTypeId(transaction.getPayload().getUserInfo().getTypeId());
-                    request.setMerchantInfo(MerchantInfo);
-                }
-                request.getMerchantInfo().setName("jommo kenyatta");
-                request.getMerchantInfo().setPhone("0724654695");
+
                 request.setOrderInfo(CardOrderInfo.from(destination));
                 response = hitStore(destination.getPayload().getAccount().getType(), request);
             } else {

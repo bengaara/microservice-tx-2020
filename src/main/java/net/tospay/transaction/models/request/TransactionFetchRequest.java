@@ -10,6 +10,8 @@ import net.tospay.transaction.enums.UserType;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransactionFetchRequest
 {
+    @JsonProperty("transactionId")
+    String transactionId;
 
     @JsonProperty("user_id")
     private UUID userId;
@@ -18,10 +20,20 @@ public class TransactionFetchRequest
     private UserType userType;
 
     @JsonProperty("offset")
-    private Integer offset =0;
+    private Integer offset = 0;
 
     @JsonProperty("limit")
-    private Integer limit=10;
+    private Integer limit = 10;
+
+    public String getTransactionId()
+    {
+        return transactionId;
+    }
+
+    public void setTransactionId(String transactionId)
+    {
+        this.transactionId = transactionId;
+    }
 
     public Integer getLimit()
     {

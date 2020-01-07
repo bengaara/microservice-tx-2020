@@ -42,6 +42,19 @@ public class NotifyTransferOutgoingRequest extends BaseModel
     @JsonProperty("operation")
     private String operation;
 
+    @JsonProperty("callback_url")
+    private String callbackUrl;
+
+    public String getCallbackUrl()
+    {
+        return callbackUrl;
+    }
+
+    public void setCallbackUrl(String callbackUrl)
+    {
+        this.callbackUrl = callbackUrl;
+    }
+
     public String getOperation()
     {
         return operation;
