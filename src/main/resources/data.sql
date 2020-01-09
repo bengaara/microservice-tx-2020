@@ -1,0 +1,1 @@
+create sequence if not exists report_number_gen increment 1;

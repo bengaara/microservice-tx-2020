@@ -5,27 +5,28 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.tospay.transaction.entities.Transaction;
 
-@Component
+//scheduler should not be a bean @Component
 public class JobScheduleService extends BaseService
 {
     ObjectMapper mapper = new ObjectMapper();
 
-    @Autowired
     FundService fundService;
 
-    @Autowired CrudService crudService;
+    CrudService crudService;
 
-    public JobScheduleService(FundService fundService, CrudService crudService)
+    ReportingService reportingService;
+
+    public JobScheduleService(FundService fundService, CrudService crudService, ReportingService reportingService)
     {
         this.fundService = fundService;
         this.crudService = crudService;
+        this.reportingService = reportingService;
     }
 
     //  @Scheduled(cron ="${cron.job.autoreversal}")
@@ -43,6 +44,21 @@ public class JobScheduleService extends BaseService
             list.forEach(transaction -> {
                 fundService.refundFloatingFundsToWallet(transaction);
             });
+        } catch (Exception e) {
+            logger.error("{}", e);
+        }
+    }
+
+    @Scheduled(cron = "${cron.job.kpa_report}", zone = "Africa/Nairobi")
+    public void prepareKPAReports()
+    {
+        try {
+            logger.info("Cron Task :: prepareKPAReports  Execution Time - {} {}", LocalDateTime.now(),
+                    Thread.currentThread().getName());
+            LocalDateTime toNow = LocalDateTime.now(); // current date and time
+            LocalDateTime midnight = toNow.toLocalDate().atStartOfDay();
+
+            reportingService.prepareKPAReports(toNow);
         } catch (Exception e) {
             logger.error("{}", e);
         }

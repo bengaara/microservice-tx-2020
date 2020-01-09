@@ -1,10 +1,7 @@
 package net.tospay.transaction.controllers;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -15,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.tospay.transaction.entities.Destination;
-import net.tospay.transaction.entities.Source;
 import net.tospay.transaction.entities.Transaction;
 import net.tospay.transaction.enums.ResponseCode;
 import net.tospay.transaction.models.request.TransactionFetchRequest;
@@ -44,38 +39,9 @@ public class FetchController extends BaseController
     {
         logger.info(" {}", request);
 
-        List<Source> list1 = crudServiced
-                .fetchSources(request.getUserId(), request.getUserType(), request.getOffset(), request.getLimit());
-        List<Destination> list2 = crudServiced
-                .fetchDestinations(request.getUserId(), request.getUserType(), request.getOffset(), request.getLimit());
-
-        List<TransactionFetchResponse> list = new ArrayList<>();
-
-        list1 = list1
-                .stream()
-                .filter(s -> {
-                            boolean b = 0 == list2.stream()
-                                    .filter(d ->
-                                            d.getTransaction().getId().equals(s.getTransaction().getId()) && s.getPayload()
-                                                    .getAccount().getUserId()
-                                                    .equals(d.getPayload().getAccount().getUserId()
-                                                    )
-                                    ).limit(1).count();
-                            return b;
-                        }
-                ).collect(Collectors.toList());
-
-        list.addAll(list1.stream().map(TransactionFetchResponse::from).collect(Collectors.toList()));
-        list.addAll(list2.stream().map(TransactionFetchResponse::from).collect(Collectors.toList()));
-
-        list.sort(new Comparator<TransactionFetchResponse>()
-        {
-            @Override
-            public int compare(TransactionFetchResponse o1, TransactionFetchResponse o2)
-            {
-                return o2.getDateCreated().compareTo(o1.getDateCreated());
-            }
-        });
+        List<TransactionFetchResponse> list = crudServiced
+                .fetchSourceAndDestination(request.getUserId(), request.getOffset(),
+                        request.getLimit());
 
         return new ResponseObject(ResponseCode.SUCCESS.type, ResponseCode.SUCCESS.name(), null, list);
     }

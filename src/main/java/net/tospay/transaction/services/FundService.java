@@ -56,8 +56,6 @@ import net.tospay.transaction.repositories.TransactionRepository;
 @Service
 public class FundService extends BaseService
 {
-    ObjectMapper mapper = new ObjectMapper();
-
     @Autowired
     RestTemplate restTemplate;
 
