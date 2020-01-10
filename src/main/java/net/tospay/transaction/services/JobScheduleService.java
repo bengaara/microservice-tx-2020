@@ -3,8 +3,6 @@ package net.tospay.transaction.services;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,8 +27,8 @@ public class JobScheduleService extends BaseService
         this.reportingService = reportingService;
     }
 
-    //  @Scheduled(cron ="${cron.job.autoreversal}")
-    @Transactional
+    @Scheduled(cron = "${cron.job.autoreversal}")
+    // @Transactional
     public void checkFailedTransactions()
     {
         try {

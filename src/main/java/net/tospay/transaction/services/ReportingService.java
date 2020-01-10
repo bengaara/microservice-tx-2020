@@ -13,9 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.prowidesoftware.swift.model.SwiftBlock5;
 import com.prowidesoftware.swift.model.SwiftTagListBlock;
-import com.prowidesoftware.swift.model.Tag;
 import com.prowidesoftware.swift.model.field.Field20;
 import com.prowidesoftware.swift.model.field.Field25;
 import com.prowidesoftware.swift.model.field.Field28C;
@@ -86,17 +84,18 @@ public class ReportingService extends BaseService
             List<TransactionFetchResponse> list = crudService
                     .fetchSourceAndDestination(userId, from, to);
 
-            createMt940(userId, from, to, list);
+            Report report = createMt940(userId, from, to, list);
+            report = createNBK(report, list);
         } catch (Exception e) {
             logger.error("{}", e);
         }
     }
 
-    void createMt940(UUID userId, LocalDateTime from, LocalDateTime to, List<TransactionFetchResponse> list)
+    Report createMt940(UUID userId, LocalDateTime from, LocalDateTime to, List<TransactionFetchResponse> list)
     {
         final MT940 m = new MT940();
 
-        final BigDecimal[] total = { BigDecimal.ZERO };
+        final BigDecimal[] total = { BigDecimal.ZERO, BigDecimal.ZERO };//0 opening bal,1 closing bal
 
         //m.setSender("");
         //m.setReceiver("");
@@ -121,7 +120,7 @@ public class ReportingService extends BaseService
 
         String date = getDateString(LocalDateTime
                 .now());
-        m.addField(new Field20("940S"
+        m.addField(new Field20("TOSP"
                 + date));//Transaction Reference Number TODO Reference Number 16x for National Bank accounts <940S> followed by the bookdate (YYMMDD), for example “940S121224”. For non-National Bank accounts, the field-20 reference
         m.addField(new Field25(
                 KPA_ACCOUNT_ID));//Account Identification 35x. The account number in field-25 will be presented in IBAN format if available. Specifically: <IBAN><space><CURRENCY>
@@ -131,6 +130,8 @@ public class ReportingService extends BaseService
         final Long[] sequenceNumber = { 0l };
         optionalOld.ifPresent(report -> {
             sequenceNumber[0] = report.getReportNumber() + 1;
+            total[0] = report.getOpeningBalance();
+            total[1] = total[0];
         });
 //        Report oldReport = optional.orElseGet(() ->
 //        {
@@ -150,14 +151,16 @@ public class ReportingService extends BaseService
                 .setDCMark("D");
         m.addField(f60f);
 
-        DecimalFormat decimalFormat = new DecimalFormat("#,00");
+        DecimalFormat decimalFormat = new DecimalFormat("#,##");
+        decimalFormat.setMaximumFractionDigits(2);
+        decimalFormat.setMinimumFractionDigits(2);
         list.forEach(transactionFetchResponse -> {
 
             String DC = transactionFetchResponse.getOperation().substring(0, 1);//Debit/credit D/C
             if ("C".equalsIgnoreCase(DC)) {
-                total[0] = total[0].add(new BigDecimal(transactionFetchResponse.getAmount().toString()));
+                total[1] = total[1].add(new BigDecimal(transactionFetchResponse.getAmount().toString()));
             } else {
-                total[0] = total[0].subtract(new BigDecimal(transactionFetchResponse.getAmount().toString()));
+                total[1] = total[1].subtract(new BigDecimal(transactionFetchResponse.getAmount().toString()));
             }
 
             Field61 f61 = new Field61().setValueDate(getDateString(transactionFetchResponse.getDateCreated()))//yymmdd
@@ -196,14 +199,14 @@ public class ReportingService extends BaseService
 //        );
 
         Field62F f62f = new Field62F() //closing balance
-                .setAmount(total[0])
+                .setAmount(total[1])
                 .setCurrency("KES")
                 .setDate(date).setDCMark("D");
         m.addField(f62f);
 
-        SwiftBlock5 block5 = new SwiftBlock5();
-        block5.append(new Tag("CHK", ""));
-        m.getSwiftMessage().addBlock(block5);
+//        SwiftBlock5 block5 = new SwiftBlock5();
+//        block5.append(new Tag("CHK", ""));
+//        m.getSwiftMessage().addBlock(block5);
 
         logger.debug("{}", m.message());
 
@@ -212,11 +215,49 @@ public class ReportingService extends BaseService
         report.setDateFrom(from);
         report.setDateTo(to);
         //  report.setPayload(m);
-        report.setPayloadString(m.message());
+        report.setMT940PayloadString(m.message());
         report.setReportNumber(sequenceNumber[0]);
+        report.setOpeningBalance(total[0]);
+        report.setClosingBalance(total[1]);
+        report.setTransactionCount(list.size());
+
+        reportingRepository.save(report);
+        //reportingRepository.saveAndFlush(report);
+        return report;
+    }
+
+    Report createNBK(Report report, List<TransactionFetchResponse> list)
+    {
+        final BigDecimal[] total = { report.getOpeningBalance(), report.getOpeningBalance() };//0 opening bal
+
+        StringBuilder NBKPayloadString = new StringBuilder();
+
+        list.forEach(transactionFetchResponse -> {
+
+            NBKPayloadString.append(KPA_ACCOUNT_ID + " ");//account number
+            NBKPayloadString.append(getNBKDateString(transactionFetchResponse.getDateCreated()) + " ");
+            NBKPayloadString.append(getNBKDateString(transactionFetchResponse.getDateCreated()) + " ");
+            String DC = transactionFetchResponse.getOperation().substring(0, 1);//Debit/credit D/C
+            if ("C".equalsIgnoreCase(DC)) {
+                total[1] = total[1].add(new BigDecimal(transactionFetchResponse.getAmount().toString()));
+                NBKPayloadString.append("0.00 " + transactionFetchResponse.getAmount() + " ");
+                NBKPayloadString.append(total[1] + " ");
+                NBKPayloadString.append(transactionFetchResponse.getAccountName() + " ");
+            } else {
+                total[1] = total[1].subtract(new BigDecimal(transactionFetchResponse.getAmount().toString()));
+                NBKPayloadString.append(transactionFetchResponse.getAmount() + " 0.00 ");
+                NBKPayloadString.append(total[1] + " ");
+                NBKPayloadString.append(" OUTGOING " + transactionFetchResponse.getAccountName() + " ");
+            }
+            NBKPayloadString.append(" 0 ");//what?
+        });
+
+        logger.debug("{}", NBKPayloadString.toString());
+        report.setNBKPayloadString(NBKPayloadString.toString());
 
         //reportingRepository.save(report);
         reportingRepository.saveAndFlush(report);
+        return report;
     }
 
     String getDateString(LocalDateTime date)
@@ -225,6 +266,14 @@ public class ReportingService extends BaseService
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMdd");
         // LocalDate localDate = LocalDate.parse(date, formatter);
         return formatter.format(date.toLocalDate());
+    }
+
+    String getNBKDateString(LocalDateTime date)
+    {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        // LocalDate localDate = LocalDate.parse(date, formatter);
+        return formatter.format(date);
     }
 }
 

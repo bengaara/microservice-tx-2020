@@ -1,6 +1,7 @@
 package net.tospay.transaction.entities;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -49,8 +50,14 @@ public class Report extends BaseEntity<UUID> implements Serializable
 //    @Type(type = "jsonb")
 //    private MT940 payload;
 
-    @Column(name = "payload_string")
-    private String payloadString;
+    @Column(name = "MT940_payload_string")
+    private String MT940PayloadString;
+
+    @Column(name = "transaction_count")
+    private Number transactionCount;
+
+    @Column(name = "NBK_payload_string")
+    private String NBKPayloadString;
 
     @Column(name = "date_created", nullable = false)
     private LocalDateTime dateCreated;
@@ -63,6 +70,12 @@ public class Report extends BaseEntity<UUID> implements Serializable
 
     @Column(name = "date_modified", nullable = false)
     private LocalDateTime dateModified;
+
+    @Column(name = "opening_balance", nullable = false)
+    private BigDecimal openingBalance;
+
+    @Column(name = "closing_balance", nullable = false)
+    private BigDecimal closingBalance;
 
     @Column(name = "sent")
     private boolean sent;
@@ -84,6 +97,56 @@ public class Report extends BaseEntity<UUID> implements Serializable
     public static String getID()
     {
         return ID;
+    }
+
+    public Number getTransactionCount()
+    {
+        return transactionCount;
+    }
+
+    public void setTransactionCount(Number transactionCount)
+    {
+        this.transactionCount = transactionCount;
+    }
+
+    public String getMT940PayloadString()
+    {
+        return MT940PayloadString;
+    }
+
+    public void setMT940PayloadString(String MT940PayloadString)
+    {
+        this.MT940PayloadString = MT940PayloadString;
+    }
+
+    public String getNBKPayloadString()
+    {
+        return NBKPayloadString;
+    }
+
+    public void setNBKPayloadString(String NBKPayloadString)
+    {
+        this.NBKPayloadString = NBKPayloadString;
+    }
+
+    public BigDecimal getOpeningBalance()
+    {
+        return openingBalance;
+    }
+
+    public void setOpeningBalance(BigDecimal openingBalance)
+    {
+        this.openingBalance = openingBalance;
+    }
+
+    public BigDecimal getClosingBalance()
+    {
+        return closingBalance;
+    }
+
+    public void setClosingBalance(BigDecimal closingBalance)
+    {
+        this.closingBalance = closingBalance;
     }
 
     public UUID getUserId()
@@ -114,16 +177,6 @@ public class Report extends BaseEntity<UUID> implements Serializable
     public void setSent(boolean sent)
     {
         this.sent = sent;
-    }
-
-    public String getPayloadString()
-    {
-        return payloadString;
-    }
-
-    public void setPayloadString(String payloadString)
-    {
-        this.payloadString = payloadString;
     }
 
     public LocalDateTime getDateCreated()
