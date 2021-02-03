@@ -3,3 +3,5 @@ target/
 /app.log
 /app.log.*
 /lib
+*.log
+/create.sql

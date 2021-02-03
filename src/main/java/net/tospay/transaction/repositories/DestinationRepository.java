@@ -18,8 +18,8 @@ public interface DestinationRepository extends BaseRepositoryInterface<Destinati
     Optional<Destination> findById(UUID uuid);
 
     @Query(value = "select * from destinations where payload ->'account'->>'user_id' = :userId", nativeQuery = true)
-    ArrayList<Destination> findByUserId(String userId, Pageable pageable);
+    ArrayList<Destination> findByUserId(UUID userId, Pageable pageable);
 
-    @Query(value = "select * from destinations where payload ->'account'->>'user_id' = :userId and date_created>=:dateCreatedFrom and date_created<:dateCreatedTo",nativeQuery = true)
-    ArrayList<Destination> findByUserId(String userId, LocalDateTime dateCreatedFrom, LocalDateTime dateCreatedTo);
+//    @Query(value = "select * from destinations where payload ->'account'->>'user_id' = :userId and date_created>=:dateCreatedFrom and date_created<:dateCreatedTo",nativeQuery = true)
+//    ArrayList<Destination> findByUserId(UUID userId, LocalDateTime dateCreatedFrom, LocalDateTime dateCreatedTo);
 }

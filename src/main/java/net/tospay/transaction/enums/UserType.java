@@ -1,16 +1,16 @@
 package net.tospay.transaction.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-
-public enum UserType
-{
+public enum UserType {
     PERSONAL("PERSONAL"),
     AGENT("AGENT"),
     MERCHANT("MERCHANT"),
-    PARTNER("PARTNER");
+    ADMIN("ADMIN"),
+    PARTNER("PARTNER"),
+    SYSTEM("SYSTEM");
 
     private static final Map<String, UserType> LABEL = new HashMap<>();
 
@@ -20,18 +20,16 @@ public enum UserType
         }
     }
 
-    private String type;
+    private final String type;
 
     // ... fields, constructor, methods
 
-     UserType(String type)
-    {
+    UserType(String type) {
         this.type = type;
     }
 
     @JsonCreator
-    public static UserType valueOfType(String label)
-    {
+    public static UserType valueOfType(String label) {
         label = label.toUpperCase();
         return LABEL.get(label);
 

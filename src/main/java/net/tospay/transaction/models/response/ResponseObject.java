@@ -1,10 +1,12 @@
 package net.tospay.transaction.models.response;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import net.tospay.transaction.models.BaseModel;
 import net.tospay.transaction.util.Utils;
 
 /**
@@ -12,7 +14,7 @@ import net.tospay.transaction.util.Utils;
  * @Email : owinoclifford@gmail.com
  * @since : 9/16/2019, Mon
  **/
-public class ResponseObject<T>
+public class ResponseObject<T> extends BaseModel  implements Serializable
 {
     @JsonProperty("status")
     private String status;
@@ -121,6 +123,7 @@ public class ResponseObject<T>
     }
     @Override
     public String toString(){
-        return Utils.inspect(this);
+        // return Utils.inspect(this);
+        return super.toString();
     }
 }

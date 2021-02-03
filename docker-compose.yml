@@ -1,10 +1,27 @@
-version: '3'
+version: '3.3'
 services:
-  web:
-    build: .
+  docker-host:
+    image: qoomon/docker-host
+    cap_add: [ 'NET_ADMIN', 'NET_RAW' ]
+    restart: on-failure
+  transaction:
+    image: mjenzi.tospay.net/transaction_service:${profile}V1.14
+    build:
+      context: .
+      #target: runtime
+    restart: always
     ports:
-      -  "127.0.0.1:8900:8900"
-    #expose: - "8000"- "8900"
+      - "0.0.0.0:8900:8900"
+    expose:
+      - "8000"
+      - "8900"
     #volumes: - .:/app
     environment:
+      PROFILE: ${profile:-uat}
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n
+    #volumes:
+      #- /var/run/docker.sock:/var/run/docker.sock
+      #- /usr/bin/docker:/usr/bin/docker
+      #- /usr/local/bin/docker:/usr/bin/docker
+    depends_on:
+      - docker-host

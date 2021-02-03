@@ -1,16 +1,23 @@
 package net.tospay.transaction.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+public class Notify {
+    public enum Category {
+        CASHOUT("CASHOUT"),
+        CASHIN("CASHIN"),
+        COMMISSION("COMMISSION"),
+        MINI_STATEMENT("MINI_STATEMENT"),
+        FULL_STATEMENT("FULL_STATEMENT"),
+        MT940("MT940"),
+        UTILITY("UTILITY"),
+        REVERSAL_CASHOUT("REVERSAL_CASHOUT"),
+        REVERSAL_CASHIN("REVERSAL_CASHIN"),
 
-public class Notify
-{
-    public enum Category
-    {
-        TRANSFER("TRANSFER"),
-        LINK_CARD("LINK_CARD");
+        ;
 
         private static final Map<String, Category> LABEL = new HashMap<>();
 
@@ -20,20 +27,46 @@ public class Notify
             }
         }
 
-        private String type;
+        private final String type;
 
         // ... fields, constructor, methods
 
-         Category(String type)
-        {
+        Category(String type) {
             this.type = type;
         }
 
         @JsonCreator
-        public static Category valueOfType(String label)
-        {
+        public static Category valueOfType(String label) {
             label = label.toUpperCase();
             return LABEL.get(label);
+
+        }
+
+        public static Category getCategory(TransactionType transactionType, StoreActionType storeActionType, boolean isCommision) {
+            switch (transactionType) {
+
+                //    break;
+                case TRANSFER:
+                case WITHDRAWAL:
+                case TOPUP:
+                    if (isCommision) {
+                        return COMMISSION;
+                    }
+                    return StoreActionType.DEBIT.equals(storeActionType) ? CASHOUT : CASHIN;
+                case UTILITY:
+                    return StoreActionType.DEBIT.equals(storeActionType) ? UTILITY : CASHIN;
+
+                case PAYMENT:
+                case SETTLEMENT:
+                    return StoreActionType.DEBIT.equals(storeActionType) ? CASHOUT : CASHIN;
+
+                case REVERSAL:
+
+                    return StoreActionType.DEBIT.equals(storeActionType) ? REVERSAL_CASHOUT : REVERSAL_CASHIN;
+
+                default:
+                    return null;
+            }
 
         }
     }

@@ -8,11 +8,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.tospay.transaction.enums.TransactionType;
 import net.tospay.transaction.enums.UserType;
+import net.tospay.transaction.models.BaseModel;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
 })
-public class TransactionIdRequest implements Serializable
+public class TransactionIdRequest extends BaseModel
 {
     @JsonProperty("country_iso_2")
     private String country;

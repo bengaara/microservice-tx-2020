@@ -1,120 +1,47 @@
 package net.tospay.transaction.models;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import java.util.List;
+import lombok.Data;
+import net.tospay.transaction.enums.TransactionStatus;
 import net.tospay.transaction.enums.TransactionType;
 import net.tospay.transaction.models.request.OrderInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Data
+public class TransactionRequest extends BaseModel {
 
-public class TransactionRequest extends BaseModel
-{
-    @JsonProperty("merchantInfo")
-    MerchantInfo merchantInfo;
 
+    @JsonProperty("fraudInfo")
+    FraudInfo fraudInfo;
     @JsonProperty("deviceInfo")
     private DeviceInfo deviceInfo;
-
     @JsonProperty("type")
     private TransactionType type;
-
     @JsonProperty("source")
     private List<Store> source;
-
     @JsonProperty("delivery")
     private List<Store> delivery;
-
     @JsonProperty("userInfo")
     private UserInfo userInfo;
-
     @JsonProperty("orderInfo")
     private OrderInfo orderInfo;
-
     @JsonProperty("chargeInfo")
     private ChargeInfo chargeInfo;
 
-    public MerchantInfo getMerchantInfo()
-    {
-        return merchantInfo;
-    }
+    //special for logs from pos
+    @JsonProperty("status")
+    private TransactionStatus status;
 
-    public void setMerchantInfo(MerchantInfo merchantInfo)
-    {
-        this.merchantInfo = merchantInfo;
-    }
+    @JsonProperty("sumSourceAmount")
+    private Amount sumSourceAmount;
 
-    public DeviceInfo getDeviceInfo()
-    {
-        return deviceInfo;
-    }
 
-    public void setDeviceInfo(DeviceInfo deviceInfo)
-    {
-        this.deviceInfo = deviceInfo;
-    }
-
-    public TransactionType getType()
-    {
-        return type;
-    }
-
-    public void setType(TransactionType type)
-    {
-        this.type = type;
-    }
-
-    public List<Store> getSource()
-    {
-        return source;
-    }
-
-    public void setSource(List<Store> source)
-    {
-        this.source = source;
-    }
-
-    public List<Store> getDelivery()
-    {
-        return delivery;
-    }
-
-    public void setDelivery(List<Store> delivery)
-    {
-        this.delivery = delivery;
-    }
-
-    public UserInfo getUserInfo()
-    {
-        return userInfo;
-    }
-
-    public void setUserInfo(UserInfo userInfo)
-    {
-        this.userInfo = userInfo;
-    }
-
-    public OrderInfo getOrderInfo()
-    {
-        return orderInfo;
-    }
-
-    public void setOrderInfo(OrderInfo orderInfo)
-    {
-        this.orderInfo = orderInfo;
-    }
-
-    public ChargeInfo getChargeInfo()
-    {
-        return chargeInfo;
-    }
-
-    public void setChargeInfo(ChargeInfo chargeInfo)
-    {
-        this.chargeInfo = chargeInfo;
+    public TransactionRequest() {
+        // logger.debug("new TransactionRequest caller: {}", Utils.getCallerCallerClassName());
+        //setHideData(false);
     }
 }

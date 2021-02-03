@@ -1,77 +1,66 @@
 package net.tospay.transaction.models.request;
 
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import net.tospay.transaction.enums.UserType;
+import java.time.LocalDate;
+import java.util.UUID;
+import lombok.Data;
+import net.tospay.transaction.models.BaseModel;
+import net.tospay.transaction.models.UserInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TransactionFetchRequest
-{
-    @JsonProperty("transactionId")
+@Data
+public class TransactionFetchRequest extends BaseModel {
+
+    @JsonProperty("transaction_id")
     String transactionId;
 
+    @JsonProperty("reference")
+    String reference;
+
     @JsonProperty("user_id")
-    private UUID userId;
+    UUID userId;
 
-    @JsonProperty("user_type")
-    private UserType userType;
-
+    @JsonProperty("msisdn")
+    String msisdn;
+    //transaction.id
+    @JsonProperty("id")
+    UUID id;
+    @JsonProperty("userInfo")
+    UserInfo userInfo;
+    //@JsonInclude(value= JsonInclude.Include.NON_EMPTY)
+    //  @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MMM-yyyy", timezone="PST")
+    @JsonProperty("from")
+    LocalDate from;
+    @JsonProperty("to")
+    LocalDate to;
+    String type; //MINI/FULL
     @JsonProperty("offset")
     private Integer offset = 0;
-
     @JsonProperty("limit")
-    private Integer limit = 10;
+    private Integer limit ;
 
-    public String getTransactionId()
-    {
-        return transactionId;
+    public void setId(String someUUID){
+        try{
+            id = UUID.fromString(someUUID);
+            //do something
+        } catch (IllegalArgumentException e){
+            e.getStackTrace();
+        }
+    }
+    public void setUserId(String someUUID){
+        try{
+            userId = UUID.fromString(someUUID);
+            //do something
+        } catch (IllegalArgumentException e){
+            e.getStackTrace();
+        }
     }
 
-    public void setTransactionId(String transactionId)
-    {
-        this.transactionId = transactionId;
-    }
-
-    public Integer getLimit()
-    {
-        return limit;
-    }
-
-    public void setLimit(Integer limit)
-    {
-        this.limit = limit;
-    }
-
-    public Integer getOffset()
-    {
-        return offset;
-    }
-
-    public void setOffset(Integer offset)
-    {
-        this.offset = offset;
-    }
-
-    public UUID getUserId()
-    {
-        return userId;
-    }
-
-    public void setUserId(UUID userId)
-    {
-        this.userId = userId;
-    }
-
-    public UserType getUserType()
-    {
-        return userType;
-    }
-
-    public void setUserType(UserType userType)
-    {
-        this.userType = userType;
+    public LocalDate getTo() {
+        if (to != null) {
+            return to.plusDays(1).atStartOfDay().toLocalDate();
+        }
+        return to;
     }
 }

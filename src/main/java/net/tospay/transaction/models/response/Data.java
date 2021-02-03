@@ -15,8 +15,7 @@ import net.tospay.transaction.models.MerchantInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "userInfo",
-        "merchantInfo"
+        "userInfo"
 })
 public class Data implements Serializable
 {
@@ -25,11 +24,8 @@ public class Data implements Serializable
     @JsonProperty("userInfo")
     private UserInfo userInfo;
 
-    @JsonProperty("merchantInfo")
-    private MerchantInfo merchantInfo;
-
     @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("userInfo")
     public UserInfo getUserInfo()
@@ -49,23 +45,6 @@ public class Data implements Serializable
         return this;
     }
 
-    @JsonProperty("merchantInfo")
-    public MerchantInfo getMerchantInfo()
-    {
-        return merchantInfo;
-    }
-
-    @JsonProperty("merchantInfo")
-    public void setMerchantInfo(MerchantInfo merchantInfo)
-    {
-        this.merchantInfo = merchantInfo;
-    }
-
-    public Data withMerchantInfo(MerchantInfo merchantInfo)
-    {
-        this.merchantInfo = merchantInfo;
-        return this;
-    }
 
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties()

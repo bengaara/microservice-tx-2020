@@ -1,70 +1,64 @@
 package net.tospay.transaction.models.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 
 /**
  * @author : Clifford Owino
  * @Email : owinoclifford@gmail.com
  * @since : 9/16/2019, Mon
  **/
-public class Error
-{
+public class Error   implements Serializable {
     @JsonProperty("code")
     private String code;
 
     @JsonProperty("description")
     private String description;
 
+
     /**
      * No args constructor for use in serialization
      */
-    public Error()
-    {
+    public Error() {
     }
 
     /**
      * @param description
      * @param code
      */
-    public Error(String code, String description)
-    {
+    public Error(String code, String description) {
         super();
         this.code = code;
         this.description = description;
     }
 
+
     @JsonProperty("code")
-    public String getCode()
-    {
+    public String getCode() {
         return code;
     }
 
     @JsonProperty("code")
-    public void setCode(String code)
-    {
+    public void setCode(String code) {
         this.code = code;
     }
 
-    public Error withCode(String code)
-    {
+    public Error withCode(String code) {
         this.code = code;
         return this;
     }
 
     @JsonProperty("description")
-    public String getDescription()
-    {
+    public String getDescription() {
         return description;
     }
 
     @JsonProperty("description")
-    public void setDescription(String description)
-    {
+    public void setDescription(String description) {
         this.description = description;
     }
 
-    public Error withDescription(String description)
-    {
+    public Error withDescription(String description) {
         this.description = description;
         return this;
     }

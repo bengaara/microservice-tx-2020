@@ -1,19 +1,20 @@
 package net.tospay.transaction.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-
-public enum TransactionType
-{
+public enum TransactionType {
     TOPUP("TOPUP"),
     TRANSFER("TRANSFER"),
-    WITHDRAW("WITHDRAW"),
+    WITHDRAWAL("WITHDRAWAL"),
     REVERSAL("REVERSAL"),
     SETTLEMENT("SETTLEMENT"),
-    PAYMENT("PAYMENT");
-   ;
+    PAYMENT("PAYMENT"),
+    UTILITY("UTILITY"),
+    ;
+
 
     private static final Map<String, TransactionType> LABEL = new HashMap<>();
 
@@ -23,18 +24,16 @@ public enum TransactionType
         }
     }
 
-    private String type;
+    private final String type;
 
     // ... fields, constructor, methods
 
-    TransactionType(String type)
-    {
+    TransactionType(String type) {
         this.type = type;
     }
 
     @JsonCreator
-    public static TransactionType valueOfType(String label)
-    {
+    public static TransactionType valueOfType(String label) {
 
         label = label.toUpperCase();
         return LABEL.get(label);

@@ -1,218 +1,111 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.2.0.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
-<repositories>
-</repositories>
-    <groupId>net.tospay</groupId>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <artifactId>transaction</artifactId>
-    <version>0.0.1</version>
-    <name>transaction</name>
-    <description>Transaction Service</description>
-
-    <properties>
-        <java.version>1.8</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <querydsl.version>4.2.1</querydsl.version>
-    </properties>
-
-
-    <developers>
-
-    </developers>
-
-    <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-web</artifactId>-->
-
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.data</groupId>-->
-<!--            <artifactId>spring-data-jpa</artifactId>-->
-
-<!--        </dependency>-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.plugin</groupId>
-            <artifactId>spring-plugin-core</artifactId>
-            <version>2.0.0.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-rest</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>3.12.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>retrofit</artifactId>
-            <version>2.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>converter-gson</artifactId>
-            <version>2.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>converter-jackson</artifactId>
-            <version>2.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.9.3</version>
-        </dependency>
-<!--        <dependency>-->
-<!--            <groupId>io.springfox</groupId>-->
-<!--            <artifactId>springfox-core</artifactId>-->
-<!--            <version>2.9.2</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>io.springfox</groupId>-->
-<!--            <artifactId>springfox-spi</artifactId>-->
-<!--            <version>2.9.2</version>-->
-<!--        </dependency>-->
-        <!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
-        <!-- dependency>
-        org.springframework.boot
-        spring-boot-starter-data-rest
-     </dependency>
-            -->
-
-<!--    <dependency>-->
-<!--        <groupId>io.springfox</groupId>-->
-<!--        <artifactId>springfox-swagger2</artifactId>-->
-<!--        <version>2.9.2</version>-->
-<!--    </dependency>-->
-
-
-<!--    &lt;!&ndash; https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui &ndash;&gt;-->
-<!--    <dependency>-->
-<!--        <groupId>io.springfox</groupId>-->
-<!--        <artifactId>springfox-swagger-ui</artifactId>-->
-<!--        <version>2.9.2</version>-->
-<!--    </dependency>-->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.9</version>
-        </dependency>
-
-
-        <!-- PostgreSQL -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.vladmihalcea</groupId>
-            <artifactId>hibernate-types-52</artifactId>
-            <version>2.1.1</version>
-
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
-
-
-        <!--        <dependency>-->
-        <!--            <groupId>net.tospay </groupId>-->
-        <!--            <artifactId>bank_db_layer</artifactId>-->
-        <!--            <version>1.0.0</version>-->
-        <!--            <scope>system</scope>-->
-        <!--            <systemPath>${basedir}/lib/bank_db_layer-0.0.1-SNAPSHOT.jar</systemPath>-->
-        <!--        </dependency>-->
-        <!-- https://mvnrepository.com/artifact/com.querydsl/querydsl-jpa -->
-
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-apt</artifactId>
-            <version>${querydsl.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-jpa</artifactId>
-            <version>${querydsl.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.prowidesoftware</groupId>
-            <artifactId>pw-swift-core</artifactId>
-            <version>SRU2019-8.0.1</version>
-        </dependency>
-    </dependencies>
-
     <build>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <profiles>
+                        <profile>dev</profile>
+                        <profile>prod</profile>
+                    </profiles>
+                </configuration>
+                <groupId>org.springframework.boot</groupId>
             </plugin>
             <plugin>
-                <groupId>com.mysema.maven</groupId>
                 <artifactId>apt-maven-plugin</artifactId>
-                <version>1.0.4</version>
+                <dependencies>
+                    <dependency>
+                        <artifactId>querydsl-jpa</artifactId>
+                        <groupId>com.querydsl</groupId>
+                        <version>${querydsl.version}</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
                         <configuration>
                             <outputDirectory>target/generated-sources/java</outputDirectory>
                             <processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
                         </configuration>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.querydsl</groupId>
-                        <artifactId>querydsl-jpa</artifactId>
-                        <version>${querydsl.version}</version>
-                    </dependency>
-                </dependencies>
+                <groupId>com.mysema.maven</groupId>
+                <version>1.0.4</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+            </plugin>
+            <plugin>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <commandlineArgs></commandlineArgs>
+                    <executable>extract${script.extension}</executable>
+                </configuration>
+                <executions>
+                    <!--                    <execution>-->
+                    <!--                        <id>script-chmod</id>-->
+                    <!--                        <phase>install</phase>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>exec</goal>-->
+                    <!--                        </goals>-->
+                    <!--                        <configuration>-->
+                    <!--                            <executable>chmod</executable>-->
+                    <!--                            <arguments>-->
+                    <!--                                <argument>+x</argument>-->
+                    <!--                                <argument>extract${script.extension}</argument>-->
+                    <!--                            </arguments>-->
+                    <!--                        </configuration>-->
+                    <!--                    </execution>-->
+                    <execution>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <id>extract-fatjar</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+                <groupId>org.codehaus.mojo</groupId>
+                <version>1.6.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>
+                                ${project.build.directory}/lib
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-                <filtering>true</filtering>
                 <excludes>
                     <exclude>**/*.cer</exclude>
                     <exclude>**/*.jks</exclude>
                     <exclude>**/*.pk8</exclude>
                 </excludes>
+                <filtering>true</filtering>
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
@@ -227,6 +120,246 @@
 
 
     </build>
+    <dependencies>
+
+        <dependency>
+            <artifactId>retrofit</artifactId>
+            <groupId>com.squareup.retrofit2</groupId>
+            <version>2.5.0</version>
+        </dependency>
+        <dependency>
+            <artifactId>converter-gson</artifactId>
+            <groupId>com.squareup.retrofit2</groupId>
+            <version>2.5.0</version>
+        </dependency>
+        <dependency>
+            <artifactId>converter-jackson</artifactId>
+            <groupId>com.squareup.retrofit2</groupId>
+            <version>2.7.2</version>
+        </dependency>
+        <dependency>
+            <artifactId>jackson-module-parameter-names</artifactId>
+            <groupId>com.fasterxml.jackson.module</groupId>
+        </dependency>
+        <dependency>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+        </dependency>
+        <dependency>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- PostgreSQL -->
+        <dependency>
+            <artifactId>postgresql</artifactId>
+            <groupId>org.postgresql</groupId>
+            <version>42.2.11</version>
+        </dependency>
+
+        <dependency>
+            <artifactId>spring-boot-devtools</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <optional>true</optional>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.vladmihalcea/hibernate-types-52 -->
+        <dependency>
+            <artifactId>hibernate-types-52</artifactId>
+            <groupId>com.vladmihalcea</groupId>
+            <version>2.9.7</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
+        <dependency>
+            <artifactId>hibernate-core</artifactId>
+            <groupId>org.hibernate</groupId>
+            <version>5.4.12.Final</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
+
+
+        <!--        <dependency>-->
+        <!--            <groupId>net.tospay </groupId>-->
+        <!--            <artifactId>bank_db_layer</artifactId>-->
+        <!--            <version>1.0.0</version>-->
+        <!--            <scope>system</scope>-->
+        <!--            <systemPath>${basedir}/lib/bank_db_layer-0.0.1-SNAPSHOT.jar</systemPath>-->
+        <!--        </dependency>-->
+        <!-- https://mvnrepository.com/artifact/com.querydsl/querydsl-jpa -->
+
+        <dependency>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+            <groupId>org.springframework.boot</groupId>
+        </dependency>
+
+        <dependency>
+            <artifactId>pw-swift-core</artifactId>
+            <groupId>com.prowidesoftware</groupId>
+            <version>SRU2019-8.0.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
+        <dependency>
+            <artifactId>poi</artifactId>
+            <groupId>org.apache.poi</groupId>
+            <version>4.1.2</version>
+        </dependency>
+
+        <dependency>
+            <artifactId>lombok</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <scope>provided</scope>
+            <version>1.18.12</version>
+        </dependency>
+
+        <dependency>
+            <artifactId>oshi-core</artifactId>
+            <groupId>com.github.oshi</groupId>
+            <version>LATEST</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.github.oshi/oshi-parent -->
+        <dependency>
+            <artifactId>oshi-parent</artifactId>
+            <groupId>com.github.oshi</groupId>
+            <type>pom</type>
+            <version>LATEST</version>
+        </dependency>
+        <dependency>
+            <artifactId>jna</artifactId>
+            <groupId>net.java.dev.jna</groupId>
+            <version>LATEST</version>
+        </dependency>
+        <dependency>
+            <artifactId>jna-platform</artifactId>
+            <groupId>net.java.dev.jna</groupId>
+            <version>LATEST</version>
+        </dependency>
+
+
+        <dependency>
+            <artifactId>jasperreports</artifactId>
+            <groupId>net.sf.jasperreports</groupId>
+            <version>6.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-spring-boot-starter</artifactId>
+            <version>1.7.23</version>
+        </dependency>
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-logback</artifactId>
+            <version>1.7.30</version>
+        </dependency>
+
+        <dependency>
+            <artifactId>sonar-maven-plugin</artifactId>
+            <groupId>org.codehaus.mojo</groupId>
+            <type>maven-plugin</type>
+            <version>2.7.1</version>
+        </dependency>
+
+        <dependency>
+            <artifactId>querydsl-apt</artifactId>
+            <groupId>com.querydsl</groupId>
+            <scope>provided</scope>
+            <version>${querydsl.version}</version>
+        </dependency>
+
+        <dependency>
+            <artifactId>querydsl-jpa</artifactId>
+            <groupId>com.querydsl</groupId>
+            <version>${querydsl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>2.0.2</version>
+        </dependency>
+        <dependency>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <groupId>org.springframework.boot</groupId>
+
+        </dependency>
+        <dependency>
+            <artifactId>spring-boot-starter-data-rest</artifactId>
+            <groupId>org.springframework.boot</groupId>
+        </dependency>
+        <dependency>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+    <description>Transaction Service</description>
+    <developers>
+
+    </developers>
+    <groupId>net.tospay</groupId>
+    <modelVersion>4.0.0</modelVersion>
+    <name>transaction</name>
+    <parent>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <relativePath/>
+        <version>2.3.0.RELEASE</version> <!-- lookup parent from repository -->
+    </parent>
+
+    <profiles>
+        <profile>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                </os>
+            </activation>
+            <id>Windows</id>
+            <properties>
+                <script.extension>.bat</script.extension>
+            </properties>
+        </profile>
+        <profile>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <id>unix</id>
+            <properties>
+                <script.extension>.sh</script.extension>
+            </properties>
+        </profile>
+    </profiles>
+
+
+    <properties>
+        <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <querydsl.version>4.2.1</querydsl.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>jcenter-snapshots</id>
+            <name>jcenter</name>
+            <url>http://oss.jfrog.org/artifactory/oss-snapshot-local/</url>
+        </repository>
+    </repositories>
+
+    <version>0.0.1</version>
 
 
 </project>

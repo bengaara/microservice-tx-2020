@@ -24,7 +24,7 @@ public enum ResponseCode
 
     public final String responseCode;
 
-    private ResponseCode(String responseCode)
+    ResponseCode(String responseCode)
     {
         this.responseCode = responseCode;
     }
